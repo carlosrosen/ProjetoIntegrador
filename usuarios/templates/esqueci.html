@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
+    <title>Recuperar Senha</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -31,14 +31,14 @@
         button {
             width: 100%;
             padding: 10px;
-            background: #007bff;
+            background: #ffc107;
             color: white;
             border: none;
             border-radius: 5px;
             cursor: pointer;
         }
         button:hover {
-            background: #0056b3;
+            background: #e0a800;
         }
         .link {
             display: block;
@@ -53,13 +53,11 @@
 </head>
 <body>
     <div class="container">
-        <h2>Login</h2>
+        <h2>Recuperar Senha</h2>
         <form>
-            <input type="text" placeholder="Usuario" required>
-            <input type="password" placeholder="Senha" required>
-            <button type="submit">Entrar</button>
-            <a href="../esqueci/" class="link">Esqueceu a senha?</a>
-            <a href="../cadastro/" class="link">Criar uma conta</a>
+            <input type="email" placeholder="Digite seu email" required>
+            <button type="submit">Enviar Link de Recuperação</button>
+            <a href="../login/" class="link">Voltar para o login</a>
         </form>
     </div>
 </body>
