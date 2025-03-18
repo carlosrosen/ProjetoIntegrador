@@ -56,7 +56,7 @@
         <h2>Cadastro</h2>
         <form method="POST">
             {% csrf_token %}
-            <input type="text" placeholder="Nome" name="usuario" required>
+            <input type="text" placeholder="Usuário" name="usuario" required>
             <input type="email" placeholder="Email" name="email" required>
             <input type="password" placeholder="Senha" name="senha" required>
             <input type="submit" value="Cadastrar">
