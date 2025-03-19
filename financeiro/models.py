@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from datetime import date
 
 # cria uma tabela para linkar o user com o perfil
 class Perfil(models.Model):
@@ -25,3 +26,11 @@ class DespesaFixa(models.Model):
     valor = models.DecimalField(default=0.0, decimal_places=2, max_digits=13)
     descricao = models.CharField(max_length=100)
     data = models.DateField()
+
+class Metas(models.Model):
+    perfil = models.ForeignKey(Perfil, on_delete=models.CASCADE, related_name="Metas")
+    nome = models.CharField(max_length=100)
+    valor = models.DecimalField(default=0.0, decimal_places=2, max_digits=13)
+    data_inicio = models.DateField(auto_now_add=True)
+    data_fim = models.DateField()
+    descricao = models.CharField(max_length=100)

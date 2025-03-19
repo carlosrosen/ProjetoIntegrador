@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Saldo Financeiro</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f4f4f4;
+            position: relative;
+        }
+        .logout-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 10px 15px;
+            font-size: 14px;
+            color: white;
+            background-color: red;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        .saldo-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        .saldo-info {
+            font-size: 20px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        .saldo {
+            color: green;
+        }
+        .despesa {
+            color: red;
+        }
+        .btn {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 10px 20px;
+            font-size: 16px;
+            color: white;
+            background-color: blue;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <a href="/logout" class="logout-btn">Logout</a>
+    <div class="saldo-container">
+        <h2>Seu Saldo</h2>
+        <p class="saldo-info saldo" id="saldo">Carregando...</p>
+        <h3>Receita</h3>
+        <p class="saldo-info" id="receita">Carregando...</p>
+        <h3>Despesas Variáveis</h3>
+        <p class="saldo-info despesa" id="despesa-variavel">Carregando...</p>
+        <h3>Despesas Fixas</h3>
+        <p class="saldo-info despesa" id="despesa-fixa">Carregando...</p>
+        <a href="https://seusite.com/adicionar" class="btn">Adicionar Informações</a>
+    </div>
+
+    <script>
+        fetch('/api/saldo')  // Substitua pela URL real da API
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('saldo').innerText = `R$ ${data.saldo.toFixed(2)}`;
+                document.getElementById('receita').innerText = `R$ ${data.receita.toFixed(2)}`;
+                document.getElementById('despesa-variavel').innerText = `R$ ${data.despesa_variavel.toFixed(2)}`;
+                document.getElementById('despesa-fixa').innerText = `R$ ${data.despesa_fixa.toFixed(2)}`;
+            })
+            .catch(error => {
+                console.error('Erro ao buscar saldo:', error);
+                document.getElementById('saldo').innerText = 'Erro ao carregar saldo';
+                document.getElementById('receita').innerText = 'Erro ao carregar receita';
+                document.getElementById('despesa-variavel').innerText = 'Erro ao carregar despesas variáveis';
+                document.getElementById('despesa-fixa').innerText = 'Erro ao carregar despesas fixas';
+            });
+    </script>
+</body>
+</html>

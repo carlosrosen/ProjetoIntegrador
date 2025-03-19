@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro Financeiro</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .hidden {
+            display: none;
+        }
+        .container {
+            max-width: 400px;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background: #f9f9f9;
+        }
+        label, select, input, textarea, button {
+            width: 100%;
+            margin-top: 10px;
+            padding: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <label for="tipo">Escolha uma opção:</label>
+        <select id="tipo" onchange="mostrarCampos()">
+            <option value="receita">Receita</option>
+            <option value="despesa_variavel">Despesa Variável</option>
+            <option value="despesa_fixa">Despesa Fixa</option>
+            <option value="meta">Meta</option>
+        </select>
+        
+        <div id="campos_comuns">
+            <input type="number" id="valor" placeholder="Insira um valor">
+            <input type="date" id="data">
+            <textarea id="descricao" placeholder="Insira uma descrição (opcional)"></textarea>
+        </div>
+        
+        <div id="campos_meta" class="hidden">
+            <input type="text" id="nome_meta" placeholder="Insira o nome da meta">
+        </div>
+        
+        <button onclick="salvarDados()">Salvar</button>
+    </div>
+
+    <script>
+        function mostrarCampos() {
+            let tipoSelecionado = document.getElementById("tipo").value;
+            let camposMeta = document.getElementById("campos_meta");
+
+            if (tipoSelecionado === "meta") {
+                camposMeta.classList.remove("hidden");
+            } else {
+                camposMeta.classList.add("hidden");
+            }
+        }
+
+        function salvarDados() {
+            let tipo = document.getElementById("tipo").value;
+            let valor = document.getElementById("valor").value;
+            let data = document.getElementById("data").value;
+            let descricao = document.getElementById("descricao").value;
+            let nomeMeta = document.getElementById("nome_meta").value;
+
+            let dados = { tipo, valor, data, descricao };
+            if (tipo === "meta") {
+                dados.nomeMeta = nomeMeta;
+            }
+            
+            fetch('/salvar', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(dados)
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert("Informação salva com sucesso!");
+                window.location.href = "SaldoDisplay.html";
+            })
+            .catch(error => console.error("Erro ao salvar:", error));
+        }
+    </script>
+</body>
+</html>
