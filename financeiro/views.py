@@ -1,11 +1,11 @@
 from django.shortcuts import render
 from django.http import HttpResponse
 from financeiro.models import Perfil, Receita, DespesaFixa, DespesaVariavel, Metas
-from ProjetoIntegrador.financeiro.funcoes import comum
+from financeiro.funcoes import comum
 import json
 
 
-def inserir_valor(request):
+def inserirValor(request):
     if request.method == "GET":
         return render(request, "inserirsaldo.html")
     infos = json.loads(request.body)
