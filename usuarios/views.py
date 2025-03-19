@@ -13,6 +13,7 @@ def cadastrar(request):
         usuario = request.POST.get('usuario', '').strip()
         email = request.POST.get('email', '').strip()
         senha = request.POST.get('senha', '')
+        #sugestao, criar confirmação de senha
 
         #Filtra se já existe um e-mail ou usuario parecidos no banco de dados, para evitar cadastros repetidos.
         user = User.objects.filter(Q(username=usuario) | Q(email=email)).first()
