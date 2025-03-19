@@ -20,7 +20,7 @@ from . import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', views.Pagina_Inicial, name='Pagina_Inicial'),
+    path('', views.home, name='home'),
     path('auth/', include('usuarios.urls')), #Chamando as urls do aplicativo usuarios
     path('plataforma/', include('financeiro.urls'))
 ]
