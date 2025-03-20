@@ -22,7 +22,13 @@ def inserirValor(request):
             perfil = Perfil.objects.get(fk_user=id_user)
 
             if tipo == "receita":
-                receita = Receita.objects.create(perfil= perfil,valor=valor,data=data ,descricao=descricao)
+                Receita.objects.create(perfil= perfil,valor=valor,data=data ,descricao=descricao)
+            elif tipo == "despesa_fixa":
+                DespesaFixa.objects.create(perfil=perfil,valor=valor,data=data,descricao=descricao)
+            elif tipo == "despesa_variavel":
+                DespesaVariavel.objects.create(perfil=perfil,valor=valor,data=data,descricao=descricao)
+            elif tipo == "meta":
+                Metas.objects.create(perfil=perfil,nome=nome,valor=valor,data=data,descricao=descricao)
             return redirect('home')
     else:
         return redirect('home')
