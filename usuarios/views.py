@@ -3,6 +3,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
+from financeiro.models import Perfil
 
 #Função para cadastrar novos usuarios
 def cadastrar(request):
@@ -12,7 +13,7 @@ def cadastrar(request):
         else:
             usuario = request.POST.get('usuario', '').strip()
             email = request.POST.get('email', '').strip()
-            senha = request.POST.get('senha', '')
+            senha = request.POST.get('senha', '').strip()
             # sugestao, criar confirmação de senha
 
             # Filtra se já existe um e-mail ou usuario parecidos no banco de dados, para evitar cadastros repetidos.
@@ -23,6 +24,8 @@ def cadastrar(request):
 
             # Chamando a função de criar usuário do Django
             user = User.objects.create_user(username=usuario, email=email, password=senha)
+            print(user)
+            profile = Perfil.objects.create(fk_user = User.objects.get(username=usuario))
             messages.success(request, 'Cadastro realizado com sucesso!')
             return redirect('login')
     else:
@@ -42,7 +45,8 @@ def logar(request):
 
             if user:
                 login(request, user)
-                return redirect('home')
+                #alterei momentaneamente de home para uma pagina de saldo para testes
+                return redirect('../../plataforma/alterar_saldo')
             else:
                 messages.error(request, 'Usuário ou senha errada')
                 return redirect('login')
