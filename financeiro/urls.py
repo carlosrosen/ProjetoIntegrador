@@ -3,5 +3,6 @@ from . import views
 
 # As URLs de Login e Cadastro
 urlpatterns = [
-    path('alterar-saldo/', views.inserir_valor, name='inserir_valor'),
+    path('alterar_saldo', views.inserirValor, name='inserirValor'),
+    #path('mostrarSaldo', views.displaySaldo, name='displaySaldo')   
 ]

@@ -7,26 +7,70 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            margin: 20px;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f4f4f4;
+            position: relative;
         }
-        .hidden {
-            display: none;
-        }
+
         .container {
             max-width: 400px;
             padding: 20px;
             border: 1px solid #ccc;
             border-radius: 5px;
-            background: #f9f9f9;
+            background: #fff;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
         }
+
         label, select, input, textarea, button {
             width: 100%;
             margin-top: 10px;
             padding: 8px;
         }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* Botão de logout */
+        .logout-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: white;
+            color: #DC3545; /* Vermelho */
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .logout-btn:hover {
+            background-color: #f8d7da;
+        }
     </style>
 </head>
 <body>
+    <a href="../auth/logout" class="logout-btn">Logout</a> <!-- Botão de logout -->
+
     <div class="container">
         <label for="tipo">Escolha uma opção:</label>
         <select id="tipo" onchange="mostrarCampos()">
@@ -35,17 +79,17 @@
             <option value="despesa_fixa">Despesa Fixa</option>
             <option value="meta">Meta</option>
         </select>
-        
+
         <div id="campos_comuns">
             <input type="number" id="valor" placeholder="Insira um valor">
             <input type="date" id="data">
             <textarea id="descricao" placeholder="Insira uma descrição (opcional)"></textarea>
         </div>
-        
+
         <div id="campos_meta" class="hidden">
             <input type="text" id="nome_meta" placeholder="Insira o nome da meta">
         </div>
-        
+
         <button onclick="salvarDados()">Salvar</button>
     </div>
 
@@ -61,6 +105,19 @@
             }
         }
 
+        function getCSRFToken() {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                document.cookie.split(';').forEach(cookie => {
+                    let [key, value] = cookie.trim().split('=');
+                    if (key === 'csrftoken') {
+                        cookieValue = decodeURIComponent(value);
+                    }
+                });
+            }
+            return cookieValue;
+        }
+
         function salvarDados() {
             let tipo = document.getElementById("tipo").value;
             let valor = document.getElementById("valor").value;
@@ -68,17 +125,39 @@
             let descricao = document.getElementById("descricao").value;
             let nomeMeta = document.getElementById("nome_meta").value;
 
+            if (!valor || valor <= 0) {
+                alert("Por favor, insira um valor válido.");
+                return;
+            }
+
+            if (!data) {
+                alert("Por favor, insira uma data.");
+                return;
+            }
+
             let dados = { tipo, valor, data, descricao };
             if (tipo === "meta") {
+                if (!nomeMeta) {
+                    alert("Por favor, insira um nome para a meta.");
+                    return;
+                }
                 dados.nomeMeta = nomeMeta;
             }
-            
-            fetch('/salvar', {
+
+            fetch('./alterar_saldo', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCSRFToken()
+                },
                 body: JSON.stringify(dados)
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("Erro ao salvar os dados.");
+                }
+                return response.json();
+            })
             .then(data => {
                 alert("Informação salva com sucesso!");
                 window.location.href = "SaldoDisplay.html";

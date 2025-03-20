@@ -16,11 +16,11 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from . import views
+from usuarios import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', views.Pagina_Inicial, name='Pagina_Inicial'),
+    path('', views.home, name='home'), #Inclui a pagina inicial nos caminhos
     path('auth/', include('usuarios.urls')), #Chamando as urls do aplicativo usuarios
     path('plataforma/', include('financeiro.urls'))
 ]
