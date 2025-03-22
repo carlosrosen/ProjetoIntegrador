@@ -7,12 +7,13 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            margin: 20px;
+            margin: 0;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
             background-color: #f4f4f4;
+            position: relative;
         }
 
         .container {
@@ -45,14 +46,31 @@
         .hidden {
             display: none;
         }
+
+        /* Botão de logout */
+        .logout-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: white;
+            color: #DC3545; /* Vermelho */
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .logout-btn:hover {
+            background-color: #f8d7da;
+        }
     </style>
 </head>
 <body>
-<<<<<<< Updated upstream
-=======
     <a href="{% url 'usuario:logout' %}" class="logout-btn">Logout</a> <!-- Botão de logout -->
 
->>>>>>> Stashed changes
     <div class="container">
         <label for="tipo">Escolha uma opção:</label>
         <select id="tipo" onchange="mostrarCampos()">
@@ -61,17 +79,17 @@
             <option value="despesa_fixa">Despesa Fixa</option>
             <option value="meta">Meta</option>
         </select>
-        
+
         <div id="campos_comuns">
             <input type="number" id="valor" placeholder="Insira um valor">
             <input type="date" id="data">
             <textarea id="descricao" placeholder="Insira uma descrição (opcional)"></textarea>
         </div>
-        
+
         <div id="campos_meta" class="hidden">
             <input type="text" id="nome_meta" placeholder="Insira o nome da meta">
         </div>
-        
+
         <button onclick="salvarDados()">Salvar</button>
     </div>
 
@@ -128,7 +146,7 @@
 
             fetch('./alterarSaldo', {
                 method: 'POST',
-                headers: { 
+                headers: {
                     'Content-Type': 'application/json',
                     'X-CSRFToken': getCSRFToken()
                 },

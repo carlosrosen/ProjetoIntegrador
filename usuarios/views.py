@@ -27,15 +27,10 @@ def cadastrar(request):
             user = User.objects.create_user(username=usuario, email=email, password=senha)
             print(user)
             profile = Perfil.objects.create(fk_user = User.objects.get(username=usuario))
-<<<<<<< Updated upstream
-            messages.success(request, 'Cadastro realizado com sucesso!')
-            return redirect('login')
-=======
 
             #Logando o usuario automaticamente e redicionando para a aplicação
             login(request, user)
             return redirect(reverse('financeiro:alterarSaldo'))
->>>>>>> Stashed changes
     else:
         return redirect('home')
 
@@ -57,7 +52,7 @@ def logar(request):
                 return redirect(reverse('financeiro:alterarSaldo'))
             else:
                 messages.error(request, 'Usuário ou senha errada')
-                return redirect('login')
+                return redirect(reverse('usuario:login'))
     else:
         return redirect('home')
 
