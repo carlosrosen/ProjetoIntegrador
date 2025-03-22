@@ -5,8 +5,6 @@ from financeiro.funcoes.comum import OperacoesUsuarios
 from django.shortcuts import render, redirect
 import json
 
-
-
 def inserirValor(request):
     if request.user.is_authenticated:
         if request.method == "GET":

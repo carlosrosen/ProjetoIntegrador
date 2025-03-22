@@ -12,10 +12,16 @@ def cadastrar(request):
         if request.method == "GET":
             return render(request, 'cadastro.html')
         else:
+            # Armazenando as informações fornecidas para a criação do usuario
             usuario = request.POST.get('usuario', '').strip()
             email = request.POST.get('email', '').strip()
             senha = request.POST.get('senha', '').strip()
-            # sugestao, criar confirmação de senha
+            repetir_senha = request.POST.get('repetir_senha', '').strip()
+
+            # Confirmação de senha
+            if senha != repetir_senha:
+                messages.error(request, 'As senhas não coincidem. Tente novamente.')
+                return redirect('cadastro')
 
             # Filtra se já existe um e-mail ou usuario parecidos no banco de dados, para evitar cadastros repetidos.
             user = User.objects.filter(Q(username=usuario) | Q(email=email)).first()
@@ -25,7 +31,8 @@ def cadastrar(request):
 
             # Chamando a função de criar usuário do Django
             user = User.objects.create_user(username=usuario, email=email, password=senha)
-            print(user)
+
+            # Criando a tabela perfil no banco de dados com o id do usuario recém criado
             profile = Perfil.objects.create(fk_user = User.objects.get(username=usuario))
 
             #Logando o usuario automaticamente e redicionando para a aplicação

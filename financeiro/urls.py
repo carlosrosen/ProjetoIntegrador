@@ -6,5 +6,5 @@ app_name = "financeiro"
 # As URLs de Login e Cadastro
 urlpatterns = [
     path('alterarSaldo', views.inserirValor, name='alterarSaldo'),
-    path('mostrarSaldo', views.displaySaldo, name='displaySaldo')   
+    path('mostrarSaldo', views.displaySaldo, name='displaySaldo')
 ]

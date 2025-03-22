@@ -70,7 +70,6 @@
 </head>
 <body>
     <a href="{% url 'usuario:logout' %}" class="logout-btn">Logout</a> <!-- Botão de logout -->
-
     <div class="container">
         <label for="tipo">Escolha uma opção:</label>
         <select id="tipo" onchange="mostrarCampos()">
@@ -143,7 +142,6 @@
                 }
                 dados.nomeMeta = nomeMeta;
             }
-
             fetch('./alterarSaldo', {
                 method: 'POST',
                 headers: {
