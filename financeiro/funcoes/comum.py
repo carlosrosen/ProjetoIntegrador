@@ -1,17 +1,30 @@
+from django.contrib import messages
+from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Sum
-from financeiro.models import Receita, DespesaFixa, DespesaVariavel, Perfil
+from financeiro.models import Perfil, Receita, DespesaFixa, DespesaVariavel, Metas
 
-def calcular_saldo(perfil):
-    # Calculando a soma das receitas
-    total_receitas = Receita.objects.filter(perfil=perfil).aggregate(Sum('valor'))['valor__sum'] or 0
+class OperacoesUsuarios:
+    tabelas = {
+        "Receita": Receita,
+        "DespesaFixa": DespesaFixa,
+        "DespesaVariavel": DespesaVariavel
+    }
+    def __init__(self, user_id):
+        self.__perfil = Perfil.objects.filter(fk_user=user_id).first()
+        if not self.__perfil:
+            raise ValueError(f"Erro: Nenhum perfil encontrado para o usuário {user_id}.")
 
-    # Calculando a soma das despesas fixas
-    total_despesas_fixas = DespesaFixa.objects.filter(perfil=perfil).aggregate(Sum('valor'))['valor__sum'] or 0
+    def total_valor(self, Nome_tabela):
+        modelo = self.tabelas.get(Nome_tabela)
+        if not modelo:
+            raise ValueError(f"Error: tabela {Nome_tabela} não encontrada.")
+        total = modelo.objects.filter(perfil=self.__perfil).aggregate(Sum("valor"))["valor__sum"] or 0
+        return total
 
-    # Calculando a soma das despesas variáveis
-    total_despesas_variaveis = DespesaVariavel.objects.filter(perfil=perfil).aggregate(Sum('valor'))['valor__sum'] or 0
+    def calcular_saldo(self):
+        total_receitas = self.total_valor("Receita")
+        total_despesas_fixas = self.total_valor("DespesaFixa")
+        total_despesas_variaveis = self.total_valor("DespesaVariavel")
 
-    # Calculando o saldo final
-    saldo = total_receitas - (total_despesas_fixas + total_despesas_variaveis)
-
-    return saldo
+        saldo = total_receitas - (total_despesas_fixas + total_despesas_variaveis)
+        return saldo

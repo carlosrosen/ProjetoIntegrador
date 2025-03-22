@@ -108,9 +108,15 @@
             {% csrf_token %}
             <input type="text" placeholder="Usuário" name="usuario" required>
             <input type="password" placeholder="Senha" name="senha" required>
+<<<<<<< Updated upstream
             <input type="submit" value="Entrar">
             <a href="../esqueci/" class="link">Esqueceu a senha?</a>
             <a href="../cadastro/" class="link">Criar uma conta</a>
+=======
+            <button type="submit">Entrar</button>
+            <a href="{% url 'usuario:esqueci' %}" class="link">Esqueceu a senha?</a>
+            <a href="{% url 'usuario:cadastro' %}" class="link">Criar uma conta</a>
+>>>>>>> Stashed changes
         </form>
     </div>
 </body>

@@ -22,5 +22,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.home, name='home'), #Inclui a pagina inicial nos caminhos
     path('auth/', include('usuarios.urls')), #Chamando as urls do aplicativo usuarios
-    path('plataforma/', include('financeiro.urls'))
+    path('dashboard/', include('financeiro.urls'))
 ]

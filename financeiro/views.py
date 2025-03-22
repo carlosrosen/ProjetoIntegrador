@@ -1,9 +1,10 @@
 from django.shortcuts import render
 from django.http import HttpResponse
 from financeiro.models import Perfil, Receita, DespesaFixa, DespesaVariavel, Metas
-from financeiro.funcoes.comum import calcular_saldo
+from financeiro.funcoes.comum import OperacoesUsuarios
 from django.shortcuts import render, redirect
 import json
+
 
 
 def inserirValor(request):
@@ -32,3 +33,21 @@ def inserirValor(request):
             return redirect('home')
     else:
         return redirect('home')
+
+def displaySaldo(request):
+    if request.user.is_authenticated:
+        print("id user: ",request.user.id)
+        print("id perfil_user", Perfil.objects.get(fk_user=request.user.id))
+        operacoes = OperacoesUsuarios(request.user.id)
+        saldo = operacoes.calcular_saldo()
+        receita = operacoes.total_valor("Receita")
+        despesafixa = operacoes.total_valor("DespesaFixa")
+        despesavariavel = operacoes.total_valor("DespesaVariavel")
+        valores = {
+            "saldo": saldo,
+            "receita": receita,
+            "despesa_fixa": despesafixa,
+            "despesa_variavel": despesavariavel
+        }
+
+        return render(request, "SaldoDisplay.html",valores)
