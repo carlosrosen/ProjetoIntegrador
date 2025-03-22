@@ -69,8 +69,7 @@
     </style>
 </head>
 <body>
-    <a href="../auth/logout" class="logout-btn">Logout</a> <!-- Botão de logout -->
-
+    <a href="{% url 'usuario:logout' %}" class="logout-btn">Logout</a> <!-- Botão de logout -->
     <div class="container">
         <label for="tipo">Escolha uma opção:</label>
         <select id="tipo" onchange="mostrarCampos()">
@@ -143,8 +142,7 @@
                 }
                 dados.nomeMeta = nomeMeta;
             }
-
-            fetch('./alterar_saldo', {
+            fetch('./alterarSaldo', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

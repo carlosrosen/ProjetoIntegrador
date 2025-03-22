@@ -1,6 +1,8 @@
 from django.urls import path
 from . import views
 
+app_name = 'usuario'
+
 # As URLs de Login e Cadastro
 urlpatterns = [
     path('cadastro/', views.cadastrar, name='cadastro'),

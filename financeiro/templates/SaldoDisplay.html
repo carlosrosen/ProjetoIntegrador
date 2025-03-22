@@ -62,35 +62,17 @@
     </style>
 </head>
 <body>
-    <a href="/logout" class="logout-btn">Logout</a>
+    <a href="{% url 'usuario:logout' %}" class="logout-btn">Logout</a>
     <div class="saldo-container">
         <h2>Seu Saldo</h2>
-        <p class="saldo-info saldo" id="saldo">Carregando...</p>
+        <p class="saldo-info saldo">R$ {{ saldo|floatformat:2 }}</p>
         <h3>Receita</h3>
-        <p class="saldo-info" id="receita">Carregando...</p>
+        <p class="saldo-info">R$ {{ receita|floatformat:2 }}</p>
         <h3>Despesas Variáveis</h3>
-        <p class="saldo-info despesa" id="despesa-variavel">Carregando...</p>
+        <p class="saldo-info despesa">R$ {{ despesa_variavel|floatformat:2 }}</p>
         <h3>Despesas Fixas</h3>
-        <p class="saldo-info despesa" id="despesa-fixa">Carregando...</p>
-        <a href="home" class="btn">Adicionar Informações</a>
+        <p class="saldo-info despesa">R$ {{ despesa_fixa|floatformat:2 }}</p>
+        <a href="{% url 'financeiro:alterarSaldo' %}" class="btn">Adicionar Informações</a>
     </div>
-
-    <script>
-        fetch('/api/saldo')  // Substitua pela URL real da API
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById('saldo').innerText = `R$ ${data.saldo.toFixed(2)}`;
-                document.getElementById('receita').innerText = `R$ ${data.receita.toFixed(2)}`;
-                document.getElementById('despesa-variavel').innerText = `R$ ${data.despesa_variavel.toFixed(2)}`;
-                document.getElementById('despesa-fixa').innerText = `R$ ${data.despesa_fixa.toFixed(2)}`;
-            })
-            .catch(error => {
-                console.error('Erro ao buscar saldo:', error);
-                document.getElementById('saldo').innerText = 'Erro ao carregar saldo';
-                document.getElementById('receita').innerText = 'Erro ao carregar receita';
-                document.getElementById('despesa-variavel').innerText = 'Erro ao carregar despesas variáveis';
-                document.getElementById('despesa-fixa').innerText = 'Erro ao carregar despesas fixas';
-            });
-    </script>
 </body>
 </html>
