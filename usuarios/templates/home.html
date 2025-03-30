@@ -78,7 +78,7 @@
         <h1>Gestão Financeira</h1>
         <div class="auth-container">
             {% if user.is_authenticated %}
-                <a href="{% url 'financeiro:displaySaldo' %}" class="access-btn">Acesso a Plataforma</a>
+                <a href="{% url 'saldo:alterar-saldo' %}" class="access-btn">Acesso a Plataforma</a>
                 <a href="{% url 'usuario:logout' %}" class="auth-btn">Logout</a>
             {% else %}
                 <a href="{% url 'usuario:login' %}" class="auth-btn">Login</a>
