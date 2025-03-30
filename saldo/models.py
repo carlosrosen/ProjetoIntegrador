@@ -37,7 +37,7 @@ class Transacao(models.Model):
     ]
     
     user_fk = models.ForeignKey(User, on_delete=models.CASCADE, related_name='Transacao')
-    categoria_fk = models.ForeignKey(Categoria, on_delete=models.CASCADE, related_name='Categoria')
+    categoria_fk = models.ForeignKey(Categoria, on_delete=models.CASCADE, related_name='Transacao')
     tipo = models.CharField(max_length=8, choices=escolhas_tipo, null=False)
     valor = models.DecimalField(max_digits=13,decimal_places=2,null=False)
     data_criacao = models.DateField(auto_now_add=True)

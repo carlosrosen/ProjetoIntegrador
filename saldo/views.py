@@ -10,11 +10,8 @@ def inserirValor(request):
     if not request.user.is_authenticated:
         return redirect('home')
     
-    categorias = Categoria.objects.filter()
-    categorias = list(categorias)
-    print(f'\n\ncategorias: {categorias}\n\n')
     if request.method == 'GET':
-        return render(request, 'inserirSaldo.html', {'Categorias': categorias})
+        return render(request, 'inserirSaldo.html', {'Categorias': list(Categoria.objects.filter())})
     
     infos = json.loads(request.body)
     if infos.get('salvar').strip().lower() == 'categoria':

@@ -10,6 +10,7 @@ from django.urls import reverse
 def cadastrar(request):
     if request.user.is_authenticated:
         return redirect('home') 
+    
     if request.method == "GET":
         return render(request, 'cadastro.html')
     else:
