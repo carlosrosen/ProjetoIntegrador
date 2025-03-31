@@ -5,6 +5,7 @@ app_name = 'saldo'
 
 # As URLs de Login e Cadastro
 urlpatterns = [
-    path('alterar-saldo', views.inserirValor, name='alterar-saldo'),
-    #path('mostrar-saldo', views.mostrarSaldo, name='mostra-saldo')
+    path('inserir-saldo', views.inserirSaldo, name='inserir-saldo'),
+    path('editar-saldo/<int:transacao_id>', views.editarSaldo, name='editar-saldo'),
+    path('historico-saldo', views.historicoSaldo, name='historico-saldo')
 ]

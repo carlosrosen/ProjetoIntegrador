@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Transação</title>
+    <style>
+        .logout{
+            background-color: red;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+            text-decoration: none;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        
+        form {
+            max-width: 500px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            position: relative; /* Adicionado para posicionar o botão de cancelar */
+        }
+        
+        label {
+            font-weight: bold;
+            display: block;
+            margin-top: 10px;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        
+        .btn-save, .btn-delete, .btn-cancel {
+            display: block;
+            width: 100%;
+            margin-top: 10px;
+            padding: 10px;
+            font-size: 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .btn-save {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .btn-save:hover {
+            background-color: #45a049;
+        }
+
+        .btn-delete {
+            background-color: red;
+            color: white;
+        }
+
+        .btn-delete:hover {
+            background-color: darkred;
+        }
+
+        .btn-cancel {
+            background-color: #007bff;
+            color: white;
+            font-size: 14px;
+            padding: 8px 16px;
+            width: auto;
+            position: absolute;
+            top: -8px;
+            right: -200px;
+            border-radius: 4px;
+            text-align: center;
+        }
+
+        .btn-cancel:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>Editar Transação</h1>
+    <a class="logout" href="{% url 'usuario:logout' %}">logout</a>
+    <form method="POST" action="{% url 'saldo:editar-saldo' transacao_id=transacao.id %}">
+        {% csrf_token %}
+        
+        <label for="categoria">Categoria:</label>
+        <select name="categoria" id="categoria">
+            {% for categoria in categorias %}
+            <option value="{{ categoria.id }}" {% if categoria.id == transacao.categoria_fk.id %}selected{% endif %}>{{ categoria.nome }}</option>
+            {% endfor %}
+        </select>
+        
+        <label for="tipo">Tipo:</label>
+        <select name="tipo" id="tipo">
+            <option value="r" {% if transacao.tipo == 'r' %}selected{% endif %}>Receita</option>
+            <option value="d" {% if transacao.tipo == 'd' %}selected{% endif %}>Despesa</option>
+        </select>
+        
+        <label for="valor">Valor:</label>
+        <input type="number" step="0.01" name="valor" id="valor" value="{{ transacao.valor }}">
+        
+        <label for="data">Data:</label>
+        <input type="date" name="data" id="data" value="{{ transacao.data }}">
+        
+        <label for="descricao">Descrição:</label>
+        <input type="text" name="descricao" id="descricao" value="{{ transacao.descricao }}">
+        
+        <label for="status">Status:</label>
+        <select name="status" id="status">
+            <option value="True" {% if transacao.status %}selected{% endif %}>Ativa</option>
+            <option value="False" {% if not transacao.status %}selected{% endif %}>Inativa</option>
+        </select>
+
+        <button type="submit" name="ativar_botao" value="editar" class="btn-save">Salvar Alterações</button>
+
+        <button type="submit" name="ativar_botao" value="apagar" class="btn-delete" formaction="{% url 'saldo:editar-saldo' transacao_id=transacao.id %}" 
+            formmethod="POST" onclick="return confirm('Tem certeza que deseja excluir esta transação?');">
+            Excluir Transação
+        </button>
+
+        <!-- Botão de Cancelar Edição -->
+        <a href="{% url 'saldo:historico-saldo' %}">
+            <button type="button" class="btn-cancel">Cancelar Edição</button>
+        </a>
+    </form>
+</body>
+</html>

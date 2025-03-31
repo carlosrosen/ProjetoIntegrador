@@ -36,7 +36,7 @@ def cadastrar(request):
 
         #Logando o usuario automaticamente e redicionando para a aplicação
         login(request, user)
-        return redirect(reverse('saldo:alterar-saldo'))
+        return redirect(reverse('saldo:inserir-saldo'))
 
 #Função de Login
 def logar(request):
@@ -54,7 +54,7 @@ def logar(request):
 
     if user:
         login(request, user)
-        return redirect(reverse('saldo:alterar-saldo'))
+        return redirect(reverse('saldo:inserir-saldo'))
     else:
         messages.error(request, 'Usuário ou senha errada')
         return redirect(reverse('usuario:login'))
