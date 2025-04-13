@@ -9,7 +9,7 @@ import json
 
 def inserirSaldo(request):
     if not request.user.is_authenticated:
-        return redirect('home')
+        return redirect('index')
     
     # verifica se o metodo da pagina é GET para pegar as informações
     if request.method == 'GET':
@@ -64,7 +64,7 @@ def inserirSaldo(request):
 def editarSaldo(request, transacao_id):
     # Verifica a autenticação
     if not request.user.is_authenticated:
-        return redirect('home')
+        return redirect('index')
     
     if request.method == 'GET':
         return render(request,'editarSaldo.html',
@@ -91,7 +91,7 @@ def editarSaldo(request, transacao_id):
 def historicoSaldo(request):
     # Verifica a autenticação
     if not request.user.is_authenticated:
-        return redirect('home')
+        return redirect('index')
     
     #chama todos os objetos
     transacoes = Transacao.objects.filter(user_fk= request.user)

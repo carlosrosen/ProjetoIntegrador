@@ -1,0 +1,26 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>U-Balance</title>
+  <link rel="stylesheet" href="{% static 'core/css/style-dashboard.css' %}" />
+</head>
+<body>
+    <header>
+        <div class="container">
+          <div class="logo"><a href="{% url 'core:index' %}">U-Balance</a></div>
+        </div>
+      </header>
+
+      <div class="container">
+        <div class="botoes">
+            <a href="{% url 'saldo:inserir-saldo' %}">Inserir saldo</a>
+            <a href="{% url 'saldo:historico-saldo' %}">Mostrar saldo</a>
+            <a href="{% url 'core:manutencao' %}">Relatorios</a>
+        </div>
+      </div>
+</body>
+</html>
