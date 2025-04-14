@@ -8,7 +8,11 @@
   <title>U-Balance</title>
   <link rel="stylesheet" href="{% static 'core/css/style-dashboard.css' %}" />
 </head>
-<body>
-    <h1>Em manutenção</h1>
+<body style="background-color: rgb(113, 113, 113);">
+    <h1 style="text-align: center; color: yellow">Em manutenção</h1>
+    <div class="botoes">
+        <a href="{% url 'core:index' %}">Voltar para a pagina inicial</a>
+        <a href="{% url 'core:dashboard' %}">Voltar para a dashboard</a>
+    </div>
 </body>
 </html>

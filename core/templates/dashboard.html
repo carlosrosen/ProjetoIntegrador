@@ -11,15 +11,24 @@
 <body>
     <header>
         <div class="container">
-          <div class="logo"><a href="{% url 'core:index' %}">U-Balance</a></div>
+            <div class="logo">
+                <a href="{% url 'core:index' %}">U-Balance</a>
+                <p class="username">Usuario: {{request.user.username}}</p>
+                <p class="email">Email: {{request.user.email}}</p>
+            </div>
+          <nav>
+            <a href="{% url 'usuario:logout' %}">Logout</a>
+          </nav>
         </div>
       </header>
 
       <div class="container">
         <div class="botoes">
-            <a href="{% url 'saldo:inserir-saldo' %}">Inserir saldo</a>
-            <a href="{% url 'saldo:historico-saldo' %}">Mostrar saldo</a>
+            <a href="{% url 'saldo:inserir-saldo' %}">Inserir transacao</a>
+            <a href="{% url 'saldo:historico-saldo' %}">Mostrar historico</a>
             <a href="{% url 'core:manutencao' %}">Relatorios</a>
+            <a href="{%url 'saldo:criar-metas' %}">Inserir metas</a>
+            <a href="{% url 'saldo:mostrar-metas' %}">Mostrar metas</a>
         </div>
       </div>
 </body>

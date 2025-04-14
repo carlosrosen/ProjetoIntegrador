@@ -6,7 +6,21 @@
     <title>Editar Transação</title>
     <style>
         .logout{
+            margin-left: 90vw;
             background-color: red;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+            text-decoration: none;
+        }
+        .botao-dashboard{
+            display: flex;
+            text-align: center;
+            margin-right: 90px;
+            background-color: #00761e;
             color: white;
             border: none;
             padding: 10px 20px;
@@ -102,6 +116,7 @@
 <body>
     <h1>Editar Transação</h1>
     <a class="logout" href="{% url 'usuario:logout' %}">logout</a>
+    <a class="botao-dashboard" href="{% url 'core:dashboard' %}">Dashboard</a>
     <form method="POST" action="{% url 'saldo:editar-saldo' transacao_id=transacao.id %}">
         {% csrf_token %}
         

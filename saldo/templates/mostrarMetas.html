@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Histórico de Transações</title>
+    <title>Minhas Metas</title>
     <style>
 
-        .botao-metas{
-            background-color: #c5bf00;
+        .transacoes-layout{
+            background-color: #0d6efd;
             color: white;
             border: none;
             padding: 10px 20px;
@@ -17,8 +17,8 @@
             text-decoration: none;
         }
 
-        .botao-metas:hover{
-            background-color: #838d00;
+        .transacoes-layout:hover{
+            background-color: rgb(0, 62, 185);
             transform: scale(1.05);
         }
 
@@ -38,16 +38,6 @@
             transform: scale(1.05);
         }
 
-        .cor_receita{
-            text-align: center;
-            color: green;
-        }
-
-        .cor_despesa{
-            text-align: center;
-            color: red;
-        }
-
         .logout{
             background-color: red;
             color: white;
@@ -62,10 +52,6 @@
         .logout:hover{
             background-color: rgb(166, 0, 0);
             transform: scale(1.05);
-        }
-        
-        .titulo{
-            color: green;
         }
 
         body {
@@ -92,87 +78,70 @@
             font-weight: bold;
         }
 
-        .filters select, .filters input {
+        .filters input, .filters select {
             padding: 8px;
             font-size: 16px;
             margin: 5px;
         }
 
-        .transaction-table {
+        .goal-table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 20px;
         }
 
-        .transaction-table th, .transaction-table td {
+        .goal-table th, .goal-table td {
             padding: 12px;
             text-align: left;
             border-bottom: 1px solid #ddd;
         }
 
-        .transaction-table th {
-            background-color: #4CAF50;
+        .goal-table th {
+            background-color: #007BFF;
             color: white;
         }
 
-        .transaction-table td {
+        .goal-table td {
             background-color: white;
         }
 
         .status-active {
-            color: green;
+            color: #007BFF;
+            font-weight: bold;
         }
 
         .status-inactive {
             color: red;
+            font-weight: bold;
         }
 
-        .add-transaction-btn {
+        .back-btn {
             display: block;
             width: 200px;
             margin: 40px auto 0;
             padding: 10px;
             text-align: center;
-            background-color: #4CAF50;
+            background-color: #007BFF;
             color: white;
             font-size: 16px;
             text-decoration: none;
             border-radius: 5px;
         }
 
-        .add-transaction-btn:hover {
-            background-color: #45a049;
-        }
-
-        .edit-btn {
-            text-decoration: none;
-            color: #4CAF50;
-            font-weight: bold;
-        }
-
-        .edit-btn:hover {
-            text-decoration: underline;
+        .back-btn:hover {
+            background-color: #0056b3;
         }
     </style>
 </head>
 <body>
 
-<h1 class="titulo" >Minhas Transações</h1>
+<h1>Minhas Metas</h1>
 
 <a class="logout" href="{% url 'usuario:logout' %}">logout</a>
 <a class="botao-dashboard" href="{% url 'core:dashboard' %}">Dashboard</a>
-<a class="botao-metas" href="{% url 'saldo:mostrar-metas' %}">Minhas metas</a>
+<a class="transacoes-layout" href="{% url 'saldo:historico-saldo' %}">Minhas transações</a>
 
 <form method="GET" class="filters">
-    <!-- Filtros de busca -->
-    <div>
-        <label for="tipo">Tipo:</label>
-        <select name="tipo" id="tipo">
-            <option value="">Tudo</option>
-            <option value="r" {% if request.GET.tipo == 'r' %}selected{% endif %}>Receita</option>
-            <option value="d" {% if request.GET.tipo == 'd' %}selected{% endif %}>Despesa</option>
-        </select>
-    </div>
     <div>
         <label for="data_inicio">Data Início:</label>
         <input type="date" name="data_inicio" id="data_inicio" value="{{ request.GET.data_inicio }}">
@@ -182,18 +151,11 @@
         <input type="date" name="data_fim" id="data_fim" value="{{ request.GET.data_fim }}">
     </div>
     <div>
-        <label for="valor_min">Valor Mínimo:</label>
-        <input type="number" step="0.01" name="valor_min" id="valor_min" value="{{ request.GET.valor_min }}">
-    </div>
-    <div>
-        <label for="categoria">Categoria:</label>
-        <select name="categoria" id="categoria">
-            <option value="">Selecione</option>
-            {% for categoria in categorias %}
-            <option value="{{ categoria.id }}" {% if categoria.id == request.GET.categoria|default:'' %}selected{% endif %}>
-                {{ categoria.nome }}
-            </option>
-            {% endfor %}
+        <label for="status">Status:</label>
+        <select name="status" id="status">
+            <option value="">Todos</option>
+            <option value="1" {% if request.GET.status == '1' %}selected{% endif %}>Ativa</option>
+            <option value="0" {% if request.GET.status == '0' %}selected{% endif %}>Concluída</option>
         </select>
     </div>
     <div>
@@ -201,51 +163,38 @@
     </div>
 </form>
 
-<table class="transaction-table">
+<table class="goal-table">
     <thead>
         <tr>
-            <th>Data</th>
-            <th>Categoria</th>
-            <th>Tipo</th>
+            <th>Nome</th>
             <th>Valor</th>
+            <th>Data de Início</th>
+            <th>Data de Fim</th>
             <th>Status</th>
             <th>Descrição</th>
-            <th>Ações</th>
         </tr>
     </thead>
     <tbody>
-        {% for transacao in transacoes %}
+        {% for meta in metas %}
         <tr>
-            <td>{{ transacao.data }}</td>
-            <td>{{ transacao.categoria_fk.nome }}</td>
-            {% if transacao.tipo == 'r' %}
-                <td class="cor_receita">
-                    Receita
-                </td>
-            {% elif transacao.tipo == 'd' %}
-                <td class="cor_despesa">
-                Despesa
-                </td>
-            {% endif %}
-            <td>R$ {{ transacao.valor }}</td>
-            <td class="{% if transacao.status %}status-active{% else %}status-inactive{% endif %}">
-                {% if transacao.status %}Ativa{% else %}Inativa{% endif %}
+            <td>{{ meta.nome }}</td>
+            <td>R$ {{ meta.valor }}</td>
+            <td>{{ meta.data_inicio }}</td>
+            <td>{{ meta.data_fim }}</td>
+            <td class="{% if meta.status %}status-active{% else %}status-inactive{% endif %}">
+                {{ meta.status|yesno:"Ativa,Concluída" }}
             </td>
-            <td>{{ transacao.descricao }}</td>
-            <td>
-                <a href="{% url 'saldo:editar-saldo' transacao.id %}" class="edit-btn">Editar</a>
-            </td>
+            <td>{{ meta.descricao|default:"-" }}</td>
         </tr>
         {% empty %}
         <tr>
-            <td colspan="7" style="text-align: center;">Nenhuma transação encontrada.</td>
+            <td colspan="6" style="text-align: center;">Nenhuma meta cadastrada.</td>
         </tr>
         {% endfor %}
     </tbody>
 </table>
 
-<!-- Botão para realizar transações -->
-<a href="{% url 'saldo:inserir-saldo' %}" class="add-transaction-btn">Realizar Transação</a>
+<a href="{% url 'saldo:inserir-saldo' %}" class="back-btn">Adicionar Nova Meta</a>
 
 </body>
 </html>

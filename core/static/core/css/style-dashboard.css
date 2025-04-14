@@ -159,3 +159,39 @@ footer {
   font-size: 36px;
   margin-bottom: 15px;
 }
+
+nav a {
+  display: flex;
+  width: 55px;
+  height: 22px;
+  margin-left: 90vw;
+  margin-top: -3vh;
+  text-decoration: none;
+  color: white;
+  font-weight: 500;
+  padding: 10px;
+  background-color: red;
+  border-radius: 15px;
+  transition: background-color 0.3s ease;
+  transition: transform 0.3s ease;
+}
+
+nav a:hover {
+  background-color: rgb(121, 0, 0);
+  transform: scale(1.05);
+}
+
+.username{
+  color: white;
+  font-family: cursive;
+  display: flex;
+  margin-top: -30px;
+  margin-bottom: -40px;
+}
+.email{
+  color: white;
+  font-family: cursive;
+  display: flex;
+  margin-top: 40px;
+  margin-bottom: -40px;
+}

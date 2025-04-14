@@ -7,5 +7,7 @@ app_name = 'saldo'
 urlpatterns = [
     path('inserir-saldo', views.inserirSaldo, name='inserir-saldo'),
     path('editar-saldo/<int:transacao_id>', views.editarSaldo, name='editar-saldo'),
-    path('historico-saldo', views.historicoSaldo, name='historico-saldo')
+    path('criar-metas/',views.criarMetas,name='criar-metas'),
+    path('historico-saldo', views.historicoSaldo, name='historico-saldo'),
+    path('mostrar-metas/', views.mostrarMetas, name='mostrar-metas')
 ]

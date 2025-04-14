@@ -45,7 +45,6 @@ def inserirSaldo(request):
             status = True,
             descricao=descricao
         )
-
     elif infos.get('salvar').strip().lower() == 'meta':
         nome = infos.get('nome','').strip()
         valor = infos.get('valor','').strip()
@@ -57,8 +56,10 @@ def inserirSaldo(request):
             nome=nome,
             valor=valor,
             data_inicio=data_inicio,
-            data_fim=data_fim
+            data_fim=data_fim,
+            descricao=descricao
         )
+        
     return redirect(reverse('saldo:inserir-saldo'))
         
 def editarSaldo(request, transacao_id):
@@ -91,7 +92,7 @@ def editarSaldo(request, transacao_id):
 def historicoSaldo(request):
     # Verifica a autenticação
     if not request.user.is_authenticated:
-        return redirect('index')
+        return redirect(reverse('core:index'))
     
     #chama todos os objetos
     transacoes = Transacao.objects.filter(user_fk= request.user)
@@ -126,3 +127,65 @@ def historicoSaldo(request):
         'categorias': categorias
         }
     )
+    
+def criarMetas(request):
+    if not request.user.is_authenticated:
+        return redirect(reverse('core:index'))
+    
+    return redirect(reverse('saldo:inserir-saldo'))
+    
+    #codigo em manutenção
+    
+    if request.method == 'GET':
+        render(request, 'criarMetas.html')
+    
+    
+    nome = request.POST.get('nome','').strip()
+    valor = float(request.POST.get('valor','').strip())
+    data_inicio = request.POST.get('data_inicio','').strip()
+    data_fim = request.POST.get('data_fim','').strip()
+    descricao = request.POST.get('descricao','').strip()
+    print(f'\n\n{nome}\n{valor}\n{data_inicio}\n{data_fim}\n{descricao}\n\n')
+    Metas.objects.create(
+        user_fk = request.user,
+        nome=nome,
+        valor=valor,
+        data_inicio=data_inicio,
+        data_fim=data_fim,
+        descricao=descricao
+    )
+    
+def mostrarMetas(request):
+    if not request.user.is_authenticated:
+        return redirect(reverse('core:index'))
+    
+    metas = Metas.objects.filter(user_fk=request.user)
+    
+    # Coleta os parâmetros de filtro do GET
+    nome = request.GET.get('nome', '')
+    data_inicio = request.GET.get('data_inicio', '')
+    data_fim = request.GET.get('data_fim', '')
+    valor_min = request.GET.get('valor_min', '')
+    status = request.GET.get('status', '')
+
+    # Aplica os filtros conforme preenchido pelo usuário
+    if nome:
+        metas = metas.filter(nome__icontains=nome)
+
+    if data_inicio:
+        metas = metas.filter(data_inicio__gte=data_inicio)
+
+    if data_fim:
+        metas = metas.filter(data_fim__lte=data_fim)
+
+    if valor_min:
+        metas = metas.filter(valor__gte=valor_min)
+
+    if status != '':
+        # Converte para booleano (espera 'true' ou 'false' como string)
+        status_bool = status.lower() == 'true'
+        metas = metas.filter(status=status_bool)
+
+    return render(request, 'mostrarMetas.html', {
+        'metas': metas,
+    })
