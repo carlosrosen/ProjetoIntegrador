@@ -62,8 +62,3 @@ def logar(request):
 def deslogar(request):
     logout(request)
     return redirect(reverse('core:index'))
-
-#W.I.P
-#Função de requisitar o site de EsqueciMinhaSenha
-def esqueci(request):
-    return render(request, 'esqueci.html')
