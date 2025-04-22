@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inserir Saldo</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>
+
+        .botao-metas{
+            background-color: #c5bf00;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+            text-decoration: none;
+        }
+
+        .botao-metas:hover{
+            background-color: #6e7600;
+            transform: scale(1.05);
+        }
+
+        .transacoes-layout{
+            background-color: #0d6efd;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+            text-decoration: none;
+        }
+
+        .botao-dashboard{
+            display: flex;
+            text-align: center;
+            margin-right: 90px;
+            background-color: #00761e;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+            text-decoration: none;
+        }
+        
+        body {
+            background-color: #f8f9fa;
+        }
+        .card {
+            border-radius: 10px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .card-header {
+            font-weight: bold;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="d-flex justify-content-between mb-4">
+            <a class="transacoes-layout" href="{% url 'saldo:historico-saldo' %}">Minhas transações</a>
+            <a class="botao-metas" href="{% url 'saldo:mostrar-metas' %}">Minhas metas</a>
+            <a class="botao-dashboard" href="{% url 'core:dashboard' %}">Dashboard</a>
+            <a href="{% url 'usuario:logout' %}" class="btn btn-danger">Logout</a>
+        </div>
+
+        <h2 class="text-center mb-5">Inserir Saldo</h2>
+        
+
+        <div class="row">
+            <!-- Inserção de Transação -->
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-header bg-primary text-white text-center">Nova Transação</div>
+                    <div class="card-body">
+                        <form id="transacaoForm">
+                            <input type="number" id="transacaoValor" class="form-control mb-3" placeholder="Valor" required>
+                            <input type="date" id="transacaoData" class="form-control mb-3" required>
+                            <select id="transacaoTipo" class="form-control mb-3">
+                                <option value="r">Receita</option>
+                                <option value="d">Despesa</option>
+                            </select>
+                            <select id="transacaoCategoria" class="form-control mb-3">
+                                <option value="">Selecione uma Categoria</option>
+                                {% for categoria in Categorias %}
+                                    <option value="{{ categoria.id }}">{{ categoria.nome }}</option>
+                                {% endfor %}
+                            </select>
+                            <select id="transacaoRecorrente" class="form-control mb-3">
+                                <option value="false">Não Recorrente</option>
+                                <option value="true">Recorrente</option>
+                            </select>
+                            <select id="transacaoRecorrenciaTipo" class="form-control mb-3">
+                                <option value="m">Mensal</option>
+                                <option value="t">Trimestral</option>
+                                <option value="a">Anual</option>
+                            </select>
+                            <select id="transacaoStatus" class="form-control mb-3">
+                                <option value="true">Ativo</option>
+                                <option value="false">Inativo</option>
+                            </select>
+                            <input type="number" id="transacaoQuantidade" class="form-control mb-3" placeholder="Quantidade de Inserções" required>
+                            <textarea id="transacaoDescricao" class="form-control mb-3" placeholder="Descrição (opcional)"></textarea>
+                            <button type="submit" class="btn btn-primary w-100">Adicionar Transação</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Inserção de Meta -->
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-header bg-primary text-white text-center">Nova Meta</div>
+                    <div class="card-body">
+                        <form id="metaForm">
+                            <input type="text" id="metaNome" class="form-control mb-3" placeholder="Nome da Meta" required>
+                            <input type="number" id="metaValor" class="form-control mb-3" placeholder="Valor" required>
+                            <input type="date" id="metaDataInicio" class="form-control mb-3">
+                            <input type="date" id="metaDataFim" class="form-control mb-3" required>
+                            <textarea id="metaDescricao" class="form-control mb-3" placeholder="Descrição (opcional)"></textarea>
+                            <button type="submit" class="btn btn-primary w-100">Adicionar Meta</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="resultado" class="mt-4"></div>
+    </div>
+
+    <script>
+        function enviarDados(url, data) {
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("resultado").innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+            });
+        }
+
+        document.getElementById("transacaoForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+            enviarDados("{% url 'saldo:inserir-saldo' %}", {
+                salvar: 'transacao',
+                valor: document.getElementById("transacaoValor").value,
+                data: document.getElementById("transacaoData").value,
+                tipo: document.getElementById("transacaoTipo").value,
+                categoria_id: document.getElementById("transacaoCategoria").value,
+                eh_recorrente: document.getElementById("transacaoRecorrente").value === "true",
+                recorrencia_tipo: document.getElementById("transacaoRecorrenciaTipo").value,
+                status: document.getElementById("transacaoStatus").value === "true",
+                quantidade: document.getElementById("transacaoQuantidade").value,
+                descricao: document.getElementById("transacaoDescricao").value
+            });
+        });
+
+        document.getElementById("metaForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+            enviarDados("{% url 'saldo:inserir-saldo' %}", {
+                salvar: 'meta',
+                nome: document.getElementById("metaNome").value,
+                valor: document.getElementById("metaValor").value,
+                data_inicio: document.getElementById("metaDataInicio").value,
+                data_fim: document.getElementById("metaDataFim").value,
+                descricao: document.getElementById("metaDescricao").value
+            });
+        });
+    </script>
+</body>
+</html>

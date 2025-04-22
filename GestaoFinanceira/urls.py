@@ -20,7 +20,7 @@ from usuarios import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', views.home, name='home'), #Inclui a pagina inicial nos caminhos
+    path('', include('core.urls')), #Inclui a pagina inicial nos caminhos
     path('auth/', include('usuarios.urls')), #Chamando as urls do aplicativo usuarios
-    path('dashboard/', include('financeiro.urls'))
+    path('dashboard/', include('saldo.urls'))
 ]
