@@ -116,7 +116,7 @@
     <h1>Editar Transação</h1>
     <a class="logout" href="{% url 'usuario:logout' %}">logout</a>
     <a class="botao-dashboard" href="{% url 'core:dashboard' %}">Dashboard</a>
-    <form method="POST" action="{% url 'saldo:editar-saldo' transacao_id=transacao.id %}">
+    <form method="POST" action="{% url 'financeiro:editar-saldo' transacao_id=transacao.id %}">
         {% csrf_token %}
         
         <label for="categoria">Categoria:</label>
@@ -149,13 +149,13 @@
 
         <button type="submit" name="ativar_botao" value="editar" class="btn-save">Salvar Alterações</button>
 
-        <button type="submit" name="ativar_botao" value="apagar" class="btn-delete" formaction="{% url 'saldo:editar-saldo' transacao_id=transacao.id %}" 
+        <button type="submit" name="ativar_botao" value="apagar" class="btn-delete" formaction="{% url 'financeiro:editar-saldo' transacao_id=transacao.id %}"
             formmethod="POST" onclick="return confirm('Tem certeza que deseja excluir esta transação?');">
             Excluir Transação
         </button>
 
         <!-- Botão de Cancelar Edição -->
-        <a href="{% url 'saldo:historico-saldo' %}">
+        <a href="{% url 'finaceiro:historico-saldo' %}">
             <button type="button" class="btn-cancel">Cancelar Edição</button>
         </a>
     </form>

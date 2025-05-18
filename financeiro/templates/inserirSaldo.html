@@ -64,8 +64,8 @@
 <body>
     <div class="container mt-5">
         <div class="d-flex justify-content-between mb-4">
-            <a class="transacoes-layout" href="{% url 'saldo:historico-saldo' %}">Minhas transações</a>
-            <a class="botao-metas" href="{% url 'saldo:mostrar-metas' %}">Minhas metas</a>
+            <a class="transacoes-layout" href="{% url 'financeiro:historico-saldo' %}">Minhas transações</a>
+            <a class="botao-metas" href="{% url 'financeiro:mostrar-metas' %}">Minhas metas</a>
             <a class="botao-dashboard" href="{% url 'core:dashboard' %}">Dashboard</a>
             <a href="{% url 'usuario:logout' %}" class="btn btn-danger">Logout</a>
         </div>
@@ -152,7 +152,7 @@
 
         document.getElementById("transacaoForm").addEventListener("submit", function(event) {
             event.preventDefault();
-            enviarDados("{% url 'saldo:inserir-saldo' %}", {
+            enviarDados("{% url 'financeiro:inserir-saldo' %}", {
                 salvar: 'transacao',
                 valor: document.getElementById("transacaoValor").value,
                 data: document.getElementById("transacaoData").value,
@@ -168,7 +168,7 @@
 
         document.getElementById("metaForm").addEventListener("submit", function(event) {
             event.preventDefault();
-            enviarDados("{% url 'saldo:inserir-saldo' %}", {
+            enviarDados("{% url 'financeiro:inserir-saldo' %}", {
                 salvar: 'meta',
                 nome: document.getElementById("metaNome").value,
                 valor: document.getElementById("metaValor").value,

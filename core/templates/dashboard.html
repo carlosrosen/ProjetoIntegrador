@@ -5,31 +5,238 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>U-Balance</title>
-  <link rel="stylesheet" href="{% static 'core/css/style-dashboard.css' %}" />
+  <title>U-Balance Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="{% static 'core/css/sytle_dashdashboard.css' %}" />
 </head>
 <body>
-    <header>
-        <div class="container">
-            <div class="logo">
-                <a href="{% url 'core:index' %}">U-Balance</a>
-                <p class="username">Usuario: {{request.user.username}}</p>
-                <p class="email">Email: {{request.user.email}}</p>
-            </div>
-          <nav>
-            <a href="{% url 'usuario:logout' %}">Logout</a>
-          </nav>
-        </div>
-      </header>
+  <aside class="sidebar">
+    <h1>U-Balance</h1>
+    <nav>
+      <a href="#">🏠 Início</a>
+      <a href="#" id="abrirModalTransacao">💲 Adicionar Transação</a>
+      <a href="#" id="abrirModalMeta">🎯 Adicionar Meta</a>
+      <!-- ADICIONADO ESSE ID -->
+      <a href="#" id="abrirModalObjetivo">📈 Adicionar Objetivo</a>
+      <!------------------------>
+      <a href="#">🧾 Extrato</a>
+      <a href="#">📊 Relatórios</a>
+      <a href="#">⚙️ Configurações</a>
+      <a href="#" id="logout">Logout</a>
+    </nav>
+  </aside>
 
-      <div class="container">
-        <div class="botoes">
-            <a href="{% url 'saldo:inserir-saldo' %}">Inserir transacao</a>
-            <a href="{% url 'saldo:historico-saldo' %}">Mostrar historico</a>
-            <a href="{% url 'core:manutencao' %}">Relatorios</a>
-            <a href="{%url 'saldo:criar-metas' %}">Inserir metas</a>
-            <a href="{% url 'saldo:mostrar-metas' %}">Mostrar metas</a>
+  <main class="content">
+    <div class="top-bar">
+      <h2>Dashboard Financeiro</h2>
+      <div><strong>Usuário:</strong> DF</div>
+    </div>
+
+    <div class="saldo-box">
+      <h2>Saldo Atual: R$ -59,28</h2>
+      <p>Ganhos do mês: R$ 100,00 | Gastos do mês: R$ 109,28</p>
+    </div>
+
+    <div class="flex">
+      <div style="width: 50%;">
+        <div class="desempenho-box">
+          <h3>Desempenho - Mai/25</h3>
+          <p>Resultado: <strong>-9,28</strong></p><br>
+          <p style="font-size: 20px;">Entradas: <span style="color:green">100,00</span> <br><br> Saídas: <span style="color:red">109,28</span></p>
+        </div>
+        <div class="transacoes-box">
+          <h3>Últimas Transações</h3>
+          <ul>
+            <li><span>💰 Salário</span> <span class="valor">+50,00</span></li>
+            <li><span>✈️ Viagem</span> <span class="valor">-1,00</span></li>
+            <li><span>🍽️ Alimentação</span> <span class="valor">-35,30</span></li>
+            <li><span>💰 Salário</span> <span class="valor">+50,00</span></li>
+            <li><span>🍽️ Alimentação</span> <span class="valor">-72,98</span></li>
+          </ul>
         </div>
       </div>
+
+      <div class="grafico-box">
+        <h3>Controle por Categoria</h3><br>
+        <button onclick="alternarGrafico()" id="btnAlternar">Ver Ganhos</button>
+        <canvas id="graficoGastos"></canvas>
+      </div>
+
+      <div class="metas-box">
+        <h3>Metas</h3><br>
+        <ul>
+          <li><span><strong>Nome:</strong> Viajar </span>
+          <li><span><strong>Valor da meta:</strong> 15.000R$</span>
+          <li><span><strong>Valor Guardado:</strong> 8.250R$ </span>
+          <li><span><strong>Data Limite:</strong> 16/09/2025</span>
+        </ul>
+        <button id="btnVermaisMeta">Ver mais</button>
+
+        <h3 style="padding-top: 5px;">Lançamentos Futuros</h3>
+        <ul>
+          <li><span>Cartão Crédito (Parcela 1/3)</span> <span class="valor">-200,00</span></li>
+          <li><span>Aluguel (Vencimento dia 10)</span> <span class="valor">-800,00</span></li>
+          <li><span>Celular - Plano mensal</span> <span class="valor">-49,90</span></li>
+        </ul>
+        <button id="btnVermaisFuture">Ver mais</button><br><br>
+      </div>
+    </div>
+  </main>
+
+<div id="modalTransacao">
+  <div class="modal-content">
+    <div class="tabs">
+      <button type="button" class="tab active" data-tipo="saida">Despesa</button>
+      <button type="button" class="tab" data-tipo="entrada">Receita</button>
+    </div>
+
+    <h2>Adicionar Transação 💲</h2><br>
+    <p>Aqui você irá adicionar uma transação, seja ela uma receita ou despesa para auxiliarmos no gerenciamento financeiro da sua conta! <strong>Lembre-se</strong>, é importante manter as transações atualizadas para uma maior precisão de decisões. ⚠️</p><br>
+    <hr>
+    <br>
+    <form id="formTransacao">
+
+
+      <div id="camposDespesa">
+        <label>Valor gasto:</label><br>
+        <input type="number" name="valor" step="0.01" required><br>
+
+        <label>Descrição:</label><br>
+        <input type="text" name="descricao" required><br>
+
+        <label>Categoria:</label><br>
+        <input type="text" name="categoria" required><br>
+
+        <label>Condição do pagamento:</label><br>
+        <select id="condicaoPagamento">
+          <option value="avista">À vista</option>
+          <option value="parcelado">Parcelado</option>
+        </select><br>
+
+        <div id="campoParcelas" style="display: none;">
+          <label>Quantidade de parcelas:</label><br>
+          <input type="number" name="parcelas" min="1"><br>
+        </div>
+
+        <label>Data da Transação:</label><br>
+        <input type="date" name="data" required><br>
+        <!-- ADICIONADO 16/05/2025   1-->
+        <div class="radio-group">
+          <label>Você já realizou o pagamento dessa despesa?</label>
+
+            <div class="radio-option">
+              <input type="radio" name="pagamentoRE" id="pagamentoSIM" required>
+              <label for="pagamentoSIM">Sim, já paguei essa despesa.</label>
+            </div>
+
+            <div class="radio-option">
+              <input type="radio" name="pagamentoRE" id="pagamentoNAO" required>
+              <label for="pagamentoNAO">Não, não paguei essa despesa.</label>
+            </div>
+        </div><br>
+        <!-------------------------   1-->
+
+      </div>
+      <div id="camposReceita" style="display: none;">
+        <label>Valor ganho:</label><br>
+        <input type="number" name="valor" step="0.01" required><br>
+
+        <label>Descrição:</label><br>
+        <input type="text" name="descricao" required><br>
+
+        <label>Categoria:</label><br>
+        <input type="text" name="categoria" required><br>
+
+        <label>Data:</label><br>
+        <input type="date" name="data" required><br>
+         <!-- ADICIONADO 16/05/2025    2-->
+        <div class="radio-group">
+          <label>Você já recebeu essa receita?</label>
+
+            <div class="radio-option">
+              <input type="radio" name="pagamentoRE" id="pagamentoSIM" required>
+              <label for="pagamentoSIM">Sim, já recebi essa receita.</label>
+            </div>
+
+            <div class="radio-option">
+              <input type="radio" name="pagamentoRE" id="pagamentoNAO" required>
+              <label for="pagamentoNAO">Não, não recebi essa receita ainda.</label>
+            </div>
+        </div><br>
+        <!-------------------------   2-->
+      </div>
+      <button type="submit" class="btn-salvar">Salvar</button>
+      <button type="button" onclick="fecharModal()" class="btn-cancelar">Cancelar</button>
+      <br>
+
+      </div>
+    </form>
+  </div>
+</div>
+<div id="modalMeta" class="modal">
+  <div class="modal-content">
+    <h2>Adicionar Meta 🎯</h2><br>
+    Aqui você irá definir uma meta, ela pode ser tratada de duas formas:<br><br>
+    <strong>1° </strong>Você pode defini-la como algo a ser atingido.<strong>(Receita)</strong><br>
+    &nbsp;&nbsp;&nbsp;<strong>Exemplo:</strong>&nbsp;Sobrar pelo menos 1000R$ ao final do mês.<br><br>
+    <strong>2°</strong> Você pode defini-la como um limite a não ser ultrapassado.<strong>(Despesa)</strong><br>
+    &nbsp;&nbsp;&nbsp;<strong>Exemplo:</strong>&nbsp;Gastar até 300R$ com internet. <br><br>
+    <hr><br>
+    <form id="formMeta">
+      <p>Nome da meta:</p>
+      <input type="text" name="nomeMeta"  required/>
+      <p>Tipo da meta:</p>
+      <select required>
+        <option value="receita">Receita</option>
+        <option value="despesa">Despesa</option>
+      </select>
+      <p>Valor desejado(Atingir/Evitar):</p>
+      <input type="number" step="0.01" name="valorMeta" required />
+      <p>Exclusão da meta:</p>
+      <select name="exclusaoMeta" id="exclusaoMeta" required>
+        <option value="nenhum">Não quero excluir a meta.</option>
+        <option value="data">Por Data</option>
+        <option value="conclusao">Por Conclusão</option>
+      </select>
+
+      <input type="date" name="dataMeta" id="campoDataMeta" style="display:none;"/>
+
+      <div style="text-align:right;">
+        <button type="submit" class="btn-salvar">Salvar</button>
+        <button type="button" class="btn-cancelar" onclick="fecharModalMeta()">Cancelar</button>
+      </div>
+    </form>
+  </div>
+</div>
+<!--ADICIONADO 16/05/2025  3 -->
+<div id="modalObjetivo" class="modal">
+  <div class="modal-content">
+    <h2>Adicionar Objetivo 📈</h2><br>
+    <p>Aqui você irá adicionar um objetivo, diferente da meta, o objetivo se trata de algo focado no longo prazo, sempre relacionado a uma poupança ou investimento para a realização de algo.<br>
+    <br><strong>Exemplo 1: Comprar um carro - 30.000R$</strong><br>
+    <strong>Exemplo 2: Comprar um apartamento - 345.000R$</strong></p><br>
+    <hr><br>
+    <form id="formObjetivo">
+      <p>Título do Objetivo:</p>
+      <input type="text" name="tituloObjetivo" required />
+
+      <p>Valor que deseja guardar:</p>
+      <input type="number" step="0.01" name="valorDesejado" min="0" required />
+
+      <p>Valor já guardado:</p>
+      <input type="number" step="0.01" name="valorGuardado" min="0" required />
+
+      <p>Ano final do Objetivo:</p>
+      <input type="number" name="anoFinal" min="2025" required />
+
+      <div style="text-align:right;">
+        <button type="submit" class="btn-salvar">Salvar</button>
+        <button type="button" class="btn-cancelar" onclick="fecharModalObjetivo()">Cancelar</button>
+      </div>
+    </form>
+  </div>
+</div>
+<!------------------------- 3 -->
+<script src="script.js"></script>
 </body>
 </html>

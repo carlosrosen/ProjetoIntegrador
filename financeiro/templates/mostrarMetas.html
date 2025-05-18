@@ -139,7 +139,7 @@
 
 <a class="logout" href="{% url 'usuario:logout' %}">logout</a>
 <a class="botao-dashboard" href="{% url 'core:dashboard' %}">Dashboard</a>
-<a class="transacoes-layout" href="{% url 'saldo:historico-saldo' %}">Minhas transações</a>
+<a class="transacoes-layout" href="{% url 'financeiro:historico-saldo' %}">Minhas transações</a>
 
 <form method="GET" class="filters">
     <div>
@@ -194,7 +194,7 @@
     </tbody>
 </table>
 
-<a href="{% url 'saldo:inserir-saldo' %}" class="back-btn">Adicionar Nova Meta</a>
+<a href="{% url 'financeiro:inserir-saldo' %}" class="back-btn">Adicionar Nova Meta</a>
 
 </body>
 </html>

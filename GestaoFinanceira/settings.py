@@ -39,7 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'core',
     'usuarios',
-    'saldo'
+    'financeiro'
 ]
 
 MIDDLEWARE = [
@@ -91,6 +91,7 @@ DATABASES = {
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = []
+AUTH_USER_MODEL = 'usuarios.CustomUser'
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/

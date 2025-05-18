@@ -161,7 +161,7 @@
 
 <a class="logout" href="{% url 'usuario:logout' %}">logout</a>
 <a class="botao-dashboard" href="{% url 'core:dashboard' %}">Dashboard</a>
-<a class="botao-metas" href="{% url 'saldo:mostrar-metas' %}">Minhas metas</a>
+<a class="botao-metas" href="{% url 'financeiro:mostrar-metas' %}">Minhas metas</a>
 
 <form method="GET" class="filters">
     <!-- Filtros de busca -->
@@ -233,7 +233,7 @@
             </td>
             <td>{{ transacao.descricao }}</td>
             <td>
-                <a href="{% url 'saldo:editar-saldo' transacao.id %}" class="edit-btn">Editar</a>
+                <a href="{% url 'financeiro:editar-saldo' transacao.id %}" class="edit-btn">Editar</a>
             </td>
         </tr>
         {% empty %}
@@ -245,7 +245,7 @@
 </table>
 
 <!-- Botão para realizar transações -->
-<a href="{% url 'saldo:inserir-saldo' %}" class="add-transaction-btn">Realizar Transação</a>
+<a href="{% url 'financeiro:inserir-saldo' %}" class="add-transaction-btn">Realizar Transação</a>
 
 </body>
 </html>

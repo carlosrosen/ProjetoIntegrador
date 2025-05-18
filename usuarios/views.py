@@ -3,7 +3,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
-from saldo.models import Categoria
+from financeiro.models import Categoria
 from django.urls import reverse
 
 #Função para cadastrar novos usuarios

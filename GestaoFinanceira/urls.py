@@ -16,11 +16,9 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from usuarios import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('core.urls')), #Inclui a pagina inicial nos caminhos
     path('auth/', include('usuarios.urls')), #Chamando as urls do aplicativo usuarios
-    path('dashboard/', include('saldo.urls'))
 ]
