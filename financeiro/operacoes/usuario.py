@@ -16,33 +16,25 @@ class OperacoesTransacao:
         self.user = user
 
     def criar(self
-              , valor:str
-              , data: str
-              , valor_tipo:str
-              , quantidade_parcelas:str
-              , descricao:str
-              , pago:str
-              , categoria:str
+              , valor: Valor
+              , data: Data
+              , tipo: Tipo
+              , quantidade_parcelas: QuantidadeParcelas
+              , descricao: str
+              , pago: Pago
+              , categoria_objeto : Categoria
               ):
-        #Formatação dos dados
-        tipo = Tipo(valor_tipo)
-        data =  Data(data)
-        valor = Valor(valor)
-        pago = Pago(pago)
-        quantidade_parcelas = QuantidadeParcelas(quantidade_parcelas)
-
-        categoria_objeto = Categoria.verificacao_nomes(categoria)
 
         transacao_objeto = Transacao.objects.create(user_fk= self.user
-                                                    , categoria_fk = categoria_objeto
                                                     , tipo = tipo.valor
                                                     , quantidade_parcelas = quantidade_parcelas.valor
                                                     , descricao = descricao
         )
 
         self.__criarParcelas(transacao=transacao_objeto
+                             , categoria=categoria_objeto
                              , data=data
-                             , valor=valor.valor
+                             , valor=valor
                              , quantidade_parcelas=quantidade_parcelas
                              , pago=pago
                              , tipo=tipo
@@ -50,26 +42,27 @@ class OperacoesTransacao:
 
     def __criarParcelas(self
                         , transacao: Transacao
+                        , categoria: Categoria
                         , valor:Valor
                         , data:Data
                         , quantidade_parcelas: QuantidadeParcelas
                         , pago: Pago
                         , tipo:Tipo
     ):
-
-        valor_parcela = valor.valorParcela(quantidade_parcelas=quantidade_parcelas.valorDecimal),
+        valor_parcela = valor.valorParcela(quantidade_parcelas=quantidade_parcelas.valorDecimal)
 
         for i in range(quantidade_parcelas.valor):
             try:
                 data_parcela = data.somarMes(quantidade_meses=i)
                 ParcelasTransacao.objects.create(transacao_fk = transacao
-                                                , data = data_parcela
+                                                 , categoria_fk=categoria
+                                                 , data = data_parcela
                                                 , valor = valor_parcela
                                                 , ordem_parcela = i + 1
                                                 , pago = pago.status
                 )
             except Exception as e:
-                raise Exception('Erro ao criar o parcela')
+                raise Exception(f'Erro ao criar o parcela {e} - ordem {i+1}')
 
             if pago.status and data.comparacaoDatasMenoresQueHoje(data_parcela):
                 if tipo.valor == 'R':
@@ -79,20 +72,14 @@ class OperacoesTransacao:
                 self.user.save()
 
     def editarUmaParcela(self
-                         , parcela_id: str
-                         , valor: str
-                         , data: str
-                         , categoria: str
-                         , sub_categoria: str
-                         , pago: str
+                         , parcela_id: int
+                         , valor: Valor
+                         , data: Data
+                         , categoria: Categoria
+                         , pago: Pago
                          , descricao: str
                          ):
         parcela = ParcelasTransacao.objects.get(id=int(parcela_id))
-        valor = Valor(valor)
-        data = Data(data)
-        categoria = Categoria.verificacaoNomesCategoria(categoria)
-        sub_categoria = Categoria.verificacaoNomesSubCategoria(sub_categoria)
-        pago = Pago(pago)
 
         pago_status_anterior = parcela.pago
         valor_antigo = parcela.valor
@@ -100,30 +87,43 @@ class OperacoesTransacao:
         try:
             parcela.valor = valor.valor
             parcela.data = data.valor
-            parcela.categoria = categoria
-            parcela.sub_categoria = sub_categoria
             parcela.pago = pago.status
-            parcela.Transacao.descricao = descricao
+            parcela.categoria_fk = categoria
+            parcela.transacao_fk.descricao = descricao
         except Exception as e:
-            raise Exception('Erro ao editar parcela')
-
+            raise Exception(f'Erro ao editar parcela {e}')
 
         if  pago_status_anterior == True and pago.status == True:
             #pago -> pago
-            if parcela.Transacao.tipo == 'R':
-                self.user.editarReceita(valor_antigo, valor.valor)
-            else:
-                self.user.editarDespesa(valor_antigo, valor.valor)
+            self.user.editarSaldoAtualComTipo(valor_antigo=valor_antigo
+                                              , valor_novo=valor.valor
+                                              , tipo=parcela.transacao_fk.tipo
+            )
         elif pago_status_anterior == True and pago.status == False:
             #pago -> não pago
-            if parcela.Transacao.tipo == 'R':
-                self.user.subtrairSaldoAtual(valor.valor)
-            else:
-                self.user.somarSaldoAtual(valor.valor)
+            self.user.operarSaldoAtualInverso(valor_antigo, parcela.transacao_fk.tipo)
         elif pago_status_anterior == False and pago.status == True:
             #não pago -> pago
-            if parcela.Transacao.tipo == 'R':
-                self.user.somarSaldoAtual(valor.valor)
-            else:
-                self.user.subtrairSaldoAtual(valor.valor)
+            self.user.operarSaldoAtual(valor.valor, parcela.transacao_fk.tipo)
         parcela.save()
+
+    def deletarUmaParcela(self, parcela: ParcelasTransacao):
+        transacao = parcela.transacao_fk
+        self.user.operarSaldoAtualInverso(parcela.valor, transacao.tipo)
+        if transacao.quantidade_parcelas == 1:
+            transacao.delete()
+        else:
+            transacao.quantidade_parcelas -= 1
+            transacao.save()
+            parcela.delete()
+            if transacao.quantidade_parcelas <= 0:
+                transacao.delete()
+
+    def deletarTodasParcelas(self,transacao: Transacao):
+        parcelas = ParcelasTransacao.objects.filter(transacao_fk=transacao)
+        for parcela in parcelas:
+            if not Data.comparacaoDatasMenoresQueHoje(parcela.data):
+                continue
+            self.user.operarSaldoAtualInverso(parcela.valor, transacao.tipo)
+
+        transacao.delete()

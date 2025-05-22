@@ -16,7 +16,7 @@ class Objetivos(models.Model):
     titulo = models.CharField(max_length=100, null=False)
     valor_objetivo = models.DecimalField(max_digits=12, decimal_places=2, null=False)
     valor_guardado = models.DecimalField(max_digits=12, decimal_places=2, default=0)
-    data_criacao = models.DateField(auto_now_add=True)
+    data_inicio = models.DateField(auto_now_add=True)
     data_fim = models.DateField(null=False)
     status = models.CharField(max_length=1, choices=__opcoes_status, default='A')
 

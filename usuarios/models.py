@@ -6,40 +6,52 @@ from decimal import Decimal
 class CustomUser(AbstractUser):
     saldoAtual = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
 
-    def subtrairSaldoAtual(self, valor):
-        valor = Decimal(valor)
+    def operarSaldoAtual(self, valor:Decimal, tipo:str):
         if valor < 0:
             valor = -valor
-        self.saldoAtual -= valor
+        if tipo == 'R':
+            self.saldoAtual += valor
+        elif tipo == 'D':
+            self.saldoAtual -= valor
         self.save()
 
-    def somarSaldoAtual(self, valor):
-        valor = Decimal(valor)
+    def operarSaldoAtualInverso(self, valor:Decimal, tipo:str):
         if valor < 0:
             valor = -valor
-        self.saldoAtual += valor
+        if tipo == 'R':
+            self.saldoAtual -= valor
+        elif tipo == 'D':
+            self.saldoAtual += valor
         self.save()
 
-    def editarReceita(self, valor_antigo:str, valor_novo:str):
+    def editarSaldoAtualComTipo(self, valor_antigo:str, valor_novo:str, tipo:str):
         valor_antigo = Decimal(valor_antigo)
         valor_novo = Decimal(valor_novo)
-        if valor_antigo > valor_novo:
-            self.saldoAtual -= valor_antigo - valor_novo
-        elif valor_novo < valor_antigo:
-            self.saldoAtual += valor_antigo - valor_novo
+        if tipo.upper() == 'R':
+            if valor_antigo > valor_novo:
+                self.saldoAtual -= valor_antigo - valor_novo
+            elif valor_novo < valor_antigo:
+                self.saldoAtual += valor_antigo - valor_novo
+        elif tipo.upper() == 'D':
+            if valor_antigo > valor_novo:
+                self.saldoAtual += valor_antigo - valor_novo
+            elif valor_novo < valor_antigo:
+                self.saldoAtual -= valor_antigo - valor_novo
+            self.save()
+        else:
+            raise Exception('Tipo desconhecido')
+
         self.save()
 
     def editarDespesa(self, valor_antigo:str, valor_novo:str):
         valor_antigo = Decimal(valor_antigo)
         valor_novo = Decimal(valor_novo)
-        if valor_antigo > valor_novo:
-            self.saldoAtual += valor_antigo - valor_novo
-        elif valor_novo < valor_antigo:
-            self.saldoAtual -= valor_antigo - valor_novo
-        self.save()
+
 
 
 
 
     def __str__(self):
-        return self.id + self.username + self.email + str(self.saldoAtual)
+        return f'''
+        {str(self.id)} - {self.username} - {self.email} - {str(self.saldoAtual)}
+        '''

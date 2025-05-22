@@ -1,5 +1,5 @@
-from datetime import date
-from dateutil import relativedelta
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
 
 class Data:
     def __init__(self, data:str):
@@ -7,7 +7,7 @@ class Data:
 
     def __formatarData(self,data):
         try:
-            return date.strptime(data, "%Y-%m-%d").date()
+            return datetime.strptime(data, "%Y-%m-%d").date()
         except ValueError:
             raise ValueError('formatação de data incorreta')
 
@@ -15,7 +15,7 @@ class Data:
         return self.valor + relativedelta(months=quantidade_meses)
 
     @staticmethod
-    def comparacaoDatasMenoresQueHoje(data: date):
-        if data <= date.today():
+    def comparacaoDatasMenoresQueHoje(data: datetime) -> bool:
+        if data <= datetime.today().date():
             return True
         return False

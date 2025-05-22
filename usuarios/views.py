@@ -1,3 +1,6 @@
+from decimal import Decimal
+from datetime import date
+
 from django.db.models import Q
 from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
@@ -5,6 +8,11 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from financeiro.models import Categoria
 from django.urls import reverse
+
+
+from financeiro.models import HistoricoSaldo
+
+from usuarios.models import CustomUser
 
 #Função para cadastrar novos usuarios
 def cadastrar(request):
@@ -26,13 +34,21 @@ def cadastrar(request):
             return redirect(reverse('usuario:cadastro'))
         
         # Filtra se já existe um e-mail ou usuario parecidos no banco de dados, para evitar cadastros repetidos.
-        user = User.objects.filter(Q(username=usuario) | Q(email=email)).first()
+        user = CustomUser.objects.filter(Q(username=usuario) | Q(email=email)).first()
         if user:
             messages.error(request, 'Já existe um usuário com esse nome de usuário ou email')
             return redirect(reverse('usuario:cadastro'))
         
         # Chamando a função de criar usuário do Django
-        user = User.objects.create_user(username=usuario, email=email, password=senha)
+        user = CustomUser.objects.create_user(username=usuario, email=email, password=senha)
+
+        data = date(date.today().year, date.today().month,1)
+
+        HistoricoSaldo.objects.create(user_fk= user
+                                      , data= data
+                                      , saldo= Decimal('0.0')
+        )
+
 
         #Logando o usuario automaticamente e redicionando para a aplicação
         login(request, user)
