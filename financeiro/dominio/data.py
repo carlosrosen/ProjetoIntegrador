@@ -9,10 +9,15 @@ class Data:
         try:
             return datetime.strptime(data, "%Y-%m-%d").date()
         except ValueError:
-            raise ValueError('formatação de data incorreta')
+            raise ValueError('valor de data incorreto')
 
     def somarMes(self, quantidade_meses: int):
+        quantidade_meses = abs()
         return self.valor + relativedelta(months=quantidade_meses)
+
+    def subtrairMes(self, quantidade_meses: int):
+        quantidade_meses = abs(quantidade_meses)
+        return self.valor + relativedelta(months=-quantidade_meses)
 
     @staticmethod
     def comparacaoDatasMenoresQueHoje(data: datetime) -> bool:

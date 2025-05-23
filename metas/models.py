@@ -14,6 +14,7 @@ class Objetivos(models.Model):
 
     user_fk = models.ForeignKey(User, on_delete=models.CASCADE, related_name='Objetivos')
     titulo = models.CharField(max_length=100, null=False)
+    valor_inicial = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     valor_objetivo = models.DecimalField(max_digits=12, decimal_places=2, null=False)
     valor_guardado = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     data_inicio = models.DateField(auto_now_add=True)
@@ -23,6 +24,22 @@ class Objetivos(models.Model):
     def __str__(self):
         return f'titulo: {self.titulo} - status: {self.status}'
 
+class TransacaoObjetivo(models.Model):
+    __opcoes_tipo = [
+        {
+            'D': 'Deposito',
+            'R': 'Resgate',
+        }
+    ]
+
+    objetivo_fk = models.ForeignKey(Objetivos, on_delete=models.CASCADE)
+    tipo = models.CharField(max_length=1, choices=__opcoes_tipo, null=False)
+    valor = models.DecimalField(max_digits=12, decimal_places=2, null=False)
+    data = models.DateField(default=timezone.now)
+
+    def __str__(self):
+        pass
+        # Preencher aqui depois
 
 # Tabela para metas
 class Metas(models.Model):

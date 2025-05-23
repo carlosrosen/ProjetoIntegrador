@@ -5,7 +5,7 @@ from financeiro.models import Transacao, ParcelasTransacao, Categoria
 
 from financeiro.dominio.tipo import Tipo
 from financeiro.dominio.data import Data
-from financeiro.dominio.valor import Valor
+from financeiro.dominio.valortransacao import Valor
 from financeiro.dominio.pago import Pago
 from financeiro.dominio.quantidadeparcelas import QuantidadeParcelas
 
@@ -57,19 +57,16 @@ class OperacoesTransacao:
                 ParcelasTransacao.objects.create(transacao_fk = transacao
                                                  , categoria_fk=categoria
                                                  , data = data_parcela
-                                                , valor = valor_parcela
-                                                , ordem_parcela = i + 1
-                                                , pago = pago.status
+                                                 , valor = valor_parcela
+                                                 , ordem_parcela = i + 1
+                                                 , pago = pago.status
                 )
             except Exception as e:
+                transacao.delete()
                 raise Exception(f'Erro ao criar o parcela {e} - ordem {i+1}')
 
             if pago.status and data.comparacaoDatasMenoresQueHoje(data_parcela):
-                if tipo.valor == 'R':
-                    self.user.saldoAtual += valor_parcela
-                else:
-                    self.user.saldoAtual -= valor_parcela
-                self.user.save()
+                self.user.operarSaldoAtual(valor_parcela, tipo.status)
 
     def editarUmaParcela(self
                          , parcela_id: int

@@ -5,7 +5,7 @@ from django.shortcuts import render
 from django.http import HttpResponse
 
 from usuarios.views import deslogar
-from .dominio.valor import Valor
+from .dominio.valortransacao import Valor
 from .operacoes import usuario
 from .models import Transacao, Categoria
 from django.shortcuts import render, redirect
@@ -17,9 +17,10 @@ from django.http import Http404
 
 #classes de logica
 from financeiro.operacoes.usuario import OperacoesTransacao
+from financeiro.operacoes.historicoSaldo import HistoricoSaldo
 from financeiro.models import ParcelasTransacao
 
-from financeiro.dominio.valor import Valor
+from financeiro.dominio.valortransacao import Valor
 from financeiro.dominio.tipo import Tipo
 from financeiro.dominio.data import Data
 from financeiro.dominio.quantidadeparcelas import QuantidadeParcelas
@@ -45,7 +46,6 @@ def CriarTransacao(request):             #, operacao:str):
     categoria = Categoria.objects.get(nome='salario')
     descricao = 'abroba'
     pago = Pago('true')
-
 
     operacoes_usuario.criar(valor=valor
                             , data=data
@@ -110,3 +110,10 @@ def deletarTodasParcelas(request):
     operacoes_usuario.deletarTodasParcelas(transacao=transacao)
 
     return HttpResponse('deletou tudo')
+
+
+def teste(request):
+    if not request.user.is_authenticated:
+        return redirect(reverse('core:login'))
+    operacoes_historico_saldo = HistoricoSaldo(request.user)
+    pass

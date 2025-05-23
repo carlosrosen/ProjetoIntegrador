@@ -8,13 +8,12 @@ class Status:
     ]
 
     def __init__(self, status:str):
-        if not self.__verificarStatus(status):
-            raise ValueError('Status incorreto')
-        self.status = self.__opcoes_status[status]
+        self.valor = self.__formatarStatus(status)
 
-    def __verificarStatus(self, status):
-        if status.lower() in self.__opcoes_status[0].keys():
-            return True
-        return False
+
+    def __formatarStatus(self, status) -> bool | ValueError:
+        if not status.lower() in self.__opcoes_status[0].keys():
+            raise ValueError('Status incorreto')
+        return self.__opcoes_status[0][status.lower()]
 
 

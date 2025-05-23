@@ -1,6 +1,10 @@
+from idlelib.query import Query
+
+from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.conf import settings
-from django.utils import timezone
+from datetime import date
+from decimal import Decimal
 
 # Cria a tabela Categoria
 class Categoria(models.Model):
@@ -51,7 +55,7 @@ class Transacao(models.Model):
         return f'''id: {self.id}
     - user_id: {self.user_fk.id}
     - tipo: {next(palavra for letra, palavra in self.__escolhas_tipo if letra == self.tipo)}
-    - quantidade parcelas : {self.quantidade_parcelas}
+    - quantidade parcelas: {self.quantidade_parcelas}
     - descricao: {self.descricao}'''
 
 class ParcelasTransacao(models.Model):
@@ -61,6 +65,10 @@ class ParcelasTransacao(models.Model):
     valor = models.DecimalField(max_digits=12,decimal_places=2,null=False) # Valor das parcelas
     ordem_parcela = models.PositiveIntegerField(null=False)
     pago = models.BooleanField(default=True)
+
+    @staticmethod
+    def buscaDataIntervalo(data_inicio: date, data_fim: date) -> list:
+        return list(ParcelasTransacao.objects.filter(data__gt=data_inicio, data__lt=data_fim))
 
     def __str__(self):
         return f'''
@@ -72,6 +80,15 @@ class HistoricoSaldo(models.Model):
     user_fk = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='HistoricoSaldo')
     data = models.DateField(null=False)
     saldo = models.DecimalField(max_digits=12,decimal_places=2,null=False)
+
+    @property
+    def inicializar(self,user):
+        if not isinstance(user, AbstractUser):
+            raise TypeError('Usuario invalido')
+        HistoricoSaldo.objects.create(user_fk=user
+                                      , data = date(date.today().year,date.today().month,1)
+                                      , saldo = Decimal(0.0)
+                                      )
 
     def __str__(self):
         return f'''
