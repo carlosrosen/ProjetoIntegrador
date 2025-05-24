@@ -48,10 +48,22 @@ class Metas(models.Model):
             'MIN': 'Minimo desejado'   # Meta de alcançar (Receita)
         }
     ]
+
+    __opcoes_status = [
+        {
+            'A': 'Ativo',
+            'P': 'Pausado',
+            'U': 'Ultrapassado',
+            'N': 'Não atingido',
+            'C': 'Concluido',
+        }
+    ]
+
     # Define os atributos da tabela metas
     user_fk = models.ForeignKey(User, on_delete=models.CASCADE, related_name='Metas')
     tipo = models.CharField(max_length=3, choices=__opcoes_tipo, null=False)
-    categoria = models.CharField(max_length=100, null=False) # Uso a tabela de categoria aqui?
+    status = models.CharField(max_length=1, choices=__opcoes_status, default='A')
+    categoria = models.CharField(max_length=100, null=False) # Uso a chave estrangeira de categorias aqui?
     valor = models.DecimalField(max_digits=12, decimal_places=2, null=False)
     data_inicio = models.DateField(default=timezone.now)
     data_fim = models.DateField(null=False)
@@ -60,4 +72,4 @@ class Metas(models.Model):
     # Inicializa o nome de cada objeto/atributos
     def __str__(self):
         return f"{self.user_fk.id} - {self.nome}"
-# Create your models here.
+
