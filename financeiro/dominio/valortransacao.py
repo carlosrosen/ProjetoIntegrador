@@ -1,8 +1,13 @@
 from decimal import Decimal
 
-class Valor:
-    def __init__(self, valor:str):
-        self.valor = self.__formatacaoValor(valor)
+class ValorTransacao:
+    def __init__(self, valor: str | Decimal):
+        if type(valor) == str:
+            self.valor = self.__formatacaoValor(valor)
+        elif type(valor) == Decimal:
+            self.valor = valor
+        else:
+            raise TypeError('Valor invalido')
 
     def __formatacaoValor(self,valor:str):
         return Decimal(valor)

@@ -67,8 +67,16 @@ class ParcelasTransacao(models.Model):
     pago = models.BooleanField(default=True)
 
     @staticmethod
-    def buscaDataIntervalo(data_inicio: date, data_fim: date) -> list:
-        return list(ParcelasTransacao.objects.filter(data__gt=data_inicio, data__lt=data_fim))
+    def buscaEntreDatas(data_inicio: date, data_fim: date) -> list:
+        if data_inicio > data_fim:
+            data_inicio, data_fim = data_fim, data_inicio
+        return ParcelasTransacao.objects.filter(data__gt=data_inicio, data__lt=data_fim)
+
+    @staticmethod
+    def buscaIntervaloHistoricoSaldo(data_inicio: date, data_fim: date):
+        if data_inicio > data_fim:
+            data_inicio, data_fim = data_fim, data_inicio
+        return ParcelasTransacao.objects.filter(data__gte=data_inicio, data__lt=data_fim)
 
     def __str__(self):
         return f'''
@@ -81,14 +89,21 @@ class HistoricoSaldo(models.Model):
     data = models.DateField(null=False)
     saldo = models.DecimalField(max_digits=12,decimal_places=2,null=False)
 
-    @property
-    def inicializar(self,user):
+    @staticmethod
+    def criarTupla(user, data:date, saldo:Decimal):
+        if not isinstance(user, AbstractUser):
+            raise TypeError('Usuario invalido')
+        HistoricoSaldo.objects.create(user=user, data=data, saldo=saldo)
+
+    @staticmethod
+    def inicializarPrimeiroValor(user):
         if not isinstance(user, AbstractUser):
             raise TypeError('Usuario invalido')
         HistoricoSaldo.objects.create(user_fk=user
                                       , data = date(date.today().year,date.today().month,1)
                                       , saldo = Decimal(0.0)
                                       )
+
 
     def __str__(self):
         return f'''

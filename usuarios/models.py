@@ -29,27 +29,18 @@ class CustomUser(AbstractUser):
         valor_novo = Decimal(valor_novo)
         if tipo.upper() == 'R':
             if valor_antigo > valor_novo:
-                self.saldoAtual -= valor_antigo - valor_novo
-            elif valor_novo < valor_antigo:
-                self.saldoAtual += valor_antigo - valor_novo
+                self.saldoAtual -= abs(valor_antigo - valor_novo)
+            elif valor_antigo < valor_novo:
+                self.saldoAtual += abs(valor_antigo - valor_novo)
         elif tipo.upper() == 'D':
             if valor_antigo > valor_novo:
-                self.saldoAtual += valor_antigo - valor_novo
-            elif valor_novo < valor_antigo:
-                self.saldoAtual -= valor_antigo - valor_novo
-            self.save()
+                self.saldoAtual += abs(valor_antigo - valor_novo)
+            elif valor_antigo > valor_novo :
+                self.saldoAtual -= abs(valor_antigo - valor_novo)
         else:
             raise Exception('Tipo desconhecido')
 
         self.save()
-
-    def editarDespesa(self, valor_antigo:str, valor_novo:str):
-        valor_antigo = Decimal(valor_antigo)
-        valor_novo = Decimal(valor_novo)
-
-
-
-
 
     def __str__(self):
         return f'''

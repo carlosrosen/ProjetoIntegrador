@@ -17,7 +17,6 @@ class OperacoesObjetivo:
 
     def criarObjetivo(self
                     , titulo: str
-                    , valor_inicial: ValorObjetivo
                     , valor_objetivo: ValorObjetivo
                     , valor_guardado: ValorObjetivo
                     , data_inicio: Data
@@ -25,18 +24,46 @@ class OperacoesObjetivo:
                     , status: Status
                     ):
 
-        if valor_objetivo.valor >= valor_inicial.valor:
+        if valor_guardado.valor > valor_objetivo.valor:
+            raise ValueError('Valor que já está guardado excede o valor do objetivo')
+        elif valor_guardado.valor == valor_objetivo.valor:
             status.valor = 'C'
-            valor_guardado.valor =  valor_objetivo.valor
 
         Objetivos.objects.create(user_fk= self.user
                                 , titulo=titulo
                                 , valor_objetivo=valor_objetivo.valor
-                                , valor_guardado=valor_inicial.valor
+                                , valor_guardado=valor_guardado.valor
                                 , data_inicio=data_inicio.valor
                                 , data_fim=data_fim.valor
                                 , status=status.valor
         )
+
+    def editarObjetivo(self
+                       , objetivo: Objetivos
+                       , novo_titulo: str
+                       , novo_valor_objetivo: ValorObjetivo
+                       , nova_data_fim: Data
+                       , novo_status: Status
+                       ):
+
+        if novo_status.valor == 'P':
+            objetivo.status = 'P'
+        elif novo_valor_objetivo.valor < objetivo.valor_guardado:
+            raise ValueError('O novo valor do objetivo é menor que o valor já guardado')
+        elif novo_valor_objetivo.valor == objetivo.valor_guardado:
+            objetivo.status = 'C'
+        elif novo_valor_objetivo.valor > objetivo.valor_guardado and objetivo.status == 'C':
+            objetivo.status = 'A'
+        else:
+            objetivo.status = novo_status.valor
+
+        objetivo.titulo = novo_titulo
+        objetivo.valor_objetivo = novo_valor_objetivo.valor
+        objetivo.data_fim = nova_data_fim.valor
+        objetivo.save()
+
+    def deletarObjetivo(self, objetivo: Objetivos):
+        objetivo.delete()
 
     def criarTransacaoObj(self
                      ,Objetivo: Objetivos
@@ -44,28 +71,35 @@ class OperacoesObjetivo:
                      ,Valor: ValorObjetivo
                      ,Data: Data
                      ):
+
+        # Não pode prosseguir nas operações caso o objetivo esteja pausado
         if Objetivo.status == 'P':
             raise ValueError('Objetivo Pausado')
 
         valor_objetivo = Objetivo.valor_objetivo
         valor_guardado = Objetivo.valor_guardado
+
+        # O valor que falta para atingir o objetivo
         valor_limite = ValorObjetivo.valorLimite(valor_objetivo, valor_guardado)
 
+        # Passa pelas operações dependendo do seu tipo
         if Tipo.valor == 'D':
             if Objetivo.status == 'C':
-                raise ValueError('Objetivo já Concluido')
+                raise ValueError('Objetivo já está concluido')
             if Valor.valor > valor_limite:
-                Valor.valor = valor_limite
+                raise ValueError('Excede o objetivo estabelecido')
+            if Valor.valor == valor_limite:
                 Objetivo.status = 'C'
             Objetivo.valor_guardado += Valor.valor
 
         elif Tipo.valor == 'R':
+            if Valor.valor > valor_guardado:
+                raise ValueError('Valor informado para resgate excede o valor que está guardado')
             if Objetivo.status == 'C':
                 Objetivo.status = 'A'
-            if Valor.valor > valor_guardado:
-                raise ValueError('Valor Invalido')
             Objetivo.valor_guardado -= Valor.valor
 
+        # Criação do registro das operações acima
         TransacaoObjetivo.objects.create(objetivo_fk=Objetivo
                                              ,tipo=Tipo.valor
                                              ,valor=Valor.valor
@@ -75,4 +109,9 @@ class OperacoesObjetivo:
         try:
             Objetivo.save()
         except Exception as e:
+            # Reverte as operações em caso de falha e retorna um erro
+            if Tipo.valor == 'D':
+                Objetivo.valor_guardado -= Valor.valor
+            elif Tipo.valor == 'R':
+                Objetivo.valor_guardado += Valor.valor
             raise Exception('Não foi possivel criar a transação objetivo')

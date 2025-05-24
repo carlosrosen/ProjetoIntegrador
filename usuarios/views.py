@@ -42,16 +42,10 @@ def cadastrar(request):
         # Chamando a função de criar usuário do Django
         user = CustomUser.objects.create_user(username=usuario, email=email, password=senha)
 
-        data = date(date.today().year, date.today().month,1)
-
-        HistoricoSaldo.objects.create(user_fk= user
-                                      , data= data
-                                      , saldo= Decimal('0.0')
-        )
-
 
         #Logando o usuario automaticamente e redicionando para a aplicação
         login(request, user)
+        HistoricoSaldo.inicializarPrimeiroValor(user)
         return redirect(reverse('core:dashboard'))
 
 #Função de Login
