@@ -111,7 +111,6 @@ def deletarTodasParcelas(request):
 
     return HttpResponse('deletou tudo')
 
-
 def teste(request):
     if not request.user.is_authenticated:
         return redirect(reverse('core:login'))

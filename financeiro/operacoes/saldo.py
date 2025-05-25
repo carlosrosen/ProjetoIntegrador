@@ -84,7 +84,7 @@ class Historico:
         dados = []
 
         intervalo_parcelas = ParcelasTransacao.buscaIntervaloHistoricoSaldo(data_inicio=data.valor
-                                                                 , data_fim=proxima_data
+                                                                          , data_fim=proxima_data
         )
         quantidade_dias = abs(proxima_data.valor - data.valor).days
 

@@ -1,7 +1,8 @@
 from metas.models import Metas
-from financeiro.models import ParcelasTransacao
+from financeiro.models import ParcelasTransacao, Categoria
 
 from django.contrib.auth.models import AbstractBaseUser
+from django.db.models import Sum
 
 from common.dominio.data import Data
 from decimal import Decimal
@@ -16,9 +17,9 @@ class Meta:
 
     def criarMeta(
             self,
-            categoria: str,
+            categoria: Categoria,
             tipo: str,
-            valor: float,
+            valor: Decimal,
             data_inicio: Data,
             data_fim: Data,
             descricao: str
@@ -29,11 +30,13 @@ class Meta:
             raise ValueError("Tipo de meta inválido. Use 'MAX' para limite máximo ou 'MIN' para mínimo desejado.")
         if data_fim < data_inicio:
             raise ValueError("A data final não pode ser anterior à data inicial.")
+        if valor <= 0:
+            raise ValueError("Valor inserido menor que zero")
 
         Metas.objects.create(
             user_fk=self.user,
             tipo=tipo,
-            categoria=categoria,
+            categoria=categoria.id,
             valor=valor,
             data_inicio=data_inicio,
             data_fim=data_fim,
@@ -45,22 +48,24 @@ class Meta:
             meta: Metas,
             categoria: str,
             tipo: str,
-            valor: float,
+            valor: Decimal,
             data_inicio: Data,
             data_fim: Data,
             descricao: str,
     ):
+        if not meta.status == 'A':
+            return
 
-        if data_fim < data_inicio:
+        if data_fim.valor < data_inicio.valor:
             raise ValueError("A data final não pode ser anterior à data inicial.")
-        elif data_fim < meta.data_inicio:
+        elif data_fim.valor < meta.data_inicio:
             raise ValueError("A data final não pode ser anterior à data inicial.")
 
         meta.data_fim = data_fim
         meta.categoria = categoria
         meta.tipo = tipo
-        meta.valor = valor
-        meta.data_inicio = data_inicio
+        meta.valor = valor.valor
+        meta.data_inicio = data_inicio.valor
         meta.descricao = descricao
         meta.save()
 
@@ -76,14 +81,13 @@ class Meta:
         parcelas = ParcelasTransacao.objects.filter(
             # O underline duplo é uma forma de navegar pelas chaves estrangeiras no Django
             transacao_fk__user_fk=self.user,
-            categoria_fk__nome=meta.categoria,
+            categoria_fk__nome=meta.categoria_fk,
             data__gte=meta.data_inicio,             # __gte maior ou igual
             data__lte=meta.data_fim,                # __lte menor ou igual
             pago=True,
         )
 
-        #Somatorio de todos os valores dos objetos encontrados nas condições acima
-        total = sum(Decimal(p.valor) for p in parcelas)
+        total = parcelas.aggregate(soma=Sum('valor'))['soma'] or Decimal('0.00')
 
         hoje = date.today()
 
@@ -93,55 +97,40 @@ class Meta:
             elif hoje > meta.data_fim:
                 meta.status = 'C'
         elif meta.tipo == 'MIN':
-            if total > meta.valor:
+            if total >= meta.valor:
                 meta.status = 'C'
             elif hoje > meta.data_fim:
                 meta.status = 'N'
+        try:
+            meta.save()
+        except Exception:
+            raise Exception('Erro inesperado ao atualizar metas')
 
-        # Tem que colocar aquele error caso tudo dê errado
 
-        meta.save()
+    def ProgressoMeta(self, meta: Metas):
 
-
-    # Será que integro essa função dentro do atualizarStatusMeta?
-    def verificarProgressoMeta(self, meta: Metas):
-        hoje = date.today()
-
-        # Coloco a outra função aqui?
-
-        parcelas = ParcelasTransacao.objects.filter(
+        valor_acumulado = ParcelasTransacao.objects.filter(
             transacao_fk__user_fk=self.user,
-            categoria_fk__nome=meta.categoria,
+            categoria_fk__nome=meta.categoria_fk,
             data__gte=meta.data_inicio,
             data__lte=meta.data_fim,
             pago=True,
-        )
-
-        valor_acumulado = sum(Decimal(p.valor) for p in parcelas)
+        ).aggregate(valor_total=Sum('valor'))['valor_acumulado']
 
         if meta.valor == Decimal('0.00'):
             percentual = Decimal('100.00')
         else:
             percentual = (valor_acumulado / meta.valor) * 100
 
-        StatusDescricao = {
-            'A': 'Ativo',
-            'P': 'Pausada',
-            'U': 'Ultrapassada',
-            'N': 'Não foi atingida',
-            'C': 'Concluida',
-        }
+        return [round(percentual, 2)]
 
-        TipoMeta = {
-            'MAX': 'Limite máximo',
-            'MIN': 'Minimo desejado'
-        }
-
+    def metasEmDict(self, meta: Metas):
         return {
-            'valor_meta': meta.valor,
-            'tipo': TipoMeta.get(meta.tipo, 'Erro'),
-            'valor_acumulado': valor_acumulado,
-            # Principalmente estava apenas pensando em retornar essas informações abaixo
-            'status': StatusDescricao.get(meta.status, 'Erro'),
-            'percentual': round(percentual, 2),
+            "categoria": meta.categoria_fk.nome,
+            "tipo": meta.tipo,
+            "valor": Decimal(meta.valor),
+            "data_inicio": meta.data_inicio,
+            "data_fim": meta.data_fim,
+            "descricao": meta.descricao,
+            "status": meta.status
         }

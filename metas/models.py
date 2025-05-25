@@ -1,6 +1,8 @@
 from django.db import models
 from django.utils import timezone
-from django.contrib.auth.models import User
+from django.conf import settings
+
+from financeiro.models import Categoria
 
 # Tabela para objetivos
 class Objetivos(models.Model):
@@ -12,7 +14,7 @@ class Objetivos(models.Model):
         }
     ]
 
-    user_fk = models.ForeignKey(User, on_delete=models.CASCADE, related_name='Objetivos')
+    user_fk = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='Objetivos')
     titulo = models.CharField(max_length=100, null=False)
     valor_objetivo = models.DecimalField(max_digits=12, decimal_places=2, null=False)
     valor_guardado = models.DecimalField(max_digits=12, decimal_places=2, default=0)
@@ -31,7 +33,7 @@ class TransacaoObjetivo(models.Model):
         }
     ]
 
-    objetivo_fk = models.ForeignKey(Objetivos, on_delete=models.CASCADE)
+    objetivo_fk = models.ForeignKey(Objetivos, on_delete=models.CASCADE, related_name='TransacaoObjetivo')
     tipo = models.CharField(max_length=1, choices=__opcoes_tipo, null=False)
     valor = models.DecimalField(max_digits=12, decimal_places=2, null=False)
     data = models.DateField(default=timezone.now)
@@ -52,7 +54,6 @@ class Metas(models.Model):
     __opcoes_status = [
         {
             'A': 'Ativo',
-            'P': 'Pausado',
             'U': 'Ultrapassado',
             'N': 'Não atingido',
             'C': 'Concluido',
@@ -60,10 +61,10 @@ class Metas(models.Model):
     ]
 
     # Define os atributos da tabela metas
-    user_fk = models.ForeignKey(User, on_delete=models.CASCADE, related_name='Metas')
+    user_fk = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='Metas')
+    categoria_fk = models.ForeignKey(Categoria, on_delete=models.CASCADE, related_name="Metas")
     tipo = models.CharField(max_length=3, choices=__opcoes_tipo, null=False)
     status = models.CharField(max_length=1, choices=__opcoes_status, default='A')
-    categoria = models.CharField(max_length=100, null=False) # Uso a chave estrangeira de categorias aqui?
     valor = models.DecimalField(max_digits=12, decimal_places=2, null=False)
     data_inicio = models.DateField(default=timezone.now)
     data_fim = models.DateField(null=False)

@@ -1,5 +1,5 @@
 from django.contrib.auth.models import AbstractBaseUser
-from django.utils.lorem_ipsum import paragraph
+from django.db import transaction
 
 from financeiro.models import Transacao, ParcelasTransacao, Categoria
 
@@ -28,15 +28,19 @@ class OperacoesTransacao:
                                                     , quantidade_parcelas = quantidade_parcelas.valor
                                                     , descricao = descricao
         )
+        with transaction.atomic():
+            try:
+                self.__criarParcelas(transacao=transacao_objeto
+                                     , categoria=categoria_objeto
+                                     , data=data
+                                     , valor=valor
+                                     , quantidade_parcelas=quantidade_parcelas
+                                     , pago=pago
+                                     , tipo=tipo
+                )
+            except Exception as e:
+                raise Exception('Falha inesperada ao criar Transação')
 
-        self.__criarParcelas(transacao=transacao_objeto
-                             , categoria=categoria_objeto
-                             , data=data
-                             , valor=valor
-                             , quantidade_parcelas=quantidade_parcelas
-                             , pago=pago
-                             , tipo=tipo
-        )
 
     def __criarParcelas(self
                         , transacao: Transacao
@@ -49,6 +53,7 @@ class OperacoesTransacao:
     ):
         valor_parcela = valor.valorParcela(quantidade_parcelas=quantidade_parcelas.valorDecimal)
 
+        historico = Historico(self.user)
         for i in range(quantidade_parcelas.valor):
             try:
                 data_parcela = data.proximoMes(quantidade_meses=i)
@@ -60,7 +65,6 @@ class OperacoesTransacao:
                                                          , ordem_parcela = i + 1
                                                          , pago = pago.status
                 )
-                historico = Historico(self.user)
                 if i == 0:
                     historico.inicializarTuplasParaParcelasAntigas(parcela=parcela)
 
@@ -74,11 +78,12 @@ class OperacoesTransacao:
 
             except Exception as e:
                 transacao.delete()
-                raise Exception(f'Erro ao criar o parcela {e} - ordem {i+1}')
+                raise Exception(f'Erro ao criar o parcela')
 
             if pago.status and data.comparacaoDatasMenoresQueHoje(data_parcela):
                 self.user.operarSaldoAtual(valor_parcela, tipo.valor)
 
+    #CORRIGIR ALTERAÇÃO DE VALORES COM AS DEVIDAS DATAS
     def editarUmaParcela(self
                          , parcela_id: int
                          , novo_valor: ValorTransacao
@@ -87,137 +92,119 @@ class OperacoesTransacao:
                          , pago: Pago
                          , descricao: str
                          ):
-        parcela = ParcelasTransacao.objects.get(id=int(parcela_id))
+        with transaction.atomic():
+            parcela = ParcelasTransacao.objects.get(id=int(parcela_id))
 
-        pago_status_anterior = parcela.pago
-        valor_antigo = parcela.valor
+            pago_status_anterior = parcela.pago
+            valor_antigo = parcela.valor
 
-        historico = Historico(self.user)
-        #caso tipo == despesa
-        valor_cancela = parcela.valor
-        if parcela.transacao_fk.tipo == 'R':
-            valor_cancela = -parcela.valor
-
-        if  pago_status_anterior == True and pago.status == True:
-            #pago -> pago
-            self.user.editarSaldoAtualComTipo(valor_antigo=valor_antigo
-                                            , valor_novo=novo_valor.valor
-                                            , tipo=parcela.transacao_fk.tipo
-            )
-            #cancela os valores antigos à frente
-            historico.corrigirValoresProximosMeses(data_transacao_editada=Data(parcela.data)
-                                                 , valor_de_correcao=valor_cancela
-            )
-            #atualiza os novos valores
-            if parcela.transacao_fk.tipo == 'D':
-                novo_valor.valor = -novo_valor.valor
-            historico.corrigirValoresProximosMeses(data_transacao_editada=nova_data.valor
-                                                , valor_de_correcao=novo_valor.valor)
-        elif pago_status_anterior == True and pago.status == False:
-            #pago -> não pago
-            self.user.operarSaldoAtualInverso(valor=valor_antigo, tipo=parcela.transacao_fk.tipo)
-            #so cancela os valores antigos ate a frente
-            historico.corrigirValoresProximosMeses(data_transacao_editada=Data(parcela.data)
-                                                   , valor_de_correcao=valor_cancela
-            )
-        elif pago_status_anterior == False and pago.status == True:
-            #não pago -> pago
-            self.user.operarSaldoAtual(novo_valor.valor, parcela.transacao_fk.tipo)
-            if parcela.transacao_fk.tipo == 'D':
-                novo_valor.valor = -novo_valor.valor
-            #so atualiza os novos valores
-            historico.corrigirValoresProximosMeses(data_transacao_editada=nova_data.valor
-                                                   , valor_de_correcao=novo_valor.valor
-            )
-
-        if novo_valor.valor < 0:
-            novo_valor.valor = -novo_valor.valor
-
-        parcela.valor = novo_valor.valor
-        parcela.data = nova_data.valor
-        parcela.pago = pago.status
-        parcela.categoria_fk = categoria
-        parcela.transacao_fk.descricao = descricao
-
-        try:
-            #por questão de tempo infelizmente não foi possivel otimizar o cancelamento da ação por questão de tempo
-            parcela.save()
-        except Exception as e:
-            #caso tipo == despesa:
-            valor_descancela = -valor_cancela
+            historico = Historico(self.user)
+            #caso tipo == despesa
+            valor_cancela = parcela.valor
             if parcela.transacao_fk.tipo == 'R':
-                valor_descancela = -valor_cancela
+                valor_cancela = -parcela.valor
 
-            #fazer as operações inversas vao cancelar o saldo adicionado e evitar erros com Saldo atual e o historico
-            if pago_status_anterior == True and pago.status == True:
-                # pago -> pago
-                tipo_inverso = parcela.transacao_fk.tipo
-                if tipo_inverso == 'R':
-                    tipo_inverso = 'D'
-                elif tipo_inverso == 'D':
-                    tipo_inverso = 'R'
+            if  pago_status_anterior == True and pago.status == True:
+                #pago -> pago
                 self.user.editarSaldoAtualComTipo(valor_antigo=valor_antigo
                                                 , valor_novo=novo_valor.valor
-                                                , tipo=tipo_inverso
+                                                , tipo=parcela.transacao_fk.tipo
                 )
-                #cancela o novo valor
-                if parcela.transacao_fk.tipo == 'R':
+                #cancela os valores antigos à frente
+                historico.corrigirValoresProximosMeses(data_transacao_editada=Data(parcela.data)
+                                                     , valor_de_correcao=valor_cancela
+                )
+                #atualiza os novos valores
+                if parcela.transacao_fk.tipo == 'D':
                     novo_valor.valor = -novo_valor.valor
                 historico.corrigirValoresProximosMeses(data_transacao_editada=nova_data.valor
-                                                       , valor_de_correcao=novo_valor.valor
-                )
-                #volta o valor original
-                historico.corrigirValoresProximosMeses(data_transacao_editada=Data(parcela.data)
-                                                     , valor_de_correcao=valor_descancela
-                )
+                                                     , valor_de_correcao=novo_valor.valor)
             elif pago_status_anterior == True and pago.status == False:
-                # pago -> não pago
-                self.user.operarSaldoAtual(valor=valor_antigo, tipo=parcela.transacao_fk.tipo)
-                historico.corrigirValoresProximosMeses(data_transacao_editada=Data(parcela.data),
-                                                       valor_de_correcao=valor_descancela)
-
+                #pago -> não pago
+                self.user.operarSaldoAtualInverso(valor=valor_antigo, tipo=parcela.transacao_fk.tipo)
+                #so cancela os valores antigos ate a frente
+                historico.corrigirValoresProximosMeses(data_transacao_editada=Data(parcela.data)
+                                                       , valor_de_correcao=valor_cancela
+                )
             elif pago_status_anterior == False and pago.status == True:
-                # não pago -> pago
-                if parcela.transacao_fk.tipo == 'R':
+                #não pago -> pago
+                self.user.operarSaldoAtual(novo_valor.valor, parcela.transacao_fk.tipo)
+                if parcela.transacao_fk.tipo == 'D':
                     novo_valor.valor = -novo_valor.valor
-                #retira os novos valores
-                self.user.operarSaldoAtualInverso(novo_valor.valor, parcela.transacao_fk.tipo)
-                historico.corrigirValoresProximosMeses(data_transacao_editada=nova_data.valor,
-                                                       valor_de_correcao=novo_valor.valor)
-            raise Exception(f'Erro ao editar parcela')
+                #so atualiza os novos valores
+                historico.corrigirValoresProximosMeses(data_transacao_editada=nova_data.valor
+                                                     , valor_de_correcao=novo_valor.valor
+                )
+
+            if novo_valor.valor < 0:
+                novo_valor.valor = -novo_valor.valor
+
+            parcela.valor = novo_valor.valor
+            parcela.data = nova_data.valor
+            parcela.pago = pago.status
+            if parcela.transacao_fk.quantidade_parcelas == 1:
+                parcela.categoria_fk = categoria
+            parcela.transacao_fk.descricao = descricao
+
+            try:
+                parcela.save()
+            except Exception as e:
+                raise Exception(f'Erro ao editar parcela')
 
 
     def deletarUmaParcela(self, parcela: ParcelasTransacao):
         transacao = parcela.transacao_fk
         self.user.operarSaldoAtualInverso(parcela.valor, transacao.tipo)
         historico = Historico(self.user)
-        valor_cancela = parcela.valor
-        if transacao.quantidade_parcelas == 1:
-            if transacao.tipo == 'R':
-                valor_cancela = -valor_cancela
-            historico.corrigirValoresProximosMeses(data_transacao_editada=Data(parcela.data)
-                                                 , valor_de_correcao=valor_cancela)
-
-            transacao.delete()
-        else:
-            transacao.quantidade_parcelas -= 1
-            transacao.save()
-            parcela.delete()
+        with transaction.atomic():
+            valor_cancela = parcela.valor
+            if transacao.quantidade_parcelas == 1:
+                if transacao.tipo == 'R':
+                    valor_cancela = -valor_cancela
+                historico.corrigirValoresProximosMeses(data_transacao_editada=Data(parcela.data)
+                                                     , valor_de_correcao=valor_cancela
+                )
+                try:
+                    transacao.delete()
+                except Exception as e:
+                    raise Exception(f'Erro deletar Transação')
+            else:
+                transacao.quantidade_parcelas -= 1
+                try:
+                    transacao.save()
+                    parcela.delete()
+                except Exception as e:
+                    raise Exception(f'Erro deletar parcela')
             if transacao.quantidade_parcelas <= 0:
-                transacao.delete()
+                try:
+                    transacao.delete()
+                except Exception as e:
+                    raise Exception(f'Erro deletar transção')
 
     def deletarTodasParcelas(self,transacao: Transacao):
-        parcelas = ParcelasTransacao.objects.filter(transacao_fk=transacao)
-        historico = Historico(self.user)
-        for parcela in parcelas:
-            if not Data.comparacaoDatasMenoresQueHoje(parcela.data):
-                continue
-            valor_cancela = parcela.valor
-            if transacao.tipo == 'R':
-                valor_cancela = -valor_cancela
-            historico.corrigirValoresProximosMeses(data_transacao_editada=Data(parcela.data)
-                                                , valor_de_correcao=valor_cancela
-            )
-            self.user.operarSaldoAtualInverso(parcela.valor, transacao.tipo)
+        with transaction.atomic():
+            parcelas = ParcelasTransacao.objects.filter(transacao_fk=transacao)
+            historico = Historico(self.user)
+            #cancela o valor do saldo e do historico
+            for parcela in parcelas:
+                if not Data.comparacaoDatasMenoresQueHoje(parcela.data):
+                    continue
+                self.user.operarSaldoAtualInverso(parcela.valor, transacao.tipo)
 
-        transacao.delete()
+                valor_cancela = parcela.valor
+                if transacao.tipo == 'R':
+                    valor_cancela = -valor_cancela
+                historico.corrigirValoresProximosMeses(data_transacao_editada=Data(parcela.data)
+                                                     , valor_de_correcao=valor_cancela
+                )
+
+            try:
+                transacao.delete()
+            except Exception as e:
+                raise Exception(f'Erro inesperado ao deletar parcelas')
+
+    def verificarParcelasPagas(self, parcela: ParcelasTransacao):
+        if parcela.transacao_fk.quantidade_parcelas <= 1:
+            return
+        with transaction.atomic():
+            pass

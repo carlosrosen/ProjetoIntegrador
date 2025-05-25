@@ -16,4 +16,3 @@ class ValorObjetivo:
             return abs(valor_objetivo - valor_guardado)
         except Exception as e:
             raise Exception('Erro inesperado ao calcular o valor limite')
-

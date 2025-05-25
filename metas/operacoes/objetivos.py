@@ -3,9 +3,9 @@ from django.contrib.auth.models import AbstractBaseUser
 from metas.models import Objetivos, TransacaoObjetivo
 
 from metas.dominio.valorobjetivo import ValorObjetivo
-from metas.dominio.tipoobjetivo import TipoObjetivo, TipoObjetivo
+from metas.dominio.tipoobjetivo import TipoObjetivo
 from metas.dominio.status import Status
-from financeiro.dominio.data import Data
+from common.dominio.data import Data
 
 # Estou importando do financeiro a formatação
 
@@ -15,7 +15,7 @@ class OperacoesObjetivo:
             raise TypeError('Usuario invalido')
         self.user = user
 
-    def criarObjetivo(self
+    def criar(self
                     , titulo: str
                     , valor_objetivo: ValorObjetivo
                     , valor_guardado: ValorObjetivo
@@ -33,12 +33,11 @@ class OperacoesObjetivo:
                                 , titulo=titulo
                                 , valor_objetivo=valor_objetivo.valor
                                 , valor_guardado=valor_guardado.valor
-                                , data_inicio=data_inicio.valor
                                 , data_fim=data_fim.valor
                                 , status=status.valor
         )
 
-    def editarObjetivo(self
+    def editar(self
                        , objetivo: Objetivos
                        , novo_titulo: str
                        , novo_valor_objetivo: ValorObjetivo
@@ -48,7 +47,8 @@ class OperacoesObjetivo:
 
         if novo_status.valor == 'P':
             objetivo.status = 'P'
-        elif novo_valor_objetivo.valor < objetivo.valor_guardado:
+
+        if novo_valor_objetivo.valor < objetivo.valor_guardado:
             raise ValueError('O novo valor do objetivo é menor que o valor já guardado')
         elif novo_valor_objetivo.valor == objetivo.valor_guardado:
             objetivo.status = 'C'
@@ -62,10 +62,10 @@ class OperacoesObjetivo:
         objetivo.data_fim = nova_data_fim.valor
         objetivo.save()
 
-    def deletarObjetivo(self, objetivo: Objetivos):
+    def deletar(self, objetivo: Objetivos):
         objetivo.delete()
 
-    def criarTransacaoObj(self
+    def criarTransacao(self
                      ,Objetivo: Objetivos
                      ,Tipo: TipoObjetivo
                      ,Valor: ValorObjetivo
@@ -109,9 +109,4 @@ class OperacoesObjetivo:
         try:
             Objetivo.save()
         except Exception as e:
-            # Reverte as operações em caso de falha e retorna um erro
-            if Tipo.valor == 'D':
-                Objetivo.valor_guardado -= Valor.valor
-            elif Tipo.valor == 'R':
-                Objetivo.valor_guardado += Valor.valor
             raise Exception('Não foi possivel criar a transação objetivo')
