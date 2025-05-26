@@ -4,17 +4,17 @@ from django.urls import reverse
 from apps.financeiro.operacoes.saldo import Historico
 
 def index(request):
-    return render(request, 'templates/index.html')
+    return render(request, 'index.html')
 
 def dashboard(request):
     if not request.user.is_authenticated:
         return redirect(reverse('core:index'))
-    Historico(request.user)
-    Historico.verificarInsercoesHistorico(request.user)
+    historico = Historico(request.user)
+    historico.verificarInsercoesHistorico()
 
-    return render(request, 'templates/dashboard.html')
+    return render(request, 'dashboard.html')
 
 def notfound(request):
     if not request.user.is_authenticated:
         return redirect(reverse('core:index'))
-    return render(request, 'templates/404.html')
+    return render(request, 'erro/404.html')

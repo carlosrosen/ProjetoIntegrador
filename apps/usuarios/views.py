@@ -16,7 +16,7 @@ def cadastrar(request):
         return redirect(reverse('core:index'))
     
     if request.method == "GET":
-        return render(request, 'templates/cadastro.html')
+        return render(request, 'cadastro.html')
     else:
         # Armazenando as informações fornecidas para a criação do usuario
         usuario = request.POST.get('usuario', '').strip()
@@ -50,7 +50,7 @@ def logar(request):
         return redirect(reverse('core:dashboard'))
         
     if request.method == "GET":
-        return render(request, 'templates/login.html')
+        return render(request, 'login.html')
     
     usuario = request.POST.get('usuario', '').strip()
     senha = request.POST.get('senha','').strip()

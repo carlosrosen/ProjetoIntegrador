@@ -22,8 +22,8 @@ class Historico:
         self.user= cast(CustomUser, user)
 
 
-    def verificarInsercoesHistorico(self,valor) -> None:
-        if HistoricoSaldo.objects.filter(user=self.user).count() <= 0:
+    def verificarInsercoesHistorico(self) -> None:
+        if HistoricoSaldo.objects.filter(user_fk=self.user).count() <= 0:
             HistoricoSaldo.inicializarPrimeiroValor(self.user)
             return
         mes_atual = Data.inicializar(dia=1, mes=date.today().month, ano=date.today().year)
