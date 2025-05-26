@@ -1,0 +1,45 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - U-Balance</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'usuarios/css/../static/usuarios/css/style-login-cadastro.css' %}">
+</head>
+<body>
+  <header>
+    <div class="logo"><a href="{% url 'core:index' %}">U-Balance</a></div>
+  </header>
+  <main class="form-container">
+    <form class="form-box" method="POST">
+      {% csrf_token %}
+      <h2>Login</h2>
+
+      {% if messages %}
+        {% for message in messages %}
+          <div id="mensagem" class="alert alert-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+      <script src="{% static 'usuarios/js/../static/usuarios/js/mensagem_erro.js' %}"></script>
+
+      <label for="login">Login</label>
+      <input type="text" id="login" name="usuario" required>
+
+      <label for="senha">Senha</label>
+      <input type="password" id="senha" name="senha" required>
+
+      <button type="submit" href="{% url 'usuario:login' %}">Entrar</button>
+
+      <p class="link"><a href="{% url 'usuario:password_reset' %}">Esqueci minha senha</a></p>
+      <p class="link">Não tem uma conta? <a href="{% url 'usuario:cadastro' %}">Cadastre-se</a></p>
+    </form>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 - U-Balance</p>
+  </footer>
+</body>
+</html>

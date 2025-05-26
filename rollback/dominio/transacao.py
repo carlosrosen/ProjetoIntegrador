@@ -1,9 +1,9 @@
 from django.contrib.auth.models import AbstractBaseUser
 
-from financeiro.dominio import *
+from apps.financeiro.dominio import *
 from common.dominio.data import Data
-from financeiro.dominio import tipo
-from financeiro.models import Categoria, ParcelasTransacao, Transacao
+from apps.financeiro.dominio import tipo
+from apps.financeiro.models import Categoria, ParcelasTransacao, Transacao
 
 
 class InformacoesTransacao:

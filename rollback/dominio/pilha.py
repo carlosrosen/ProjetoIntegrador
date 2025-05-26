@@ -1,15 +1,10 @@
-from django.contrib.auth.models import AbstractBaseUser
-
 class Pilha:
     class __No:
         def __init__(self, objeto):
             self.valor = objeto
             self.proximo = None
 
-    def __init__(self, user):
-        if not isinstance(user, AbstractBaseUser):
-            raise TypeError('Usuario Invalido')
-        self.__user = user
+    def __init__(self):
         self.tamanho = 0
         self.__topo = None
 
@@ -37,4 +32,3 @@ class Pilha:
 
     def free(self):
         self.__topo = None
-

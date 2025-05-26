@@ -19,6 +19,6 @@ from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('core.urls')), #Inclui a pagina inicial nos caminhos
-    path('auth/', include('usuarios.urls')), #Chamando as urls do aplicativo usuarios
+    path('', include('apps.core.urls')), #Inclui a pagina inicial nos caminhos
+    path('auth/', include('apps.usuarios.urls')), #Chamando as urls do aplicativo usuarios
 ]

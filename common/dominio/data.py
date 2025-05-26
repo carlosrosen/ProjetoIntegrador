@@ -39,9 +39,3 @@ class Data:
     def mesAnterior(self, quantidade_meses: int):
         quantidade_meses = abs(quantidade_meses)
         return self.valor + relativedelta(months=-quantidade_meses)
-
-    @staticmethod
-    def comparacaoDatasMenoresQueHoje(data: date) -> bool:
-        if data <= date.today():
-            return True
-        return False

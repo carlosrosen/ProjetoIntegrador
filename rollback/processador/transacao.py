@@ -1,5 +1,5 @@
 from rollback.dominio.transacao import InformacoesTransacao
-from financeiro.dominio import *
+from apps.financeiro.dominio import *
 
 class ProcessadorTransacao(InformacoesTransacao):
     def __init__(self, user, **kwargs):

@@ -1,0 +1,315 @@
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', sans-serif;
+    }
+    body {
+      display: flex;
+      background: #f5f7fa;
+    }
+    .sidebar {
+      width: 250px;
+      background-color: #ffffff;
+      border-right: 1px solid #ddd;
+      height: 108vh;
+      padding: 1rem;
+    }
+    .sidebar h1 {
+      font-size: 1.5rem;
+      color: #1abf63;
+      margin-bottom: 2rem;
+    }
+    .sidebar nav a {
+      display: block;
+      padding: 0.75rem;
+      text-decoration: none;
+      color: #333;
+      margin: 0.25rem 0;
+      border-radius: 8px;
+    }
+    .sidebar nav a:hover {
+      background-color: #f0f0f0;
+	  transition: 0.5s ease;
+    }
+
+    .content {
+      flex: 1;
+      padding: 2rem;
+    }
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+    }
+    .saldo-box, .desempenho-box, .grafico-box, .transacoes-box, .metas-box, .future-box{
+      background-color: #fff;
+      padding: 1.5rem;
+      border-radius: 10px;
+      box-shadow: 0 0 8px rgba(0,0,0,0.05);
+      margin-bottom: 2rem;
+	  
+    }
+    .saldo-box {
+      background-color: #00994c;
+      color: white;
+    }
+    .saldo-box h2 {
+      font-size: 1.5rem;
+    }
+    .flex {
+      display: flex;
+      gap: 1rem;
+    }
+    .grafico-box canvas {
+      max-width: 300px;
+    }
+    .transacoes-box ul {
+      list-style: none;
+      padding: 0;
+    }
+	.metas-box ul {
+      list-style: none;
+      padding: 0;
+    }
+	.future-box ul {
+      list-style: none;
+      padding: 0;
+    }
+    .transacoes-box li {
+      padding: 0.5rem 0;
+      border-bottom: 1px solid #eee;
+      display: flex;
+      justify-content: space-between;
+    }
+	.metas-box li {
+      padding: 0.5rem 0;
+      border-bottom: 1px solid #eee;
+      display: flex;
+      justify-content: space-between;
+    }
+	.future-box li {
+      padding: 0.5rem 0;
+      display: flex;
+      justify-content: space-between;
+    }
+    .transacoes-box li span.valor {
+      font-weight: bold;
+    }
+	#logout{
+		background-color: red;
+		color: white;
+	}
+	#logout:hover{
+		background-color: darkRed;
+		transition: 0.5s ease;
+	}
+	button#btnAlternar {
+		margin-bottom: 10px;
+		padding: 6px 12px;
+		background-color: #2ecc71;
+		color: white;
+		border: none;
+		border-radius: 5px;
+		cursor: pointer;
+	}
+	button#btnAlternar:hover {
+		background-color: #27ae60;
+	}
+	button#btnVermaisMeta {
+		margin-top: 10px;
+		padding: 6px 12px;
+		background-color: #2ecc71;
+		color: white;
+		border: none;
+		border-radius: 5px;
+		cursor: pointer;
+	}
+  button#btnVermaisObjetivos {
+		margin-top: 10px;
+		padding: 6px 12px;
+		background-color: #2ecc71;
+		color: white;
+		border: none;
+		border-radius: 5px;
+		cursor: pointer;
+	}
+  button#btnVermaisObjetivos:hover {
+		background-color: #27ae60;
+	}
+	button#btnVermaisMeta:hover {
+		background-color: #27ae60;
+	}
+	button#btnVermaisFuture{
+		margin-top: 10px;
+		padding: 6px 12px;
+		background-color: #2ecc71;
+		color: white;
+		border: none;
+		border-radius: 5px;
+		cursor: pointer;
+	}
+	button#btnVermaisFuture:hover {
+		background-color: #27ae60;
+	}
+
+    /* Modal */
+/* Estilo base para o modal */
+#modalTransacao {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  justify-content: center;
+  align-items: center;
+  animation: fadeIn 0.3s ease forwards;
+}
+
+#modalTransacao.ativo {
+  display: flex;
+}
+
+.modal-content {
+  background: white;
+  padding: 2rem;
+  border-radius: 10px;
+  width: 700px;
+  max-width: 90%;
+  opacity: 0;
+  transform: scale(0.95);
+  animation: scaleIn 0.3s ease forwards;
+}
+
+.tabs {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+.tab {
+  flex: 1;
+  padding: 0.7rem;
+  cursor: pointer;
+  background-color: #eee;
+  border: none;
+  outline: none;
+  transition: 0.2s;
+  font-weight: bold;
+}
+
+.tab:hover {
+  background-color: #ddd;
+}
+
+.tab.active {
+  background-color: #2ecc71;
+  color: white;
+  border-bottom: 3px solid #27ae60;
+}
+
+.modal-content input,
+.modal-content select {
+  width: 100%;
+  padding: 0.5rem;
+  margin-bottom: 1rem;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+
+.btn-salvar {
+  padding: 0.5rem 1rem;
+  background-color: #2ecc71;
+  color: white;
+  border: none;
+  border-radius: 5px;
+}
+
+.btn-cancelar {
+  padding: 0.5rem 1rem;
+  background-color: #ccc;
+  margin-left: 10px;
+  border: none;
+  border-radius: 5px;
+}
+
+/* Animação de fundo escurecido */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Animação de entrada do conteúdo */
+@keyframes scaleIn {
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes aparecer {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+#modalMeta {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  justify-content: center;
+  align-items: center;
+  animation: fadeIn 0.3s ease forwards;
+}
+
+#modalMeta.ativo {
+  display: flex;
+}
+
+.radio-group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.radio-option {
+  display: flex;
+  align-items: center; /* alinha verticalmente */
+  gap: 8px;
+}
+
+.radio-option input[type="radio"] {
+  transform: translateY(10px); /* micro ajuste vertical da bolinha */
+}
+
+.radio-option label {
+  white-space: nowrap;
+}
+
+#modalObjetivo {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  justify-content: center;
+  align-items: center;
+  animation: fadeIn 0.3s ease forwards;
+}
+
+#modalObjetivo.ativo {
+  display: flex;
+}
+
