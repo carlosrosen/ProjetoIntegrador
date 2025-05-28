@@ -15,10 +15,8 @@ from datetime import date
 
 
 class OperacoesTransacao:
-    def __init__(self, user):
-        if not isinstance(user, AbstractBaseUser):
-            raise TypeError('Usuario invalido')
-        self.user = cast(CustomUser, user)
+    def __init__(self, user_id):
+        self.user = CustomUser.objects.get(id=user_id)
 
     def criar(self
               , valor: ValorTransacao
@@ -239,3 +237,28 @@ class OperacoesTransacao:
             except Exception as e:
                 raise Exception(f'Erro verificar parcelas pagas')
 
+
+    def proximasTresParcelas(self):
+        parcelas = ParcelasTransacao.objects.filter(transacao_fk__user_fk=self.user
+                                                    , data__gt=date.today()
+                                                    )
+        dados = []
+        for parcela in parcelas:
+            if len(dados) <= 3:
+                dados.append(parcela)
+                if len(dados) == 3:
+                    break
+        return dados
+
+    def ultimaCincoParcelas(self):
+        parcelas = ParcelasTransacao.objects.filter(transacao_fk__user_fk=self.user
+                                                        , data__lte=date.today()
+                                                        )
+        dados = []
+        tamanho = parcelas.count()
+        inicio = tamanho - 5
+        if inicio < 0:
+            inicio = 0
+        for parcela in parcelas[inicio:tamanho]:
+            dados.append(parcela)
+        return dados

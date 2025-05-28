@@ -39,3 +39,12 @@ class Data:
     def mesAnterior(self, quantidade_meses: int):
         quantidade_meses = abs(quantidade_meses)
         return self.valor + relativedelta(months=-quantidade_meses)
+
+    @staticmethod
+    def formatarMesAno(mes:int, ano:int):
+        import locale
+        locale.setlocale(locale.LC_TIME, 'pt_BR.UTF-8')
+        mes, ano = abs(mes), abs(ano)
+        data = Data.inicializar(1, mes, ano)
+        nome_mes = data.valor.strftime('%B')
+        return nome_mes[0:3] + '/' + str(ano)[2:4]

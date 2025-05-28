@@ -3,7 +3,7 @@ from typing import cast
 from apps.usuarios.models import CustomUser
 
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
-from django.db.models import Max, Min
+from django.db.models import Max, Min, Sum
 
 from apps.financeiro.dominio import *
 from common.dominio.data import Data
@@ -16,10 +16,8 @@ from decimal import Decimal
 
 
 class Historico:
-    def __init__(self, user):
-        if not isinstance(user, AbstractBaseUser):
-            raise TypeError('Usuario Invalido.')
-        self.user= cast(CustomUser, user)
+    def __init__(self, user_id):
+        self.user= CustomUser.objects.get(id=user_id)
 
 
     def verificarInsercoesHistorico(self) -> None:
@@ -134,3 +132,26 @@ class Historico:
         for mes in range(1,13):
             dados.extend(self.pegarSaldoMes(mes=mes,ano=ano))
         return dados
+
+    def pegarGanhosMes(self,mes:int, ano:int):
+        mes, ano = abs(mes), abs(ano)
+        ganhos = ParcelasTransacao.objects.filter(transacao_fk__user_fk= self.user
+                                                , transacao_fk__tipo='R'
+                                                , data__month=mes, data__year=ano).aggregate(total = Sum('valor'))['total']
+        if ganhos == None:
+            return '0.00'
+        return ganhos
+
+    def pegarGastosMes(self,mes:int, ano:int):
+        mes, ano = abs(mes), abs(ano)
+        gastos = ParcelasTransacao.objects.filter(transacao_fk__user_fk= self.user
+                                                , transacao_fk__tipo='D'
+                                                , data__month=mes, data__year=ano).aggregate(total = Sum('valor'))['total']
+        if gastos == None:
+            return '0.00'
+        return gastos
+
+
+
+    def pegarSaldoAtual(self):
+        return self.user.saldoAtual
