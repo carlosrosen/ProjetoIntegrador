@@ -1,11 +1,15 @@
 let modoGrafico = "gastos";
 const ctx = document.getElementById("graficoGastos").getContext("2d");
 
+let categorias_gasto = document.getElementById("categorias_despesa")
+let valores_gasto = document.getElementById("dados_gastos_categoria")
+
+
 const dadosGastos = {
-  labels: ["Alimentação", "Viagem", "Saúde", "Casa"],
+  labels: categorias_gasto,
   datasets: [{
     label: "Gastos por Categoria",
-    data: [56.00, 10.00, 14.00, 20.00],
+    data: valores_gasto,
     backgroundColor: ["#f39c12", "#1abc9c","red","lightBlue"]
   }]
 };
@@ -14,7 +18,7 @@ const dadosGanhos = {
   labels: ["Salário", "Freelancer"],
   datasets: [{
     label: "Ganhos por Categoria",
-    data: [89.00, 11.00],
+    data: [89.00, 12.00],
     backgroundColor: ["#2ecc71","blue"]
   }]
 };

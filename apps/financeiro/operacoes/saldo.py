@@ -1,3 +1,5 @@
+from urllib.request import parse_http_list
+
 from django.contrib.auth.models import AbstractBaseUser
 from typing import cast
 from apps.usuarios.models import CustomUser
@@ -7,7 +9,7 @@ from django.db.models import Max, Min, Sum
 
 from apps.financeiro.dominio import *
 from common.dominio.data import Data
-from apps.financeiro.models import ParcelasTransacao
+from apps.financeiro.models import ParcelasTransacao, Categoria
 from apps.financeiro.models import HistoricoSaldo
 
 from datetime import date
@@ -133,17 +135,16 @@ class Historico:
             dados.extend(self.pegarSaldoMes(mes=mes,ano=ano))
         return dados
 
-    def pegarGanhosMes(self,mes:int, ano:int):
+    def pegarGanhosMes(self,mes:int, ano:int) -> str:
         mes, ano = abs(mes), abs(ano)
         ganhos = ParcelasTransacao.objects.filter(transacao_fk__user_fk= self.user
                                                 , transacao_fk__tipo='R'
                                                 , data__month=mes, data__year=ano).aggregate(total = Sum('valor'))['total']
-        if ganhos == None:
+        if ganhos is None:
             return '0.00'
         return ganhos
 
     def pegarGastosMes(self,mes:int, ano:int):
-        mes, ano = abs(mes), abs(ano)
         gastos = ParcelasTransacao.objects.filter(transacao_fk__user_fk= self.user
                                                 , transacao_fk__tipo='D'
                                                 , data__month=mes, data__year=ano).aggregate(total = Sum('valor'))['total']
@@ -155,3 +156,32 @@ class Historico:
 
     def pegarSaldoAtual(self):
         return self.user.saldoAtual
+
+    def pegarValorCategorias(self, mes:int, ano:int, tipo = 'all') -> dict:
+        if tipo.lower() == 'r':
+            tipo = 'receita'
+        elif tipo.lower() == 'd':
+            tipo = 'despesa'
+        inicio_mes = Data.inicializar(1,mes,ano)
+        inicio_proximo_mes = Data.incrementarMes(inicio_mes.valor)
+        categorias = Categoria.objects.all()
+        parcelas_mes = ParcelasTransacao.objects.filter(transacao_fk__user_fk=self.user
+                                                       , data__gte=inicio_mes.valor
+                                                       , data__lt=inicio_proximo_mes.valor
+                                                       )
+        if tipo.lower() == 'receita':
+            parcelas_mes.filter(transacao_fk__tipo='R')
+            categorias = categorias.filter(tipo='R')
+        elif tipo.lower() == 'despesa':
+            parcelas_mes.filter(transacao_fk__tipo='D')
+            categorias = categorias.filter(tipo='D')
+        dicionario = {}
+
+        for categoria in categorias:
+            valor_total = parcelas_mes.filter(transacao_fk__categoria_fk=categoria).aggregate(total=Sum('valor'))['total']
+            dicionario[categoria.nome] = valor_total
+
+        return dicionario
+
+
+

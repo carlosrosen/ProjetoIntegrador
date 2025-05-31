@@ -11,6 +11,8 @@ from common.dominio.data import Data
 from datetime import date
 from decimal import Decimal
 
+import json
+
 def index(request):
     return render(request, 'index.html')
 
@@ -27,6 +29,9 @@ def dashboard(request):
     ganhos_mes = Decimal(historico.pegarGanhosMes(hoje.month, hoje.year))
     gastos_mes = Decimal(historico.pegarGastosMes(hoje.month, hoje.year))
 
+    dicionario_despesas_categorias = historico.pegarValorCategorias(hoje.month, hoje.year, 'despesa')
+    dicionario_receitas_categorias = historico.pegarValorCategorias(hoje.month, hoje.year, 'receita')
+
     return render(request, 'dashboard.html'
                   , {'saldo_atual': saldo_atual
                             , 'username': request.user.username
@@ -36,7 +41,11 @@ def dashboard(request):
                             , 'mes_ano': Data.formatarMesAno(hoje.month, hoje.year)
                             , 'lancamentos_futuros': transacoes.proximasTresParcelas()
                             , 'ultimos_lancamentos': transacoes.ultimaCincoParcelas()
-                     }
+                            , 'lista_receitas_categoria': dicionario_receitas_categorias.values()
+                            , 'lista_categorias_receitas': dicionario_receitas_categorias.keys()
+                            , 'lista_despesas_categoria': dicionario_despesas_categorias.values()
+                            , 'lista_categorias_despesa': dicionario_receitas_categorias.keys()
+                            }
                   )
 
 def notfound(request):

@@ -13,10 +13,11 @@ class Data:
 
     @classmethod
     def incrementarMes(cls, data: str | date):
-        if type(data) == date:
-            data = f'{data.year}-{data.month}-{data.day}'
+        if type(data) == str:
+            data = datetime.strptime(data, "%Y-%m-%d").date()
         nova_data = data + relativedelta(months=1)
         return cls(nova_data)
+
     @classmethod
     def decrementarMes(cls, data:str | date):
         if type(data) == date:

@@ -111,3 +111,31 @@ class OperacoesObjetivo:
             Objetivo.save()
         except Exception as e:
             raise Exception('Não foi possivel criar a transação objetivo')
+
+class GetObjetivo:
+    def __init__(self, user):
+        if not isinstance(user, AbstractBaseUser):
+            raise TypeError('Usuario invalido')
+        self.user = cast(CustomUser, user)
+
+    def infomacoes(self, objetivo_id):
+        objetivo = Objetivos.objects.get(pk=objetivo_id)
+        return {
+            "titulo": objetivo.titulo,
+            "valor_objetivo": objetivo.valor_objetivo,
+            "valor_guardado": objetivo.valor_guardado,
+            "data_inicio": objetivo.data_inicio,
+            "data_fim": objetivo.data_fim,
+            "status": objetivo.status,
+        }
+
+    def progresso(self, objetivo_id):
+        objetivo = Objetivos.objects.get(pk=objetivo_id)
+        return round((objetivo.valor_guardado / objetivo.valor_objetivo) * 100, 2)
+
+    def transacoes(self, objetivo_id):
+        objetivo = Objetivos.objects.get(pk=objetivo_id)
+        return TransacaoObjetivo.objects.filter(objetivo_fk=objetivo)
+
+
+

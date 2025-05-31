@@ -10,6 +10,13 @@
   <link rel="stylesheet" href="{% static 'core/css/style_dashboard.css' %}" />
 </head>
 <body>
+  <!-- pegar dados do script -->
+  <div id="categorias_receita" data-lista_categorias="{{ lista_receitas_categoria }}"></div>
+  <div id="dados_receita_categoria" data-lista="{{ lista_receitas_categoria }}"></div>
+  <div id="categorias_despesa" data-lista_categorias="{{ lista_categorias_despesa }}"></div>
+  <div id="dados_gastos_categoria" data-lista="{{ lista_despesas_categoria }}"></div>
+
+  <!-- começo do site -->
   <aside class="sidebar">
     <h1>U-Balance</h1>
     <nav>
