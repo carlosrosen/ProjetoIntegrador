@@ -1,10 +1,11 @@
-from idlelib.query import Query
-
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.conf import settings
 from datetime import date
 from decimal import Decimal
+
+from apps.usuarios.models import CustomUser
+
 
 # Cria a tabela Categoria
 class Categoria(models.Model):
@@ -21,15 +22,10 @@ class Categoria(models.Model):
 
     @staticmethod
     def verificacaoNomesCategoria(nome:str):
+        nome = nome[0].upper() + nome[1:].lower()
         encontrou = Categoria.objects.filter(nome=nome)
         if not encontrou:
             raise ValueError('Categoria não encontrada')
-
-#    @staticmethod
-#    def verificacaoNomesSubCategoria(nome:str):
-#        encontrou = Categoria.objects.filter(sub_categoria=nome)
-#        if not encontrou:
-#            raise ValueError('Subcategoria não encontrada')
     
     #formata o nome dos objetos de categoria
     def __str__(self):
@@ -90,10 +86,10 @@ class HistoricoSaldo(models.Model):
     saldo = models.DecimalField(max_digits=12,decimal_places=2,null=False)
 
     @staticmethod
-    def criarTupla(user, data:date, saldo:Decimal):
+    def criarTupla(user:CustomUser, data:date, saldo:Decimal):
         if not isinstance(user, AbstractUser):
             raise TypeError('Usuario invalido')
-        HistoricoSaldo.objects.create(user=user, data=data, saldo=saldo)
+        HistoricoSaldo.objects.create(user_fk=user, data=data, saldo=saldo)
 
     @staticmethod
     def inicializarPrimeiroValor(user):

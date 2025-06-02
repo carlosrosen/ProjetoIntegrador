@@ -1,0 +1,156 @@
+.objetivos-header {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.objetivos-header h1 {
+  font-size: 2rem;
+  color: #333;
+  margin: 0;
+}
+
+.objetivos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.objetivo-card {
+  background-color: #fff;
+  padding: 1.5rem;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  border: 1px solid #f0f0f0;
+}
+
+.objetivo-titulo {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 1rem;
+}
+
+.progresso-section {
+  margin-bottom: 1rem;
+}
+
+.progresso-label {
+  font-size: 0.9rem;
+  color: #666;
+  margin-bottom: 0.5rem;
+}
+
+.progresso-container {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.progresso-bar {
+  flex: 1;
+  height: 8px;
+  background-color: #f0f0f0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progresso-fill {
+  height: 100%;
+  background-color: #333;
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.progresso-percentage {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #333;
+  min-width: 35px;
+}
+
+.valores-container {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.valor-item {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.valor-label {
+  font-size: 0.8rem;
+  color: #666;
+  margin-bottom: 0.25rem;
+}
+
+.valor-amount {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.valor-guardado {
+  color: #2ecc71;
+}
+
+.valor-objetivo {
+  color: #666;
+}
+
+.btn-ver-mais {
+  background-color: #2ecc71;
+  color: white;
+  border: none;
+  padding: 0.4rem 0.8rem;
+  border-radius: 5px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  align-self: flex-start;
+}
+
+.btn-ver-mais:hover {
+  background-color: #27ae60;
+}
+
+.data-limite {
+  display: flex;
+  flex-direction: column;
+}
+
+.data-limite .valor-label {
+  margin-bottom: 0.25rem;
+}
+
+.data-limite .valor-amount {
+  color: #333;
+  font-size: 0.95rem;
+}
+
+@media (max-width: 768px) {
+  .objetivos-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .objetivos-header {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+  
+  .valores-container {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .valor-item {
+    align-items: flex-start;
+  }
+}

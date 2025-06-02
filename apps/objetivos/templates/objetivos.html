@@ -1,0 +1,87 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>U-Balance - Objetivos</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="{% static 'core/css/style_dashboard.css' %}" />
+  <link rel="stylesheet" href="{% static 'objetivos/css/objetivos.css' %}" />
+</head>
+<body>
+  <aside class="sidebar">
+    <h1>U-Balance</h1>
+    <nav>
+      <a href="{% url 'core:dashboard' %}">🏠 Início</a>
+      <a href="#" id="abrirModalTransacao">💲 Adicionar Transação</a>
+      <a href="#" id="abrirModalMeta">🎯 Adicionar Meta</a>
+      <a href="#" id="abrirModalObjetivo">📈 Adicionar Objetivo</a>
+      <a href="#">🎯 Metas</a>
+      <a href="{% url 'core:objetivos:menu_objetivos' %}" style="background-color: #f0f0f0; font-weight: 600;">📈 Objetivos</a>
+      <a href="#">🧾 Extrato</a>
+      <a href="#">📊 Relatórios</a>
+      <a href="#">⚙️ Configurações</a>
+      <a href="{% url 'usuario:logout' %}" id="logout">Logout</a>
+    </nav>
+  </aside>
+
+  <main class="content">
+    <div class="objetivos-header">
+      <h1>Objetivos</h1>
+    </div>
+
+    <div class="objetivos-grid">
+      {% for objetivo in objetivos %}
+      <div class="objetivo-card">
+        <div class="objetivo-titulo">{{ objetivo.titulo }}</div>
+        
+        <div class="progresso-section">
+          <div class="progresso-label">Progresso</div>
+          <div class="progresso-container">
+            <div class="progresso-bar">
+              <div class="progresso-fill" style="width: {{ objetivo.porcentagem }}%"></div>
+            </div>
+            <div class="progresso-percentage">{{ objetivo.porcentagem }}%</div>
+          </div>
+        </div>
+
+        <div class="valores-container">
+          <div class="valor-item">
+            <div class="valor-label">Valor guardado</div>
+            <div class="valor-amount valor-guardado">R$ {{ objetivo.valor_guardado }}</div>
+          </div>
+          <div class="valor-item">
+            <div class="valor-label">Valor objetivo</div>
+            <div class="valor-amount valor-objetivo">R$ {{ objetivo.valor_objetivo }}</div>
+            <button class="btn-ver-mais" onclick="verMaisObjetivo('{{ objetivo.slug }}')">Ver mais</button>
+          </div>
+        </div>
+
+        <div class="data-limite">
+          <div class="valor-label">Data limite</div>
+          <div class="valor-amount">{{ objetivo.data_limite|date:"d/m/Y" }}</div>
+        </div>
+      </div>
+      {% empty %}
+      <p>Você ainda não cadastrou nenhum objetivo.</p>
+      {% endfor %}
+    </div>
+  </main>
+
+  <script>
+    function verMaisObjetivo(objetivoId) {
+      alert(`Mostrando mais detalhes do objetivo: ${objetivoId}`);
+      // Redirecionar para uma view de detalhe
+      window.location.href = `/objetivos/${objetivoId}/`;
+    }
+
+    document.getElementById('logout').addEventListener('click', function(e) {
+      e.preventDefault();
+      if(confirm('Tem certeza que deseja sair?')) {
+        window.location.href = '{% url "usuario:logout" %}';
+      }
+    });
+  </script>
+</body>
+</html>

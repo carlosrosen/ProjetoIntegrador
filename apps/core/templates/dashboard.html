@@ -5,27 +5,29 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>U-Balance Dashboard</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <title>U-Balance Dashboard</title>
   <link rel="stylesheet" href="{% static 'core/css/style_dashboard.css' %}" />
 </head>
 <body>
   <!-- pegar dados do script -->
-  <div id="categorias_receita" data-lista_categorias="{{ lista_receitas_categoria }}"></div>
-  <div id="dados_receita_categoria" data-lista="{{ lista_receitas_categoria }}"></div>
-  <div id="categorias_despesa" data-lista_categorias="{{ lista_categorias_despesa }}"></div>
-  <div id="dados_gastos_categoria" data-lista="{{ lista_despesas_categoria }}"></div>
+  <div id="grafico_receita"
+       data-lista-categorias="{{ lista_categorias_receitas|safe }}"
+       data-lista-valores="{{ lista_receitas_categoria|safe }}"></div>
+  <div id="grafico_despesa"
+       data-lista-categorias="{{ lista_categorias_despesa|safe }}"
+       data-lista-valores="{{ lista_despesas_categoria|safe }}"></div>
 
   <!-- começo do site -->
   <aside class="sidebar">
     <h1>U-Balance</h1>
     <nav>
       <a href="{% url 'core:dashboard' %}">🏠 Início</a>
-      <a href="#" id="abrirModalTransacao">💲 Aicionar Transação</a>
+      <a href="" id="abrirModalTransacao">💲 Aicionar Transação</a>
       <a href="#" id="abrirModalMeta">🎯 Adicionar Meta</a>
       <a href="#" id="abrirModalObjetivo">📈 Adicionar Objetivo</a>
       <a href="#">🎯 Metas</a>
-      <a href="#">📈 Objetivos</a>
+      <a href="{% url 'core:objetivos:menu_objetivos' %}">📈 Objetivos</a>
       <!------------------------>
       <a href="#">🧾 Extrato</a>
       <a href="#">📊 Relatórios</a>
@@ -65,8 +67,7 @@
                     {% else %}
                         à vista
                     {% endif %}
-
-                    {% if parcela.valor > 0 %}+{{ parcela.valor }}{% else %}-{% endif %}
+                    {% if parcela.transacao_fk.tipo == 'R' %}+{{ parcela.valor }}{% else %}-{% endif %}
                     {{ parcela.data }}</span></li>
               {% endfor %}
                 {% else %}
@@ -86,23 +87,23 @@
       <div class="metas-box" style="width: 30%;">
         <h3>Metas&nbsp;&nbsp;&nbsp;<button id="btnVermaisMeta">Ver mais</button></h3><br>
         <ul>
-          <li><span><strong>Nome:</strong> Viajar </span> 
-          <li><span><strong>Valor da meta:</strong> 15.000R$</span> 
-          <li><span><strong>Valor Guardado:</strong> 8.250R$ </span> 
-          <li><span><strong>Data Limite:</strong> 16/09/2025</span> 
+          <li><span><strong>Nome:</strong> Viajar </span>
+          <li><span><strong>Valor da meta:</strong> 15.000R$</span>
+          <li><span><strong>Valor Guardado:</strong> 8.250R$ </span>
+          <li><span><strong>Data Limite:</strong> 16/09/2025</span>
         </ul>
         <br>
         <h3>Objetivos&nbsp;&nbsp;&nbsp;<button id="btnVermaisObjetivos">Ver mais</button></h3><br>
         <ul>
-          <li><span><strong>Nome:</strong> Comprar um carro </span> 
-          <li><span><strong>Valor do Objetivo:</strong> 150.000R$</span> 
-          <li><span><strong>Valor Guardado:</strong> 32.500R$ </span> 
-          <li><span><strong>Data Limite:</strong> 24/04/2030</span> 
+          <li><span><strong>Nome:</strong> Comprar um carro </span>
+          <li><span><strong>Valor do Objetivo:</strong> 150.000R$</span>
+          <li><span><strong>Valor Guardado:</strong> 32.500R$ </span>
+          <li><span><strong>Data Limite:</strong> 24/04/2030</span>
         </ul>
       </div>
 
     </div>
-    <div class="future-box"> 
+    <div class="future-box">
       <h3 style="padding-top: 5px;">Lançamentos Futuros</h3>
       <ul>
           {% if lancamentos_futuros|length > 0 %}
@@ -124,114 +125,109 @@
       <button type="button" class="tab active" data-tipo="saida">Despesa</button>
       <button type="button" class="tab" data-tipo="entrada">Receita</button>
     </div>
-    
+
     <h2>Adicionar Transação 💲</h2><br>
     <p>Aqui você irá adicionar uma transação, seja ela uma receita ou despesa para auxiliarmos no gerenciamento financeiro da sua conta! <strong>Lembre-se</strong>, é importante manter as transações atualizadas para uma maior precisão de decisões. ⚠️</p><br>
     <hr>
     <br>
-    <form id="formTransacao">
-      
-      
-      <div id="camposDespesa">
-        <label>Valor gasto:</label><br>
-        <input type="number" name="valor" step="0.01" required><br>
+    <form id="formTransacao" method="POST">
+        {% csrf_token %}
+        <input type="hidden" name="tipoform" value="transacao">
 
-        <label>Categoria:</label><br>
-        <select name="categoria" required>
-           <option value="alimentacao">Alimentação </option>
-           <option value="transporte">Transporte </option>
-           <option value="educacao">Educação </option>
-           <option value="moradia">Moradia </option>
-           <option value="despesasPessoais">Despesas Pessoais </option>
-           <option value="saude">Saúde </option>
-           <option value="impostosTarifas">Impostos e Tarifas </option>
-           <option value="outros">Outros</option>
-        </select>
+        <div id="camposDespesa">
+            <label>Valor gasto:</label><br>
+            <input type="number" name="valor_despesa" step="0.01" required><br>
 
-    
+            <label>Categoria:</label><br>
+            <select name="categoria_despesa" required>
+                <option value="alimentacao">Alimentação </option>
+                <option value="transporte">Transporte </option>
+                <option value="educacao">Educação </option>
+                <option value="moradia">Moradia </option>
+                <option value="despesasPessoais">Despesas Pessoais </option>
+                <option value="saude">Saúde </option>
+                <option value="impostosTarifas">Impostos e Tarifas </option>
+                <option value="outros">Outros</option>
+            </select>
 
-        <label>Condição do pagamento:</label><br>
-        <select id="condicaoPagamento">
-          <option value="avista">À vista</option>
-          <option value="parcelado">Parcelado</option>
-        </select><br>
+            <label>Condição do pagamento:</label><br>
+            <select id="condicaoPagamento" name="condicao_despesa">
+                <option value="avista">À vista</option>
+                <option value="parcelado">Parcelado</option>
+            </select><br>
+            <div id="campoParcelas" style="display: none;">
+                <label>Quantidade de parcelas:</label><br>
+                <input type="number" name="parcelas_despesa" min="1"><br>
+            </div>
 
-        <div id="campoParcelas" style="display: none;">
-          <label>Quantidade de parcelas:</label><br>
-          <input type="number" name="parcelas" min="1"><br>
-        </div>
+            <label>Data da Transação:</label><br>
+            <input type="date" name="data_despesa" required><br>
 
-        <label>Data da Transação:</label><br>
-        <input type="date" name="data" required><br>
-
-        <label>Descrição:</label><br>
-        <input type="text" name="descricao" required><br>
+            <label>Descrição:</label><br>
+            <input type="text" name="descricao_despesa"><br>
         <!-- ADICIONADO 16/05/2025   1-->
-        <div class="radio-group">
-          <label>Você já realizou o pagamento dessa despesa?</label>
-
-            <div class="radio-option">
-              <input type="radio" name="pagamentoRE" id="pagamentoSIM" required>
-              <label for="pagamentoSIM">Sim, já paguei essa despesa.</label>
-            </div>
-
-            <div class="radio-option">
-              <input type="radio" name="pagamentoRE" id="pagamentoNAO" required>
-              <label for="pagamentoNAO">Não, não paguei essa despesa.</label>
-            </div>
-        </div><br>
+            <div class="radio-group">
+                <label>Você já realizou o pagamento dessa despesa?</label>
+                <div class="radio-option">
+                    <input type="radio" name="pagamentoRE_despesa" id="pagamentoSIM" required>
+                    <label for="pagamentoSIM">Sim, já paguei essa despesa.</label>
+                </div>
+                <div class="radio-option">
+                    <input type="radio" name="pagamentoRE_despesa" id="pagamentoNAO" required>
+                    <label for="pagamentoNAO">Não, não paguei essa despesa.</label>
+                </div>
+            </div><br>
         <!-------------------------   1-->
-      
-      </div>
-      <div id="camposReceita" style="display: none;">
-        <label>Valor ganho:</label><br>
-        <input type="number" name="valor" step="0.01" required><br>
 
-        
-
-        <label>Categoria:</label><br>
-        <select name="categoria" required>
-          <option value="salario">Salário </option>
-          <option value="aposentadoria">Aposentadoria </option>
-          <option value="bolsaEstudos">Bolsa de Estudos </option>
-          <option value="aluguel">Aluguel recebido </option>
-          <option value="freelance">Freelance </option>
-          <option value="vendaProdutos">Venda de Produtos </option>
-          <option value="comissoes">Comissão </option>
-          <option value="premios">Prêmios </option>
-          <option value="investimentos">Rendimento de investimentos </option>
-          <option value="presente">Presente </option>
-          <option value="doacao">Doação </option>
-          <option value="heranca">Herança </option>
-          <option value="outros">Outros</option>
-       </select>
+        </div>
+        <div id="camposReceita" style="display: none;">
+            <label>Valor ganho:</label><br>
+            <input type="number" name="valor_receita" step="0.01" required><br>
 
 
-        <label>Data:</label><br>
-        <input type="date" name="data" required><br>
+            <label>Categoria:</label><br>
+            <select name="categoria_receita" required>
+                <option value="salario">Salário </option>
+                <option value="aposentadoria">Aposentadoria </option>
+                <option value="bolsaEstudos">Bolsa de Estudos </option>
+                <option value="aluguel">Aluguel recebido </option>
+                <option value="freelance">Freelance </option>
+                <option value="vendaProdutos">Venda de Produtos </option>
+                <option value="comissoes">Comissão </option>
+                <option value="premios">Prêmios </option>
+                <option value="investimentos">Rendimento de investimentos </option>
+                <option value="presente">Presente </option>
+                <option value="doacao">Doação </option>
+                <option value="heranca">Herança </option>
+                <option value="outros">Outros</option>
+            </select>
 
-        <label>Descrição:</label><br>
-        <input type="text" name="descricao" required><br>
+
+            <label>Data:</label><br>
+            <input type="date" name="data_receita" required><br>
+
+            <label>Descrição:</label><br>
+            <input type="text" name="descricao_receita" required><br>
          <!-- ADICIONADO 16/05/2025    2-->
-        <div class="radio-group">
-          <label>Você já recebeu essa receita?</label>
+            <div class="radio-group">
+                <label>Você já recebeu essa receita?</label>
 
-            <div class="radio-option">
-              <input type="radio" name="pagamentoRE" id="pagamentoSIM" required>
-              <label for="pagamentoSIM">Sim, já recebi essa receita.</label>
-            </div>
+                <div class="radio-option">
+                    <input type="radio" name="pagamentoRE_receita" id="pagamentoSIM" required>
+                    <label for="pagamentoSIM">Sim, já recebi essa receita.</label>
+                </div>
 
-            <div class="radio-option">
-              <input type="radio" name="pagamentoRE" id="pagamentoNAO" required>
-              <label for="pagamentoNAO">Não, não recebi essa receita ainda.</label>
-            </div>
-        </div><br>
+                <div class="radio-option">
+                    <input type="radio" name="pagamentoRE_receita" id="pagamentoNAO" required>
+                    <label for="pagamentoNAO">Não, não recebi essa receita ainda.</label>
+                    </div>
+
+            </div><br>
         <!-------------------------   2-->
-      </div>
-      <button type="submit" class="btn-salvar">Salvar</button>
-      <button type="button" onclick="fecharModal()" class="btn-cancelar">Cancelar</button>
-      <br>
-
+        </div>
+        <button type="submit" class="btn-salvar">Salvar</button>
+        <button type="button" onclick="fecharModal()" class="btn-cancelar">Cancelar</button>
+        <br>
     </form>
   </div>
 </div>
@@ -252,14 +248,14 @@
       </select>
       <p>Categoria da meta:</p>
       <select name="categoria" required>
-           <option value="alimentacao">Alimentação </option>
-           <option value="transporte">Transporte </option>
-           <option value="educacao">Educação </option>
-           <option value="moradia">Moradia </option>
-           <option value="despesasPessoais">Despesas Pessoais </option>
-           <option value="saude">Saúde </option>
-           <option value="impostosTarifas">Impostos e Tarifas </option>
-           <option value="salario">Salário </option>
+          <option value="alimentacao">Alimentação </option>
+          <option value="transporte">Transporte </option>
+          <option value="educacao">Educação </option>
+          <option value="moradia">Moradia </option>
+          <option value="despesasPessoais">Despesas Pessoais </option>
+          <option value="saude">Saúde </option>
+          <option value="impostosTarifas">Impostos e Tarifas </option>
+          <option value="salario">Salário </option>
           <option value="aposentadoria">Aposentadoria </option>
           <option value="bolsaEstudos">Bolsa de Estudos </option>
           <option value="aluguel">Aluguel recebido </option>
@@ -298,13 +294,13 @@
     <form id="formObjetivo">
       <p>Título do Objetivo:</p>
       <input type="text" name="tituloObjetivo" required />
-      
+
       <p>Valor que deseja guardar:</p>
       <input type="number" step="0.01" name="valorDesejado" min="0" required />
-      
+
       <p>Valor já guardado:</p>
       <input type="number" step="0.01" name="valorGuardado" min="0" required />
-      
+
       <p>Data final do Objetivo:</p>
       <input type="date" name="anoFinal"  required />
 
@@ -316,6 +312,6 @@
   </div>
 </div>
 <!------------------------- 3 -->
-<script src="{% static 'core/js/script.js' %}"></script>
+<script src="{% static 'core/js/script.js' %}" defer></script>
 </body>
 </html>

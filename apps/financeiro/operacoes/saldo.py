@@ -13,7 +13,7 @@ from apps.financeiro.models import ParcelasTransacao, Categoria
 from apps.financeiro.models import HistoricoSaldo
 
 from datetime import date
-from decimal import Decimal
+from decimal import Decimal, ROUND_DOWN
 
 
 
@@ -42,6 +42,7 @@ class Historico:
 
             if not intervalo.exists():
                 data_insercao_mais_recente.valor = data_novo_registro.valor
+                HistoricoSaldo.criarTupla(user=self.user, data=data_novo_registro.valor, saldo=insercao_mais_recente.saldo)
                 continue
 
             novo_valor = ValorTransacao(insercao_mais_recente.saldo)
@@ -54,7 +55,6 @@ class Historico:
 
             HistoricoSaldo.criarTupla(self.user, data_novo_registro.valor, novo_valor.valor)
             data_insercao_mais_recente.valor = data_novo_registro.valor
-
 
     def corrigirValoresHistorico(self
                                  , data_correcao_historico: date
@@ -82,7 +82,7 @@ class Historico:
             return
 
         while data.valor < data_insercao_mais_antiga.valor:
-            HistoricoSaldo.criarTupla(user=self, saldo=Decimal('0.0'), data=data)
+            HistoricoSaldo.criarTupla(user=self.user, saldo=Decimal('0.0'), data=data)
             data = data.incrementarMes(data.valor)
 
         self.user.operarSaldoAtual(valor=parcela.valor, tipo=parcela.transacao_fk.tipo, inversor=True)
@@ -92,96 +92,6 @@ class Historico:
                                     , inversor=False
         )
 
-    def pegarSaldoMes(self,mes:int, ano:int) -> list:
-        mes, ano = abs(mes), abs(ano)
-        data = Data.inicializar(dia=1,mes=mes, ano=ano)
-        proxima_data = data.incrementarMes(data.valor)
-        dados = []
-
-        intervalo_parcelas = ParcelasTransacao.buscaIntervaloHistoricoSaldo(data_inicio=data.valor
-                                                                          , data_fim=proxima_data
-        )
-        quantidade_dias = abs(proxima_data.valor - data.valor).days
-
-        try:
-            historico = HistoricoSaldo.objects.get(user_fk=self.user, data=data)
-        except ObjectDoesNotExist:
-            for dia in range(1,quantidade_dias+1):
-                dados.append(0)
-            return dados
-        except MultipleObjectsReturned:
-            raise IndexError('Ocorreu um erro inesperado com a busca do valores do saldo.')
-
-        saldo = historico.saldo
-
-        for dia in range(1, quantidade_dias+1):
-            parcelas_dia = intervalo_parcelas.filter(data=date(day=dia,month=mes,year=ano))
-            if not parcelas_dia.exists():
-                dados.append(saldo)
-                continue
-            for parcela in parcelas_dia:
-                if parcela.transacao_fk.tipo == 'R':
-                    saldo += parcela.valor
-                elif parcela.transacao_fk.tipo == 'D':
-                    saldo -= parcela.valor
-
-            dados.append(saldo)
-        return dados
-
-    def pegarSaldoAno(self,ano: int) -> list:
-        ano = abs(ano)
-        dados = []
-        for mes in range(1,13):
-            dados.extend(self.pegarSaldoMes(mes=mes,ano=ano))
-        return dados
-
-    def pegarGanhosMes(self,mes:int, ano:int) -> str:
-        mes, ano = abs(mes), abs(ano)
-        ganhos = ParcelasTransacao.objects.filter(transacao_fk__user_fk= self.user
-                                                , transacao_fk__tipo='R'
-                                                , data__month=mes, data__year=ano).aggregate(total = Sum('valor'))['total']
-        if ganhos is None:
-            return '0.00'
-        return ganhos
-
-    def pegarGastosMes(self,mes:int, ano:int):
-        gastos = ParcelasTransacao.objects.filter(transacao_fk__user_fk= self.user
-                                                , transacao_fk__tipo='D'
-                                                , data__month=mes, data__year=ano).aggregate(total = Sum('valor'))['total']
-        if gastos == None:
-            return '0.00'
-        return gastos
-
-
-
-    def pegarSaldoAtual(self):
-        return self.user.saldoAtual
-
-    def pegarValorCategorias(self, mes:int, ano:int, tipo = 'all') -> dict:
-        if tipo.lower() == 'r':
-            tipo = 'receita'
-        elif tipo.lower() == 'd':
-            tipo = 'despesa'
-        inicio_mes = Data.inicializar(1,mes,ano)
-        inicio_proximo_mes = Data.incrementarMes(inicio_mes.valor)
-        categorias = Categoria.objects.all()
-        parcelas_mes = ParcelasTransacao.objects.filter(transacao_fk__user_fk=self.user
-                                                       , data__gte=inicio_mes.valor
-                                                       , data__lt=inicio_proximo_mes.valor
-                                                       )
-        if tipo.lower() == 'receita':
-            parcelas_mes.filter(transacao_fk__tipo='R')
-            categorias = categorias.filter(tipo='R')
-        elif tipo.lower() == 'despesa':
-            parcelas_mes.filter(transacao_fk__tipo='D')
-            categorias = categorias.filter(tipo='D')
-        dicionario = {}
-
-        for categoria in categorias:
-            valor_total = parcelas_mes.filter(transacao_fk__categoria_fk=categoria).aggregate(total=Sum('valor'))['total']
-            dicionario[categoria.nome] = valor_total
-
-        return dicionario
 
 
 

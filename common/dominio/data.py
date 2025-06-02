@@ -5,6 +5,13 @@ class Data:
     def __init__(self, data: str | date) -> None:
         self.valor = self.__formatarData(data)
 
+
+    @classmethod
+    def variarMes(cls, mes:int , ano:int , quatidade_variacao):
+        data_base = date(1,mes,ano)
+        data = data_base + relativedelta(months=quatidade_variacao)
+        return cls(data)
+
     @classmethod
     def inicializar(cls, dia:int, mes:int, ano:int) :
         dia, mes, ano = abs(dia), abs(mes), abs(ano)

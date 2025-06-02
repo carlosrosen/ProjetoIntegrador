@@ -10,6 +10,7 @@ from django.db.models import Sum
 from common.dominio.data import Data
 from decimal import Decimal
 from datetime import date
+from itertools import chain
 
 
 
@@ -138,3 +139,17 @@ class Meta:
             "descricao": meta.descricao,
             "status": meta.status
         }
+
+class GetMetas:
+    def __init__(self, user):
+        if not isinstance(user, AbstractBaseUser):
+            raise TypeError('Usuario invalido')
+        self.user = cast(CustomUser,user)
+
+    def todosEmOrdem(self):
+        metas = Metas.objects.filter(user_fk=self)
+        ativos = metas.filter(status='A').order_by('data_inicio')
+        ultrapassados = metas.filter(status='U').order_by('data_inicio')
+        nao_atingidos = metas.filter(status='N').order_by('data_inicio')
+        concluidos = metas.filter(status='C').order_by('data_inicio')
+        return list(chain(ativos, ultrapassados, nao_atingidos, concluidos))

@@ -1,51 +1,108 @@
 let modoGrafico = "gastos";
 const ctx = document.getElementById("graficoGastos").getContext("2d");
 
-let categorias_gasto = document.getElementById("categorias_despesa")
-let valores_gasto = document.getElementById("dados_gastos_categoria")
+let div = document.getElementById("grafico_despesa");
 
+if (!div) {
+  console.warn("#grafico_despesa não encontrado.");
+}
 
-const dadosGastos = {
-  labels: categorias_gasto,
+const categorias_gasto = div.dataset.listaCategorias.split(',');
+const valores_gasto = div.dataset.listaValores.split(',');
+
+const cores_gastos = {
+    "Alimentação": "#f39c12"
+  , "Transporte": "#1abc9c"
+  , "Educação": "#3498db"
+  , "Moradia": "#9b59b6"
+  , "Despesas pessoais": "#e74c3c"
+  , "Saúde": "#2ecc71"
+  , "Tarifas": "#34495e"
+  , "Outras despesas": "#95a5a6"
+};
+
+let lista_cores_gastos = [];
+let nome_categorias_gastos = [];
+
+for(let i= 0; i < categorias_gasto.length; i++){
+  let nome = categorias_gasto[i]
+  lista_cores_gastos.push(cores_gastos[nome]);
+  nome_categorias_gastos.push(nome);
+}
+
+let dadosGastos = {
+  labels: nome_categorias_gastos,
   datasets: [{
     label: "Gastos por Categoria",
     data: valores_gasto,
-    backgroundColor: ["#f39c12", "#1abc9c","red","lightBlue"]
+    backgroundColor: lista_cores_gastos
   }]
 };
 
+div = document.getElementById("grafico_receita")
+
+const categorias_ganhos = div.dataset.listaCategorias.split(',');
+const valores_ganhos = div.dataset.listaValores.split(',');
+
+const cores_ganhos = {
+    "Salário": "#1f77b4"
+  , "Aposentadoria": "#ff7f0e"
+  , "Bolsa de estudos": "#2ca02c"
+  , "Aluguel recebido": "#d62728"
+  , "Rendimentos de investimentos": "#9467bd"
+  , "Freelance": "#8c564b"
+  , "Venda de produtos": "#e377c2"
+  , "Comissão": "#7f7f7f"
+  , "Prêmios": "#bcbd22"
+  , "Presente": "#17becf"
+  , "Doação": "#aec7e8"
+  , "Herança": "#ffbb78"
+  , "Outras Receita": "#95a5a6"
+};
+
+
+let lista_cores_ganhos = [];
+let nome_categorias_ganhos = [];
+
+for (let i = 0; i < categorias_ganhos.length; i++){
+  let nome = categorias_ganhos[i];
+  lista_cores_ganhos.push(cores_ganhos[nome]);
+  nome_categorias_ganhos.push(nome);
+}
+
+
 const dadosGanhos = {
-  labels: ["Salário", "Freelancer"],
+  labels: nome_categorias_ganhos,
   datasets: [{
     label: "Ganhos por Categoria",
-    data: [89.00, 12.00],
-    backgroundColor: ["#2ecc71","blue"]
+    data: valores_ganhos,
+    backgroundColor: lista_cores_ganhos
   }]
 };
 
 let meuGrafico = new Chart(ctx, {
-  type: "doughnut",
-  data: dadosGastos,
-  options: {
-    responsive: true,
-    plugins: {
-      legend: { position: 'bottom' }
-    }
-  }
+   type: "doughnut",
+   data: dadosGastos,
+   options: {
+     responsive: true,
+     plugins: {
+       legend: {position: 'bottom'}
+     }
+   }
 });
 
-function alternarGrafico() {
-  if (modoGrafico === "gastos") {
-    meuGrafico.data = dadosGanhos;
-    document.getElementById("btnAlternar").innerText = "Ver Gastos";
-    modoGrafico = "ganhos";
-  } else {
-    meuGrafico.data = dadosGastos;
-    document.getElementById("btnAlternar").innerText = "Ver Ganhos";
-    modoGrafico = "gastos";
+  function alternarGrafico() {
+    if (modoGrafico === "gastos") {
+      meuGrafico.data = dadosGanhos;
+      document.getElementById("btnAlternar").innerText = "Ver Gastos";
+      modoGrafico = "ganhos";
+    } else {
+      meuGrafico.data = dadosGastos;
+      document.getElementById("btnAlternar").innerText = "Ver Ganhos";
+      modoGrafico = "gastos";
+    }
+    meuGrafico.update();
   }
-  meuGrafico.update();
-}
 
 // Modal - abrir e fechar
 function fecharModal() {
@@ -196,6 +253,18 @@ document.getElementById("formObjetivo").addEventListener("submit", function (eve
 });
 
 //---------------------------------------------------------------------------------
+
+function cancelarNavegacaoHash() {
+  history.pushState("", document.title, window.location.pathname + window.location.search);
+  fecharTodosModais();
+}
+document.querySelectorAll(".btn-cancelar").forEach(btn => {
+  btn.addEventListener("click", cancelarNavegacaoHash);
+});
+function fecharTodosModais() {
+  document.querySelectorAll(".modal").forEach(modal => modal.classList.remove("ativo"));
+}
+
 function navegarParaHash(forcadoHash) {
   if (location.hash === forcadoHash) {
     // Força o hashchange manualmente se o hash já for igual

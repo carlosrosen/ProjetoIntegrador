@@ -9,6 +9,8 @@ from apps.objetivos.dominio.tipoobjetivo import TipoObjetivo
 from apps.objetivos.dominio.status import Status
 from common.dominio.data import Data
 
+from itertools import chain
+
 # Estou importando do financeiro a formatação
 
 class OperacoesObjetivo:
@@ -113,21 +115,11 @@ class OperacoesObjetivo:
             raise Exception('Não foi possivel criar a transação objetivo')
 
 class GetObjetivo:
-    def __init__(self, user):
-        if not isinstance(user, AbstractBaseUser):
-            raise TypeError('Usuario invalido')
-        self.user = cast(CustomUser, user)
+    def __init__(self, user_id):
+        self.user = CustomUser.objects.get(id=user_id)
 
-    def infomacoes(self, objetivo_id):
-        objetivo = Objetivos.objects.get(pk=objetivo_id)
-        return {
-            "titulo": objetivo.titulo,
-            "valor_objetivo": objetivo.valor_objetivo,
-            "valor_guardado": objetivo.valor_guardado,
-            "data_inicio": objetivo.data_inicio,
-            "data_fim": objetivo.data_fim,
-            "status": objetivo.status,
-        }
+    def informacoes(self, objetivo_id):
+        return Objetivos.objects.get(pk=objetivo_id)
 
     def progresso(self, objetivo_id):
         objetivo = Objetivos.objects.get(pk=objetivo_id)
@@ -136,6 +128,19 @@ class GetObjetivo:
     def transacoes(self, objetivo_id):
         objetivo = Objetivos.objects.get(pk=objetivo_id)
         return TransacaoObjetivo.objects.filter(objetivo_fk=objetivo)
+
+    def variacao(self, objetivo_id):
+        transacoes = TransacaoObjetivo.objects.filter(objetivo_fk=objetivo_id).order_by('data')
+        ## Fazer depois o gráfico do valor guardado
+        pass
+
+    def todosEmOrdem(self):
+        objetivos = Objetivos.objects.filter(user_fk=self)
+        ativos = objetivos.filter(status='A').order_by('-valor_guardado')
+        pausado = objetivos.filter(status='P').order_by('-valor_guardado')
+        concluidos = objetivos.filter(status='C').order_by('-valor_guardado')
+        return list(chain(ativos, pausado, concluidos))
+
 
 
 
