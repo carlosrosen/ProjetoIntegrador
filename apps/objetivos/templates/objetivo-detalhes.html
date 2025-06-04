@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>U-Balance - Detalhes do Objetivo</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="css/style_dashboard.css" />
+  <link rel="stylesheet" href="css/objetivo-detalhes.css" />
+</head>
+<body>
+  <aside class="sidebar">
+    <h1>U-Balance</h1>
+    <nav>
+      <a href="{% url 'core:dashboard' %}">🏠 Início</a>
+      <a href="#" id="abrirModalTransacao">💲 Adicionar Transação</a>
+      <a href="#" id="abrirModalMeta">🎯 Adicionar Meta</a>
+      <a href="#" id="abrirModalObjetivo">📈 Adicionar Objetivo</a>
+      <a href="{% url 'core:metas:meta' %}">🎯 Metas</a>
+      <a href="{% url 'core:objetivos:menu_objetivos' %}" style="background-color: #f0f0f0; font-weight: 600;">📈 Objetivos</a>
+      <a href="extrato.html">🧾 Extrato</a>
+      <a href="#">📊 Relatórios</a>
+      <a href="#">⚙️ Configurações</a>
+      <a href="#" id="logout">Logout</a>
+    </nav>
+  </aside>
+
+  <main class="content">
+    <div class="objetivo-header">
+      <h1 id="tituloObjetivo">Viagem para Europa</h1>
+      <div class="usuario-info">Usuário: DF</div>
+    </div>
+<div class="acoes-container">
+  <button class="btn-acao btn-deposito" onclick="location.hash = '#deposito'">Deposito</button>
+  <button class="btn-acao btn-resgate" onclick="location.hash = '#resgate'">Resgate</button>
+  <button class="btn-acao btn-apagar" onclick="location.hash = '#apagar'">Apagar</button>
+  <button class="btn-acao btn-editar" onclick="location.hash = '#editar'">
+    <span class="icon-editar" style="color: white;">Editar</span>
+  </button>
+</div>
+    <div class="conteudo-principal">
+      <div class="painel-esquerdo">
+        <div class="historico-container">
+          <h3>Histórico de transações do objetivo</h3>
+          <div class="tabela-container">
+            <table class="tabela-historico">
+              <thead>
+                <tr>
+                  <th>Data</th>
+                  <th>Tipo da operação</th>
+                  <th>Valor</th>
+                </tr>
+              </thead>
+              <tbody id="historicoTransacoes">
+                <tr>
+                  <td>15/12/2024</td>
+                  <td>Depósito</td>
+                  <td class="valor-positivo">+R$ 500,00</td>
+                </tr>
+                <tr>
+                  <td>01/12/2024</td>
+                  <td>Depósito</td>
+                  <td class="valor-positivo">+R$ 1.000,00</td>
+                </tr>
+                <tr>
+                  <td>15/11/2024</td>
+                  <td>Depósito</td>
+                  <td class="valor-positivo">+R$ 800,00</td>
+                </tr>
+                <tr>
+                  <td>01/11/2024</td>
+                  <td>Depósito</td>
+                  <td class="valor-positivo">+R$ 700,00</td>
+                </tr>
+                <tr>
+                  <td>20/10/2024</td>
+                  <td>Resgate</td>
+                  <td class="valor-negativo">-R$ 200,00</td>
+                </tr>
+                <tr>
+                  <td>15/10/2024</td>
+                  <td>Depósito</td>
+                  <td class="valor-positivo">+R$ 600,00</td>
+                </tr>
+                <tr>
+                  <td>01/10/2024</td>
+                  <td>Depósito</td>
+                  <td class="valor-positivo">+R$ 500,00</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="painel-direito">
+        <div class="grafico-container">
+          <h3>Gráfico da variação do saldo do objetivo</h3>
+          <div class="grafico-area">
+            <canvas id="graficoVariacao"></canvas>
+          </div>
+        </div>
+
+        <div class="informacoes-container">
+          <h3>Informações do objetivo</h3>
+          <div class="info-grid">
+            <div class="info-item">
+              <span class="info-label">Valor guardado:</span>
+              <span class="info-valor valor-guardado">R$ 4.000,00</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Valor objetivo:</span>
+              <span class="info-valor">R$ 10.000,00</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Status:</span>
+              <span class="info-valor status-ativo">Ativo</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Progresso:</span>
+              <span class="info-valor">40%</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Data limite:</span>
+              <span class="info-valor">31/12/2025</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+<div id="modalDeposito" class="modal">
+  <div class="modal-content">
+    <h2>Fazer Dep sito</h2>
+    <form id="formDeposito">
+      <label for="valorDeposito">Valor a depositar:</label>
+      <input type="number" name="valorDeposito" step="0.01" required>
+      <div style="text-align:right;">
+        <button type="submit" class="btn-salvar">Confirmar</button>
+        <button type="button" class="btn-cancelar" onclick="fecharModalHash()">Cancelar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal Resgate -->
+<div id="modalResgate" class="modal">
+  <div class="modal-content">
+    <h2>Fazer Resgate</h2>
+    <form id="formResgate">
+      <label for="valorResgate">Valor a resgatar:</label>
+      <input type="number" name="valorResgate" step="0.01" required>
+      <div style="text-align:right;">
+        <button type="submit" class="btn-salvar">Confirmar</button>
+        <button type="button" class="btn-cancelar" onclick="fecharModalHash()">Cancelar</button>
+      </div>
+    </form>
+  </div>
+</div>
+<div id="modalEditar" class="modal">
+  <div class="modal-content">
+    <h2>Editar Objetivo</h2>
+    <form id="formEditar">
+      <label for="novoTitulo">Novo T tulo:</label>
+      <input type="text" name="novoTitulo" required>
+
+      <label for="novoValor">Novo Valor do Objetivo:</label>
+      <input type="number" name="novoValor" step="0.01" required>
+
+      <label for="novaData">Nova Data Final:</label>
+      <input type="date" name="novaData" required>
+
+      <div style="text-align:right;">
+        <button type="submit" class="btn-salvar">Salvar</button>
+        <button type="button" class="btn-cancelar" onclick="fecharModalHash()">Cancelar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal Apagar Objetivo -->
+<div id="modalApagar" class="modal">
+  <div class="modal-content">
+    <h2>Apagar Objetivo</h2>
+    <p>Tem certeza que deseja apagar este objetivo? Esta a  o n o pode ser desfeita.</p>
+    <div style="text-align:right;">
+      <button class="btn-salvar" onclick="confirmarApagarObjetivo()">Confirmar</button>
+      <button class="btn-cancelar" onclick="fecharModalHash()">Cancelar</button>
+    </div>
+  </div>
+</div>
+  <script src="{% static 'objetivos/js/scripts.js' %}" defer></script>
+</body>
+</html>

@@ -36,14 +36,13 @@ class OperacoesTransacao:
             )
             try:
                 self.__criarParcelas(transacao=transacao
-                                     , data= data.valor
-                                     , valor= valor.valor
-                                     , quantidade_parcelas= quantidade_parcelas.valorDecimal
+                                     , data= data
+                                     , valor= valor
+                                     , quantidade_parcelas= quantidade_parcelas
                                      , status_pago= pago.status
-                                     , tipo= tipo.valor
                 )
             except Exception as e:
-                raise Exception('Falha inesperada ao criar Transação')
+                raise Exception(e)
 
     def __criarParcelas(self
                         , transacao: Transacao
@@ -51,18 +50,17 @@ class OperacoesTransacao:
                         , data: Data
                         , quantidade_parcelas: QuantidadeParcelas
                         , status_pago: bool
-                        , tipo: str
     ):
         valor_parcela = valor.valorParcela(quantidade_parcelas= quantidade_parcelas.valorDecimal)
 
-        historico = Historico(self.user)
+        historico = Historico(self.user.id)
         for i in range(quantidade_parcelas.valor):
             try:
                 data_parcela = Data(data.proximoMes(quantidade_meses=i))
 
                 parcela = ParcelasTransacao.objects.create(transacao_fk = transacao
                                                          , data = data_parcela.valor
-                                                         , valor = abs(valor_parcela.valor)
+                                                         , valor = abs(valor_parcela)
                                                          , ordem_parcela = i + 1
                                                          , pago = status_pago
                 )
@@ -70,16 +68,16 @@ class OperacoesTransacao:
                     historico.inicializarTuplasParaParcelasAntigas(parcela=parcela)
                 else:
                     historico.corrigirValoresHistorico(data_correcao_historico= data_parcela.valor
-                                                 , valor_correcao= valor_parcela.valor
+                                                 , valor_correcao= valor_parcela
                                                  , inversor=False
                     )
                     if status_pago and data.valor <= date.today():
-                        self.user.operarSaldoAtual(valor_parcela.valor, transacao.tipo)
+                        self.user.operarSaldoAtual(valor_parcela, transacao.tipo)
 
 
             except Exception as e:
                 transacao.delete()
-                raise Exception(f'Erro ao criar o parcela')
+                raise Exception(f'Erro ao criar o parcela {e}')
 
 
     def editarUmaParcela(self

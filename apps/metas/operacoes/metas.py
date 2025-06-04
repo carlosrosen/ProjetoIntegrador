@@ -36,7 +36,7 @@ class Meta:
         if data_fim < data_inicio:
             return "A data final não pode ser anterior à data inicial."
         if valor <= 0:
-            return "Valor inserido menor que zero"
+            return "Valor inserido menor ou igual a zero"
 
         Metas.objects.create(
             user_fk=self.user,
@@ -111,24 +111,6 @@ class Meta:
         except Exception:
             raise Exception('Erro inesperado ao atualizar metas')
 
-
-    def ProgressoMeta(self, meta: Metas):
-
-        valor_acumulado = ParcelasTransacao.objects.filter(
-            transacao_fk__user_fk=self.user,
-            categoria_fk__nome=meta.categoria_fk,
-            data__gte=meta.data_inicio,
-            data__lte=meta.data_fim,
-            pago=True,
-        ).aggregate(valor_total=Sum('valor'))['valor_acumulado']
-
-        if meta.valor == Decimal('0.00'):
-            percentual = Decimal('100.00')
-        else:
-            percentual = (valor_acumulado / meta.valor) * 100
-
-        return [round(percentual, 2)]
-
     def metasEmDict(self, meta: Metas):
         return {
             "categoria": meta.categoria_fk.nome,
@@ -142,12 +124,10 @@ class Meta:
 
 class GetMetas:
     def __init__(self, user):
-        if not isinstance(user, AbstractBaseUser):
-            raise TypeError('Usuario invalido')
-        self.user = cast(CustomUser,user)
+        self.user = CustomUser.objects.get(id=user)
 
-    def todosEmOrdem(self):
-        metas = Metas.objects.filter(user_fk=self)
+    def todosEmOrdem(self) -> list:
+        metas = Metas.objects.filter(user_fk=self.user)
         ativos = metas.filter(status='A').order_by('data_inicio')
         ultrapassados = metas.filter(status='U').order_by('data_inicio')
         nao_atingidos = metas.filter(status='N').order_by('data_inicio')

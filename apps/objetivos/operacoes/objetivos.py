@@ -4,6 +4,8 @@ from typing import cast
 
 from apps.objetivos.models import Objetivos, TransacaoObjetivo
 
+from django.db.models import F, ExpressionWrapper, DecimalField
+
 from apps.objetivos.dominio.valorobjetivo import ValorObjetivo
 from apps.objetivos.dominio.tipoobjetivo import TipoObjetivo
 from apps.objetivos.dominio.status import Status
@@ -29,6 +31,7 @@ class OperacoesObjetivo:
 
         if valor_guardado.valor > valor_objetivo.valor:
             return 'Valor que já está guardado excede o valor do objetivo'
+
         elif valor_guardado.valor == valor_objetivo.valor:
             status.valor = 'C'
 
@@ -68,9 +71,8 @@ class OperacoesObjetivo:
     def deletar(self, objetivo: Objetivos):
         objetivo.delete()
 
-    def criarTransacao(self
+    def deposito(self
                      ,Objetivo: Objetivos
-                     ,Tipo: TipoObjetivo
                      ,Valor: ValorObjetivo
                      ,Data: Data
                      ):
@@ -85,26 +87,54 @@ class OperacoesObjetivo:
         # O valor que falta para atingir o objetivo
         valor_limite = ValorObjetivo.valorLimite(valor_objetivo, valor_guardado)
 
-        # Passa pelas operações dependendo do seu tipo
-        if Tipo.valor == 'D':
-            if Objetivo.status == 'C':
-                return 'Objetivo já está concluido'
-            if Valor.valor > valor_limite:
-                return'Excede o objetivo estabelecido'
-            if Valor.valor == valor_limite:
-                Objetivo.status = 'C'
-            Objetivo.valor_guardado += Valor.valor
+        if Objetivo.status == 'C':
+            return 'Objetivo já está concluido'
 
-        elif Tipo.valor == 'R':
-            if Valor.valor > valor_guardado:
-                return 'Valor informado para resgate excede o valor que está guardado'
-            if Objetivo.status == 'C':
-                Objetivo.status = 'A'
-            Objetivo.valor_guardado -= Valor.valor
+        if Valor.valor > valor_limite:
+            return 'Excede o objetivo estabelecido'
+        elif Valor.valor == valor_limite:
+            Objetivo.status = 'C'
 
-        # Criação do registro das operações acima
+        # Fazendo a soma do valor
+        Objetivo.valor_guardado += Valor.valor
+
+        # Criação do registro de deposito
         TransacaoObjetivo.objects.create(objetivo_fk=Objetivo
-                                             ,tipo=Tipo.valor
+                                             ,tipo= 'D'
+                                             ,valor=Valor.valor
+                                             ,data=Data
+        )
+
+        try:
+            Objetivo.save()
+        except Exception as e:
+            raise Exception('Não foi possivel criar a transação objetivo')
+
+    def resgate(self
+                     ,Objetivo: Objetivos
+                     ,Valor: ValorObjetivo
+                     ,Data: Data
+                     ):
+
+        # Não pode prosseguir caso o objetivo esteja pausado
+        if Objetivo.status == 'P':
+            return 'Objetivo Pausado'
+
+        if Valor.valor > Objetivo.valor_guardado:
+            return 'Valor informado para resgate excede o valor que está guardado'
+
+        if Objetivo.status == 'C':
+            if(Data > Objetivo.data_fim):
+                Objetivo.status = 'T'
+            else:
+                Objetivo.status = 'A'
+
+        # Fazendo a subtração do valor
+        Objetivo.valor_guardado -= Valor.valor
+
+        # Criação do registro de resgate
+        TransacaoObjetivo.objects.create(objetivo_fk=Objetivo
+                                             ,tipo='R'
                                              ,valor=Valor.valor
                                              ,data=Data
         )
@@ -119,27 +149,33 @@ class GetObjetivo:
         self.user = CustomUser.objects.get(id=user_id)
 
     def informacoes(self, objetivo_id):
-        return Objetivos.objects.get(pk=objetivo_id)
-
-    def progresso(self, objetivo_id):
-        objetivo = Objetivos.objects.get(pk=objetivo_id)
-        return round((objetivo.valor_guardado / objetivo.valor_objetivo) * 100, 2)
+        return Objetivos.objects.get(user_fk=self.user, id=objetivo_id)
 
     def transacoes(self, objetivo_id):
-        objetivo = Objetivos.objects.get(pk=objetivo_id)
-        return TransacaoObjetivo.objects.filter(objetivo_fk=objetivo)
+        objetivo = Objetivos.objects.get(user_fk=self.user ,id=objetivo_id)
+        return TransacaoObjetivo.objects.filter(user_fk=self.user ,objetivo_fk=objetivo)
 
     def variacao(self, objetivo_id):
-        transacoes = TransacaoObjetivo.objects.filter(objetivo_fk=objetivo_id).order_by('data')
+        transacoes = TransacaoObjetivo.objects.filter(user_fk=self.user ,objetivo_fk=objetivo_id).order_by('data')
         ## Fazer depois o gráfico do valor guardado
         pass
 
-    def todosEmOrdem(self):
-        objetivos = Objetivos.objects.filter(user_fk=self)
-        ativos = objetivos.filter(status='A').order_by('-valor_guardado')
-        pausado = objetivos.filter(status='P').order_by('-valor_guardado')
-        concluidos = objetivos.filter(status='C').order_by('-valor_guardado')
-        return list(chain(ativos, pausado, concluidos))
+    def todosEmOrdem(self) -> list:
+        objetivos = Objetivos.objects.filter(user_fk=self.user)
+
+        # Aplicar anotação e ordenar por menor diferença
+        ativos = objetivos.filter(status='A')
+        pausado = objetivos.filter(status='P')
+        atrasados = objetivos.filter(status='T')
+        concluidos = objetivos.filter(status='C')
+
+        #A função sorted utiliza timSort que é uma ordenação hibrida baseada em Heap sort e InsertionSort
+        ativos = sorted(ativos, key=lambda objetivo: abs(objetivo.valor_objetivo - objetivo.valor_guardado))
+        pausado = sorted(pausado, key=lambda objetivo: abs(objetivo.valor_objetivo - objetivo.valor_guardado))
+        atrasados = sorted(atrasados, key=lambda objetivo: abs(objetivo.valor_objetivo - objetivo.valor_guardado))
+        concluidos = sorted(concluidos, key=lambda objetivo: abs(objetivo.valor_objetivo - objetivo.valor_guardado))
+
+        return list(chain( ativos, atrasados, pausado, concluidos))
 
 
 

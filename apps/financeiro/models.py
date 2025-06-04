@@ -22,7 +22,6 @@ class Categoria(models.Model):
 
     @staticmethod
     def verificacaoNomesCategoria(nome:str):
-        nome = nome[0].upper() + nome[1:].lower()
         encontrou = Categoria.objects.filter(nome=nome)
         if not encontrou:
             raise ValueError('Categoria não encontrada')
@@ -63,7 +62,7 @@ class ParcelasTransacao(models.Model):
     pago = models.BooleanField(default=True)
 
     @staticmethod
-    def buscaEntreDatas(data_inicio: date, data_fim: date) -> list:
+    def buscaEntreDatas(data_inicio: date, data_fim: date):
         if data_inicio > data_fim:
             data_inicio, data_fim = data_fim, data_inicio
         return ParcelasTransacao.objects.filter(data__gt=data_inicio, data__lt=data_fim)

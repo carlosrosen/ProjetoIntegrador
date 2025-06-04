@@ -1,7 +1,10 @@
 from django.db import models
+from django.db.models import Sum
 from django.utils import timezone
 from django.conf import settings
-from apps.financeiro.models import Categoria
+from apps.financeiro.models import Categoria, Transacao, ParcelasTransacao
+
+from decimal import Decimal
 
 # Tabela para metas
 class Metas(models.Model):
@@ -27,7 +30,45 @@ class Metas(models.Model):
     data_fim = models.DateField(null=False)
     descricao = models.CharField(max_length=100, null=True)
 
+    def valorAcumulado(self):
+        valor_acumulado = ParcelasTransacao.objects.filter(
+            transacao_fk__user_fk=self.user_fk,
+            transacao_fk__categoria_fk=self.categoria_fk,
+            data__gte=self.data_inicio,
+            data__lte=self.data_fim,
+            pago=True,
+        ).aggregate(total=Sum('valor'))['total']
+        return valor_acumulado or 0
+
+    def porcentagem(self):
+        valor_acumulado = self.valorAcumulado()
+        return round((valor_acumulado / self.valor) * 100, 2)
+
+    # Funções de formatação (Poderiamos já ter substituido o nome dos status direto em vez de usar só letras [Ai não teria necessidade de ficar formatando)
+
+    def status_formatado(self):
+        formatacao = {
+            'A': 'Ativo',
+            'U': 'Ultrapassado',
+            'N': 'Não atingido',
+            'C': 'Concluído'
+        }
+        return formatacao[self.status]
+
+    def desempenho(self):
+        formatacao = {
+            'MAX': 'Gasto atual',
+            'MIN': 'Economizado'
+        }
+        return formatacao[self.tipo]
+
+    def tipagem(self):
+        formatacao = {
+            'MAX': 'Limite máximo',
+            'MIN': 'Minimo desejado'
+        }
+        return formatacao[self.tipo]
+
     # Inicializa o nome de cada objeto/atributos
     def __str__(self):
-        return f"{self.user_fk.id} - {self.nome}"
-
+        return f"user: {self.user_fk.id} - categoria:{self.categoria_fk.nome} - {self.status_formatado()}"

@@ -5,7 +5,7 @@ from . import views
 app_name = 'metas'
 
 urlpatterns = [
-    path('meta/', views.criarMeta, name='meta'),
+    path('', views.menuMetas, name='meta'),
     path('editar-meta/', views.editarMeta, name='editar-meta'),
     path('deletar-meta/', views.deletarMeta, name='deletar-meta/'),
 ]

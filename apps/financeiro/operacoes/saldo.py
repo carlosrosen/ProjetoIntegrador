@@ -73,7 +73,7 @@ class Historico:
 
     def inicializarTuplasParaParcelasAntigas(self,parcela: ParcelasTransacao) -> None:
         data_transacao = Data(parcela.data)
-        mes, ano = data_transacao.valor.mes, data_transacao.valor.ano
+        mes, ano = data_transacao.valor.month, data_transacao.valor.year
         data = Data.inicializar(dia=1, mes=mes, ano=ano)
         historico = HistoricoSaldo.objects.filter(user_fk=self.user)
         data_insercao_mais_antiga = Data(historico.aggregate(primeira_data=Min('data'))['primeira_data'])

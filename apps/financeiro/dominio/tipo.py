@@ -10,4 +10,4 @@ class Tipo:
         try:
             return self.__opcoesTipo[tipo.lower()]
         except KeyError:
-            raise ValueError(f'Falha na formatação do tipo, tipo invalido')
+            raise ValueError(f'tipo invalido')

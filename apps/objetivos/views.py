@@ -7,10 +7,12 @@ from apps.objetivos.operacoes.objetivos import GetObjetivo
 def menuObjetivos(request):
     if not request.user.is_authenticated:
         return redirect(reverse('login'))
-    objetivos = GetObjetivo.todosEmOrdem(request.user.id)
-    return render(request, 'objetivos.html', objetivos)
+    getterobjetivos = GetObjetivo(request.user.id)
+    objetivos = getterobjetivos.todosEmOrdem()
+    context = {'objetivos': objetivos}
+    return render(request, 'objetivos.html', context)
 
-def criarObj(request):
+def criarObjetivo(request):
     if not request.user.is_authenticated:
         return redirect(reverse('login'))
 

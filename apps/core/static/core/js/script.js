@@ -106,64 +106,56 @@ let meuGrafico = new Chart(ctx, {
 
 // Modal - abrir e fechar
 function fecharModal() {
-  const modal = document.getElementById("modalTransacao");
-  modal.classList.remove("ativo");
+    const modal = document.getElementById("modalTransacao");
+    modal.classList.remove("ativo");
+    cancelarNavegacaoHash()
 }
 
 // Lista de transações
-let transacoes = [];
+let transacao = [];
 
-document.getElementById("formTransacao").addEventListener("submit", function(event) {
-  event.preventDefault();
+document.getElementById("formTransacaoReceita").addEventListener("submit", function(event) {
   const formData = new FormData(event.target);
-  const descricao = formData.get("descricao");
-  const valor = parseFloat(formData.get("valor"));
-  const tipo = formData.get("tipo");
 
-  if (!descricao || isNaN(valor)) {
+  let valor = formData.get("valor_receita");
+  let data = formData.get("data_receita");;
+  let descricao = formData.get("descricao_receita");
+  let pago = formData.get("pagamentoRE_receita");
+
+
+  if (valor == null || data == null || pago == null){
     alert("Preencha os campos corretamente.");
-    return;
+    event.preventDefault();
+ // Cancela a URL hash
   }
-
-  // Adiciona a transação com o tipo correto (entrada ou saída)
-  transacoes.push({
-    id: Date.now(),
-    descricao,
-    valor,
-    tipo
-  });
-
-  alert(`Transação adicionada:\n${descricao} - R$ ${valor.toFixed(2)} (${tipo})`);
-
-  atualizarSaldo(); // Atualizar saldo após adicionar
-  fecharModal();
-  event.target.reset();
+  cancelarNavegacaoHash();
 });
 
-function atualizarSaldo() {
-  const totalReceitas = transacoes
-    .filter(t => t.tipo === "entrada")
-    .reduce((acc, t) => acc + t.valor, 0);
+document.getElementById("formTransacaoDespesa").addEventListener("submit",function (event){
 
-  const totalDespesas = transacoes
-    .filter(t => t.tipo === "saida")
-    .reduce((acc, t) => acc + t.valor, 0);
+  const formData = new FormData(event.target)
 
-  const saldo = totalReceitas - totalDespesas;
-  const campoSaldo = document.getElementById("saldoTotal");
+  const valor = formData.get("valor_despesa");
+  const data = formData.get("data_despesa");
+  const  descricao = formData.get("descricao_despesa");
+  const  pago = formData.get("pagamentoRE_despesa");
+  const  parcelas = formData.get("parcelas_despesa")
 
-  if (campoSaldo) {
-    campoSaldo.textContent = `R$ ${saldo.toFixed(2)}`;
-    campoSaldo.className = saldo >= 0 ? "verde" : "vermelho";
+  if (valor == null || data == null || pago == null || parcelas == null){
+    alert("Preencha os campos corretamente.");
+    event.preventDefault();
   }
-}
+  cancelarNavegacaoHash();
+});
 
 document.addEventListener("DOMContentLoaded", () => {
   const tabs = document.querySelectorAll(".tab");
   const camposDespesa = document.getElementById("camposDespesa");
   const camposReceita = document.getElementById("camposReceita");
+
   const condicaoPagamento = document.getElementById("condicaoPagamento");
   const campoParcelas = document.getElementById("campoParcelas");
+
   const btnAbrir = document.getElementById("abrirModalTransacao");
   const modal = document.getElementById("modalTransacao");
 
@@ -186,7 +178,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   condicaoPagamento.addEventListener("change", () => {
-    campoParcelas.style.display = condicaoPagamento.value === "parcelado" ? "block" : "none";
+    campoParcelas.style.display = (condicaoPagamento.value === "parcelado") ? "block" : "none";
   });
 
   btnAbrir.addEventListener("click", () => {
@@ -211,7 +203,7 @@ document.getElementById("formMeta").addEventListener("submit", function (event) 
   const formData = new FormData(event.target);
   const nome = formData.get("nomeMeta");
   const tipo = formData.get("tipoMeta");
-  const valor = parseFloat(formData.get("valorMeta"));
+  const valor = formData.get("valorMeta");
   const dataInicio = formData.get("dataInicio");
   const dataFinal = formData.get("dataFinal");
 
@@ -257,12 +249,7 @@ document.getElementById("formObjetivo").addEventListener("submit", function (eve
 function cancelarNavegacaoHash() {
   history.pushState("", document.title, window.location.pathname + window.location.search);
   fecharTodosModais();
-}
-document.querySelectorAll(".btn-cancelar").forEach(btn => {
-  btn.addEventListener("click", cancelarNavegacaoHash);
-});
-function fecharTodosModais() {
-  document.querySelectorAll(".modal").forEach(modal => modal.classList.remove("ativo"));
+  location.reload()
 }
 
 function navegarParaHash(forcadoHash) {
@@ -316,3 +303,12 @@ window.addEventListener("hashchange", abrirModalViaHash);
 
 // Dispara ao carregar a página
 window.addEventListener("DOMContentLoaded", abrirModalViaHash);
+
+window.addEventListener("hashchange", abrirModalViaHash);
+window.addEventListener("DOMContentLoaded", () => {
+  abrirModalViaHash();
+});
+
+function fecharModalEditar() {
+  document.getElementById("modalEditarTransacao")?.classList.remove("ativo");
+}

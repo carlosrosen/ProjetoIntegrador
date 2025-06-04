@@ -1,7 +1,7 @@
 from decimal import Decimal
 
 class QuantidadeParcelas:
-    def __init__(self, quantidade_meses:str):
+    def __init__(self, quantidade_meses:str | int):
         self.__verificacaoQuantidadeParcelas(int(quantidade_meses))
         self.valor = int(quantidade_meses)
         self.valorDecimal = Decimal(self.valor)

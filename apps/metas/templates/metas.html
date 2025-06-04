@@ -1,0 +1,120 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>U-Balance - Metas</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+   <link rel="stylesheet" href="{% static 'core/css/style_dashboard.css' %}" />
+  <link rel="stylesheet" href="{% static 'metas/css/metas.css' %}" />
+</head>
+<body>
+  <aside class="sidebar">
+    <h1>U-Balance</h1>
+    <nav>
+      <a href="{% url 'core:dashboard' %}">🏠 Início</a>
+      <a href="#" id="abrirModalTransacao">💲 Adicionar Transação</a>
+      <a href="#" id="abrirModalMeta">🎯 Adicionar Meta</a>
+      <a href="#" id="abrirModalObjetivo">📈 Adicionar Objetivo</a>
+      <a href="{% url 'core:metas:meta' %}" style="background-color: #f0f0f0; font-weight: 600;">🎯 Metas</a>
+      <a href="{% url 'core:objetivos:menu_objetivos' %}">📈 Objetivos</a>
+      <a href="#">🧾 Extrato</a>
+      <a href="#">📊 Relatórios</a>
+      <a href="#">⚙️ Configurações</a>
+      <a href="#" id="logout">Logout</a>
+    </nav>
+  </aside>
+
+  <main class="content">
+    <div class="metas-header">
+      <h1>Metas</h1>
+      <div class="usuario-info">Usuário: {{ usuario.username }}</div>
+    </div>
+
+    <div class="metas-grid">
+  {% for meta in metas %}
+  <div class="meta-card">
+    <div class="meta-header">
+      <div class="meta-categoria">
+        <span class="categoria-tag categoria-{{ meta.categoria_fk.nome|lower|slugify }}">{{ meta.categoria_fk.nome }}</span>
+      </div>
+      <div class="meta-status status-{{ meta.status_formatado|lower|slugify }}">{{ meta.status_formatado }}</div>
+    </div>
+
+    <div class="meta-content">
+      <h3 class="meta-titulo">{{ meta.titulo }}</h3>
+
+      <div class="meta-info-grid">
+        <div class="info-item">
+          <span class="info-label">Tipo:</span>
+          <span class="info-valor tipo-{{ meta.tipagem|lower|slugify }}">{{ meta.tipagem }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Valor:</span>
+          <span class="info-valor valor-meta">R$ {{ meta.valor|floatformat:2 }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Período:</span>
+          <span class="info-valor">{{ meta.data_inicio|date:"d/m/Y" }} - {{ meta.data_fim|date:"d/m/Y" }}</span>
+        </div>
+      </div>
+
+      <div class="meta-progresso">
+        <div class="progresso-info">
+          <span>{{ meta.desempenho }}: R$ {{ meta.valorAcumulado|floatformat:2 }}</span>
+          <span>{{ meta.porcentagem }}%</span>
+        </div>
+        <div class="progresso-bar">
+          <div class="progresso-fill
+               {% if meta.status_formatado == 'Concluído' %}progresso-concluido
+               {% elif meta.status_formatado == 'Ultrapassado' %}progresso-ultrapassado
+               {% endif %}"
+               style="width: {{ meta.porcentagem|floatformat:0 }}%">
+          </div>
+        </div>
+      </div>
+
+      <div class="meta-descricao">
+        <p>{{ meta.descricao }}</p>
+      </div>
+    </div>
+
+    <button class="btn-editar-meta" onclick="editarMeta('{{ meta.id }}')">
+      Editar Meta
+    </button>
+  </div>
+  {% endfor %}
+</div>
+<div id="modalEditarMeta" class="modal">
+  <div class="modal-content">
+    <h2>Editar Meta</h2>
+    <form id="formEditarMeta">
+      <label for="categoria">Categoria:</label>
+      <input type="text" name="categoria" required>
+
+      <label for="tipo">Tipo:</label>
+      <input type="text" name="tipo" required>
+
+      <label for="valor">Valor:</label>
+      <input type="number" name="valor" step="0.01" required>
+
+      <label for="data_inicio">Data Início:</label>
+      <input type="date" name="data_inicio" required>
+
+      <label for="data_fim">Data Fim:</label>
+      <input type="date" name="data_fim" required>
+
+      <label for="descricao">Descrição:</label>
+      <textarea name="descricao" rows="4" required></textarea>
+
+      <div style="text-align:right;">
+        <button type="submit" class="btn-salvar">Salvar</button>
+        <button type="button" class="btn-cancelar" onclick="fecharModalHash()">Cancelar</button>
+      </div>
+    </form>
+  </div>
+</div>
+  <script src="{% static 'metas/js/script.js' %}" defer></script>
+</body>
+</html>
