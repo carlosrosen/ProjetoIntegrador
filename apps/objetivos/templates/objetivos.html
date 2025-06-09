@@ -26,10 +26,211 @@
     </nav>
   </aside>
 
+  <div id="modalTransacao">
+      <div class="modal-content">
+          <div class="tabs">
+              <button type="button" class="tab active" data-tipo="saida">Despesa</button>
+              <button type="button" class="tab" data-tipo="entrada">Receita</button>
+          </div>
+
+          <h2>Adicionar Transação 💲</h2><br>
+          <p>Aqui você irá adicionar uma transação, seja ela uma receita ou despesa para auxiliarmos no gerenciamento financeiro da sua conta! <strong>Lembre-se</strong>, é importante manter as transações atualizadas para uma maior precisão de decisões. ⚠️</p><br>
+          <hr>
+          <br>
+          <form id="formTransacaoDespesa" method="POST">
+              {% csrf_token %}
+              <label></label>
+              <input type="hidden" name="tipoform" value="transacao_despesa">
+
+              <div id="camposDespesa">
+                  <label>Valor gasto: <br>
+                      <input type="number" name="valor_despesa" step="0.01" required><br>
+                  </label>
+
+                  <label>Categoria:<br>
+                      <select name="categoria_despesa" required>
+                          {% for categoria in todas_categorias_despesa %}
+                              <option value="{{ categoria.nome }}">{{ categoria.nome }}</option>
+                          {% endfor %}
+                      </select>
+                  </label>
+
+                  <label>Condição do pagamento:<br>
+                      <select id="condicaoPagamento" name="condicao_despesa">
+                          <option value="avista">À vista</option>
+                          <option value="parcelado">Parcelado</option>
+                      </select></label><br>
+                  <div id="campoParcelas" style="display: none;">
+                      <label>Quantidade de parcelas:<br>
+                          <input type="number" name="parcelas_despesa" min="1" value="1"><br>
+                      </label>
+                  </div>
+
+                  <label>Data da Transação:<br>
+                  <input type="date" name="data_despesa" required><br>
+                  </label>
+
+                  <label>Descrição:<br>
+                  <input type="text" name="descricao_despesa"><br>
+                  </label>
+                  <!-- ADICIONADO 16/05/2025   1-->
+                  <div class="radio-group">
+                      <label>Você já realizou o pagamento dessa despesa?</label>
+                      <div class="radio-option">
+                          <input type="radio" name="pagamentoRE_despesa" id="pagamentoSIM" value="true" required>
+                          <label for="pagamentoSIM">Sim, já paguei essa despesa.</label>
+                      </div>
+                      <div class="radio-option">
+                          <input type="radio" name="pagamentoRE_despesa" id="pagamentoNAO" value="false" required>
+                          <label for="pagamentoNAO">Não, não paguei essa despesa.</label>
+                      </div>
+                  </div><br>
+                  <button type="submit" class="btn-salvar">Salvar</button>
+                  <button type="button" onclick="fecharModal()" class="btn-cancelar">Cancelar</button>
+              </div>
+          </form>
+          <form id="formTransacaoReceita" method="POST">
+              {% csrf_token %}
+              <input type="hidden" name="tipoform" value="transacao_receita">
+              <div id="camposReceita" style="display: none;">
+                  <label>Valor ganho:<br>
+                      <input type="number" name="valor_receita" step="0.01" value="0.00" min="0.01" required>
+                      <br>
+                  </label>
+
+                  <label>Categoria:<br>
+                  <select name="categoria_receita" required>
+                      {% for categoria in todas_categorias_receita %}
+                    <option value="{{ categoria.nome }}">{{ categoria.nome }}</option>
+                      {% endfor %}
+                  </select>
+                  </label>
+
+                  <label>Data:<br>
+                      <input type="date" name="data_receita" required><br>
+                  </label>
+
+
+                  <label>Descrição:<br>
+                      <input type="text" name="descricao_receita" required><br>
+                  </label>
+
+                  <!-- ADIIONADO 16/05/2025    2-->
+
+                  <div class="radio-group">
+                      <label>Você já recebeu essa receita?</label>
+                      <div class="radio-option">
+                          <input type="radio" name="pagamentoRE_receita" id="pagamentoSIM" value="true" required>
+                          <label for="pagamentoSIM">Sim, já recebi essa receita.</label>
+                      </div>
+                      <div class="radio-option">
+                          <input type="radio" name="pagamentoRE_receita" id="pagamentoNAO" value="false" required>
+                          <label for="pagamentoNAO">Não, não recebi essa receita ainda.</label>
+                      </div>
+                  </div><br>
+                  <!-------------------------   2-->
+                  <button type="submit" class="btn-salvar">Salvar</button>
+                  <button type="button" onclick="fecharModal()" class="btn-cancelar">Cancelar</button>
+              </div>
+              <br>
+          </form>
+      </div>
+  </div>
+  <div id="modalMeta">
+      <div class="modal-content">
+          <h2>Adicionar Meta 🎯</h2><br>
+          Aqui você irá definir uma meta, ela pode ser tratada de duas formas:<br><br>
+          <strong>1° </strong>Você pode defini-la como algo a ser atingido.<strong>(Mínimo Desejado)</strong><br>
+          &nbsp;&nbsp;&nbsp;<strong>Exemplo:</strong>&nbsp;Sobrar pelo menos 1000R$ ao final do mês.<br><br>
+          <strong>2°</strong> Você pode defini-la como um limite a não ser ultrapassado.<strong>(Limite Máximo)</strong><br>
+          &nbsp;&nbsp;&nbsp;<strong>Exemplo:</strong>&nbsp;Gastar até 300R$ com internet. <br><br>
+          <hr><br>
+          <form id="formMeta" method="POST">
+              {% csrf_token %}
+              <input type="hidden" name="tipoform" value="meta">
+              <p>Tipo da meta:</p>
+              <label>
+              <select name="tipoMeta" required>
+                  <option value="minDesejado">Mínimo Desejado</option>
+                  <option value="limMaximo">Limite Máximo</option>
+              </select>
+              </label>
+              <p>Categoria da meta:</p>
+              <label>
+              <select name="categoria" required>
+                  <option value="default" disabled selected>---------------</option>
+                  {% for categoria in categorias %}
+                      <option value="{{ categorias.nome }}">{{ categoria.nome }}</option>
+                  {% endfor %}
+              </select>
+              </label>
+              <p>Valor desejado(Atingir/Evitar):</p>
+              <label>
+                  <input type="number" step="0.01" name="valorMeta" required />
+              </label>
+              <p>Data Início:</p>
+              <label>
+                  <input type="date" name="dataInicio"/>
+              </label>
+              <p>Data Final:</p>
+              <label>
+                  <input type="date" name="dataFinal"/>
+              </label>
+              <p>Descrição:</p>
+              <label>
+                  <input type="text" name="descricao"/>
+              </label>
+              <div style="text-align:right;">
+                  <button type="submit" class="btn-salvar">Salvar</button>
+                  <button type="button" class="btn-cancelar" onclick="fecharModalMeta()">Cancelar</button>
+              </div>
+          </form>
+      </div>
+  </div>
+  <!--ADICIONADO 16/05/2025  3 -->
+
+  <div id="modalObjetivo">
+      <div class="modal-content">
+          <h2>Adicionar Objetivo 📈</h2><br>
+          <p>Aqui você irá adicionar um objetivo, diferente da meta, o objetivo se trata de algo focado no longo prazo, sempre relacionado a uma poupança ou investimento para a realização de algo.<br>
+              <br><strong>Exemplo 1: Comprar um carro - 30.000R$</strong><br>
+              <strong>Exemplo 2: Comprar um apartamento - 345.000R$</strong></p><br>
+          <hr><br>
+          <form id="formObjetivo" method="POST">
+              {% csrf_token %}
+              <input type="hidden" name="tipoform" value="objetivo">
+              <p>Título do Objetivo:</p>
+              <label>
+                  <input type="text" name="tituloObjetivo" required />
+              </label>
+
+              <p>Valor que deseja guardar:</p>
+              <label>
+              <input type="number" step="0.01" name="valorDesejado" min="0" required />
+              </label>
+
+              <p>Valor já guardado:</p>
+              <label>
+              <input type="number" step="0.01" name="valorGuardado" min="0" required />
+              </label>
+
+              <p>Data final do Objetivo:</p>
+              <label>
+                  <input type="date" name="anoFinal"  required />
+              </label>
+
+              <div style="text-align:right;">
+                  <button type="submit" class="btn-salvar">Salvar</button>
+                  <button type="button" class="btn-cancelar" onclick="fecharModalObjetivo()">Cancelar</button>
+              </div>
+          </form>
+      </div>
+  </div>
+
   <main class="content">
     <div class="objetivos-header">
       <h1>Objetivos</h1>
-      <div class="usuario-info">Usuário: {{ usuario.nome }}</div>
+      <div class="usuario-info">Usuário: {{ user.username }}</div>
     </div>
     <div class="objetivos-grid">
       {% for objetivo in objetivos %}
@@ -79,6 +280,7 @@
       {% endfor %}
     </div>
   </main>
+  <script src="{% static 'core/js/script.js' %}" defer></script>
   <script>
     document.getElementById('logout').addEventListener('click', function(e) {
       e.preventDefault();

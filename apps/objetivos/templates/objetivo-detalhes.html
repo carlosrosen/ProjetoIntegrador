@@ -20,16 +20,221 @@
       <a href="#" id="abrirModalObjetivo">📈 Adicionar Objetivo</a>
       <a href="{% url 'core:metas:meta' %}">🎯 Metas</a>
       <a href="{% url 'core:objetivos:menu_objetivos' %}" style="background-color: #f0f0f0; font-weight: 600;">📈 Objetivos</a>
-      <a href="#">🧾 Extrato</a>
+      <a href="{% url 'core:menuExtrato' mes=mes ano=ano %}">🧾 Extrato</a>
       <a href="#">📊 Relatórios</a>
       <a href="#">⚙️ Configurações</a>
       <a href="{% url 'usuario:logout' %}" id="logout">Logout</a>
     </nav>
   </aside>
+
+
+  <div id="modalTransacao">
+      <div class="modal-content">
+          <div class="tabs">
+              <button type="button" class="tab active" data-tipo="saida">Despesa</button>
+              <button type="button" class="tab" data-tipo="entrada">Receita</button>
+          </div>
+
+          <h2>Adicionar Transação 💲</h2><br>
+          <p>Aqui você irá adicionar uma transação, seja ela uma receita ou despesa para auxiliarmos no gerenciamento financeiro da sua conta! <strong>Lembre-se</strong>, é importante manter as transações atualizadas para uma maior precisão de decisões. ⚠️</p><br>
+          <hr>
+          <br>
+          <form id="formTransacaoDespesa" method="POST">
+              {% csrf_token %}
+              <label></label>
+              <input type="hidden" name="tipoform" value="transacao_despesa">
+
+              <div id="camposDespesa">
+                  <label>Valor gasto: <br>
+                      <input type="number" name="valor_despesa" step="0.01" required><br>
+                  </label>
+
+                  <label>Categoria:<br>
+                      <select name="categoria_despesa" required>
+                          {% for categoria in todas_categorias_despesa %}
+                              <option value="{{ categoria.nome }}">{{ categoria.nome }}</option>
+                          {% endfor %}
+                      </select>
+                  </label>
+
+                  <label>Condição do pagamento:<br>
+                      <select id="condicaoPagamento" name="condicao_despesa">
+                          <option value="avista">À vista</option>
+                          <option value="parcelado">Parcelado</option>
+                      </select></label><br>
+                  <div id="campoParcelas" style="display: none;">
+                      <label>Quantidade de parcelas:<br>
+                          <input type="number" name="parcelas_despesa" min="1" value="1"><br>
+                      </label>
+                  </div>
+
+                  <label>Data da Transação:<br>
+                  <input type="date" name="data_despesa" required><br>
+                  </label>
+
+                  <label>Descrição:<br>
+                  <input type="text" name="descricao_despesa"><br>
+                  </label>
+                  <!-- ADICIONADO 16/05/2025   1-->
+                  <div class="radio-group">
+                      <label>Você já realizou o pagamento dessa despesa?</label>
+                      <div class="radio-option">
+                          <input type="radio" name="pagamentoRE_despesa" id="pagamentoSIM" value="true" required>
+                          <label for="pagamentoSIM">Sim, já paguei essa despesa.</label>
+                      </div>
+                      <div class="radio-option">
+                          <input type="radio" name="pagamentoRE_despesa" id="pagamentoNAO" value="false" required>
+                          <label for="pagamentoNAO">Não, não paguei essa despesa.</label>
+                      </div>
+                  </div><br>
+                  <button type="submit" class="btn-salvar">Salvar</button>
+                  <button type="button" onclick="fecharModal()" class="btn-cancelar">Cancelar</button>
+              </div>
+          </form>
+          <form id="formTransacaoReceita" method="POST">
+              {% csrf_token %}
+              <input type="hidden" name="tipoform" value="transacao_receita">
+              <div id="camposReceita" style="display: none;">
+                  <label>Valor ganho:<br>
+                      <input type="number" name="valor_receita" step="0.01" value="0.00" min="0.01" required>
+                      <br>
+                  </label>
+
+                  <label>Categoria:<br>
+                  <select name="categoria_receita" required>
+                      {% for categoria in todas_categorias_receita %}
+                    <option value="{{ categoria.nome }}">{{ categoria.nome }}</option>
+                      {% endfor %}
+                  </select>
+                  </label>
+
+                  <label>Data:<br>
+                      <input type="date" name="data_receita" required><br>
+                  </label>
+
+
+                  <label>Descrição:<br>
+                      <input type="text" name="descricao_receita" required><br>
+                  </label>
+
+                  <!-- ADIIONADO 16/05/2025    2-->
+
+                  <div class="radio-group">
+                      <label>Você já recebeu essa receita?</label>
+                      <div class="radio-option">
+                          <input type="radio" name="pagamentoRE_receita" id="pagamentoSIM" value="true" required>
+                          <label for="pagamentoSIM">Sim, já recebi essa receita.</label>
+                      </div>
+                      <div class="radio-option">
+                          <input type="radio" name="pagamentoRE_receita" id="pagamentoNAO" value="false" required>
+                          <label for="pagamentoNAO">Não, não recebi essa receita ainda.</label>
+                      </div>
+                  </div><br>
+                  <!-------------------------   2-->
+                  <button type="submit" class="btn-salvar">Salvar</button>
+                  <button type="button" onclick="fecharModal()" class="btn-cancelar">Cancelar</button>
+              </div>
+              <br>
+          </form>
+      </div>
+  </div>
+  <div id="modalMeta">
+      <div class="modal-content">
+          <h2>Adicionar Meta 🎯</h2><br>
+          Aqui você irá definir uma meta, ela pode ser tratada de duas formas:<br><br>
+          <strong>1° </strong>Você pode defini-la como algo a ser atingido.<strong>(Mínimo Desejado)</strong><br>
+          &nbsp;&nbsp;&nbsp;<strong>Exemplo:</strong>&nbsp;Sobrar pelo menos 1000R$ ao final do mês.<br><br>
+          <strong>2°</strong> Você pode defini-la como um limite a não ser ultrapassado.<strong>(Limite Máximo)</strong><br>
+          &nbsp;&nbsp;&nbsp;<strong>Exemplo:</strong>&nbsp;Gastar até 300R$ com internet. <br><br>
+          <hr><br>
+          <form id="formMeta" method="POST">
+              {% csrf_token %}
+              <input type="hidden" name="tipoform" value="meta">
+              <p>Tipo da meta:</p>
+              <label>
+              <select name="tipoMeta" required>
+                  <option value="minDesejado">Mínimo Desejado</option>
+                  <option value="limMaximo">Limite Máximo</option>
+              </select>
+              </label>
+              <p>Categoria da meta:</p>
+              <label>
+              <select name="categoria" required>
+                  <option value="default" disabled selected>---------------</option>
+                  {% for categoria in categorias %}
+                      <option value="{{ categorias.nome }}">{{ categoria.nome }}</option>
+                  {% endfor %}
+              </select>
+              </label>
+              <p>Valor desejado(Atingir/Evitar):</p>
+              <label>
+                  <input type="number" step="0.01" name="valorMeta" required />
+              </label>
+              <p>Data Início:</p>
+              <label>
+                  <input type="date" name="dataInicio"/>
+              </label>
+              <p>Data Final:</p>
+              <label>
+                  <input type="date" name="dataFinal"/>
+              </label>
+              <p>Descrição:</p>
+              <label>
+                  <input type="text" name="descricao"/>
+              </label>
+              <div style="text-align:right;">
+                  <button type="submit" class="btn-salvar">Salvar</button>
+                  <button type="button" class="btn-cancelar" onclick="fecharModalMeta()">Cancelar</button>
+              </div>
+          </form>
+      </div>
+  </div>
+  <!--ADICIONADO 16/05/2025  3 -->
+
+  <div id="modalObjetivo">
+      <div class="modal-content">
+          <h2>Adicionar Objetivo 📈</h2><br>
+          <p>Aqui você irá adicionar um objetivo, diferente da meta, o objetivo se trata de algo focado no longo prazo, sempre relacionado a uma poupança ou investimento para a realização de algo.<br>
+              <br><strong>Exemplo 1: Comprar um carro - 30.000R$</strong><br>
+              <strong>Exemplo 2: Comprar um apartamento - 345.000R$</strong></p><br>
+          <hr><br>
+          <form id="formObjetivo" method="POST">
+              {% csrf_token %}
+              <input type="hidden" name="tipoform" value="objetivo">
+              <p>Título do Objetivo:</p>
+              <label>
+                  <input type="text" name="tituloObjetivo" required />
+              </label>
+
+              <p>Valor que deseja guardar:</p>
+              <label>
+              <input type="number" step="0.01" name="valorDesejado" min="0" required />
+              </label>
+
+              <p>Valor já guardado:</p>
+              <label>
+              <input type="number" step="0.01" name="valorGuardado" min="0" required />
+              </label>
+
+              <p>Data final do Objetivo:</p>
+              <label>
+                  <input type="date" name="anoFinal"  required />
+              </label>
+
+              <div style="text-align:right;">
+                  <button type="submit" class="btn-salvar">Salvar</button>
+                  <button type="button" class="btn-cancelar" onclick="fecharModalObjetivo()">Cancelar</button>
+              </div>
+          </form>
+      </div>
+  </div>
+
+
+
   <main class="content">
     <div class="objetivo-header">
       <h1 id="tituloObjetivo">{{ objetivo.titulo }}</h1>
-      <div class="usuario-info">Usuário: {{ username }}</div>
+      <div class="usuario-info">Usuário: {{ user.username }}</div>
     </div>
     <div class="acoes-container">
       <button class="btn-acao btn-deposito" onclick="location.hash = '#deposito'">Depósito</button>
@@ -53,10 +258,10 @@
                 </tr>
               </thead>
               <tbody id="historicoTransacoes">
-                {% for transacao in objetivo.transacoes %}
+                {% for transacao in objetivo.todas_transacoes %}
                 <tr>
                   <td>{{ transacao.data|date:"d/m/Y" }}</td>
-                  <td>{{ transacao.tipo }}</td>
+                  <td>{{ transacao.tipo_formatado }}</td>
                   <td class="{% if transacao.tipo == 'D' %}valor-positivo{% else %}valor-negativo{% endif %}">
                     {% if transacao.tipo == 'D' %}+{% else %}-{% endif %}R$ {{ transacao.valor|floatformat:2 }}</td>
                 </tr>
@@ -91,16 +296,29 @@
               <span class="info-valor">R$ {{ objetivo.valor_objetivo|floatformat:2 }}</span>
             </div>
             <div class="info-item">
+                <span class="info-label">Valor Faltante:</span>
+                <span class="info-valor">R$ {{ objetivo.valor_faltante|floatformat:2 }}</span>
+            </div>
+            <div class="info-item">
               <span class="info-label">Status:</span>
-              <span class="info-valor {% if objetivo.status == 'Ativo' %}status-ativo{% else %}status-inativo{% endif %}">{{ objetivo.status }}</span>
+              <span class="info-valor
+              {% if objetivo.status == 'A' %}
+              status-ativo
+              {% elif objetivo.status == 'T' %}
+              status-atrasado
+              {% elif objetivo.status == 'P' %}
+              status-pausado
+              {% elif objetivo.status == 'C' %}
+              status-concluido
+              {% endif %}"> {{ objetivo.status_formatado }}</span>
             </div>
             <div class="info-item">
               <span class="info-label">Progresso:</span>
-              <span class="info-valor">{{ objetivo.progresso }}%</span>
+              <span class="info-valor">{{ objetivo.porcentagem }}%</span>
             </div>
             <div class="info-item">
               <span class="info-label">Data limite:</span>
-              <span class="info-valor">{{ objetivo.data_limite|date:"d/m/Y" }}</span>
+              <span class="info-valor">{{ objetivo.data_fim|date:"d/m/Y" }}</span>
             </div>
           </div>
         </div>
@@ -110,7 +328,7 @@
 <div id="modalDeposito" class="modal">
   <div class="modal-content">
     <h2>Fazer Depósito</h2>
-    <form id="formDeposito" method="post" action="{% url 'adicionar_deposito' objetivo.id %}">
+    <form id="formDeposito" method="POST" action="{% url 'core:objetivos:depositar-objetivo' objetivo.id %}">
       {% csrf_token %}
       <label for="valorDeposito">Valor a depositar:</label>
       <input type="number" name="valorDeposito" step="0.01" min="0" required>
@@ -124,7 +342,7 @@
 <div id="modalResgate" class="modal">
   <div class="modal-content">
     <h2>Fazer Resgate</h2>
-    <form id="formResgate" method="post" action="{% url 'adicionar_resgate' objetivo.id %}">
+    <form id="formResgate" method="POST" action="{% url 'core:objetivos:resgatar-objetivo' objetivo.id %}">
       {% csrf_token %}
       <label for="valorResgate">Valor a resgatar:</label>
       <input type="number" name="valorResgate" step="0.01" min="0" required>
@@ -138,16 +356,30 @@
 <div id="modalEditar" class="modal">
   <div class="modal-content">
     <h2>Editar Objetivo</h2>
-    <form id="formEditar" method="post" action="{% url 'editar_objetivo' objetivo.id %}">
+    <form id="formEditar" method="post" action="{% url 'core:objetivos:editar-objetivo' objetivo.id %}">
       {% csrf_token %}
-      <label for="novoTitulo">Novo Título:</label>
-      <input type="text" name="novoTitulo" value="{{ objetivo.titulo }}" required>
+      <label for="novoTitulo">Novo Título
+          <input type="text" name="novoTitulo" value="{{ objetivo.titulo }}" required>
+      </label>
 
-      <label for="novoValor">Novo Valor do Objetivo:</label>
-      <input type="number" name="novoValor" step="0.01" min="0" value="{{ objetivo.valor_objetivo }}" required>
+      <label for="novoValor">Novo Valor do Objetivo:
+          <input type="number" name="novoValor" step="0.01" min="0.01" value="{{ objetivo.valor_objetivo }}" required>
+      </label>
 
-      <label for="novaData">Nova Data Final:</label>
-      <input type="date" name="novaData" value="{{ objetivo.data_limite|date:'Y-m-d' }}" required>
+      <label for="novaData">Nova Data Final:
+          <input type="date" name="novaData" value="{{ objetivo.data_limite|date:'Y-m-d' }}" required>
+      </label>
+      <div class="radio-group">
+          <div class="radio-option">
+              {% if objetivo.status == "P" %}
+                  <input type="checkbox" name="pausar" id="pausarSIM" checked>
+                  <label for="pausarSIM">Pausar objetivo</label>
+              {% else %}
+                  <input type="checkbox" name="pausar" id="pausarNAO">
+                  <label for="pausarNAO">Pausar objetivo</label>
+              {% endif %}
+          </div>
+      </div><br>
 
       <div style="text-align:right;">
         <button type="submit" class="btn-salvar">Salvar</button>
@@ -161,7 +393,7 @@
     <h2>Apagar Objetivo</h2>
     <p>Tem certeza que deseja apagar este objetivo? Esta ação não pode ser desfeita.</p>
     <div style="text-align:right;">
-      <form method="post" action="{% url 'apagar_objetivo' objetivo.id %}">
+      <form method="POST" action="{% url 'core:objetivos:deletar-objetivo' objetivo.id %}">
         {% csrf_token %}
         <button type="submit" class="btn-salvar">Confirmar</button>
         <button type="button" class="btn-cancelar" onclick="fecharModalHash()">Cancelar</button>
@@ -173,8 +405,8 @@
 <script>
   document.addEventListener("DOMContentLoaded", function() {
   const ctx = document.getElementById('graficoVariacao').getContext('2d');
-  const monthsLabels = []
-  const saldoData = []
+  const monthsLabels = "{{ datas }}".split(',');
+  const saldoData = "{{ valoresHistorico }}".split(',');
 
   new Chart(ctx, {
     type: 'bar',

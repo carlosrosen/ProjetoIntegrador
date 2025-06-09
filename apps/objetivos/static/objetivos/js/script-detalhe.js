@@ -1,6 +1,7 @@
 function abrirModalViaHash() {
   fecharTodosModais();
   const hash = window.location.hash;
+  console.log(hash);
   if (hash === '#deposito') {
     document.getElementById('modalDeposito')?.classList.add('ativo');
   } else if (hash === '#resgate') {

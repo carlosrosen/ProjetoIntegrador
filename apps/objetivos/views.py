@@ -1,15 +1,31 @@
+from datetime import date
+
 from django.shortcuts import render, reverse, redirect, get_object_or_404
+from django.utils import timezone
 
+from decimal import Decimal
+
+from apps.financeiro.models import Categoria
+from apps.objetivos.dominio.pausar import Pausar
+from apps.objetivos.dominio.tipoobjetivo import TipoObjetivo
+from apps.objetivos.dominio.valorobjetivo import ValorObjetivo
 from apps.objetivos.models import Objetivos
-from apps.objetivos.operacoes.objetivos import GetObjetivo
+from apps.objetivos.operacoes.objetivos import GetObjetivo, OperacoesObjetivo
 
+from common.dominio.data import Data
 
 def menuObjetivos(request):
     if not request.user.is_authenticated:
         return redirect(reverse('usuario:login'))
     getterobjetivos = GetObjetivo(request.user.id)
     objetivos = getterobjetivos.todosEmOrdem()
-    context = {'objetivos': objetivos}
+
+    categorias = Categoria.objects.all()
+
+    context = {'objetivos': objetivos
+             , 'todas_categorias_receita': categorias.filter(tipo='R')
+             , 'todas_categorias_despesa': categorias.filter(tipo='D')
+    }
     return render(request, 'objetivos.html', context)
 
 def detalheObjetivo(request, id):
@@ -21,26 +37,65 @@ def detalheObjetivo(request, id):
     if objetivo.user_fk != request.user:
         return
 
-    return render(request, 'objetivo-detalhes.html')
+    getter = GetObjetivo(request.user.id)
+    datas, valores = getter.variacao(id)
+    context = {'objetivo': objetivo
+        , 'valoresHistorico': valores
+        , 'datas': datas
+        , 'mes': date.today().month
+        , 'ano': date.today().year
+        }
+
+    return render(request, 'objetivo-detalhes.html', context)
 
 
 def criarObjetivo(request):
     if not request.user.is_authenticated:
         return redirect(reverse('login'))
+    if request.method == 'GET':
+        return redirect(request.session.get('ultima_url'))
+    if request.method == 'POST':
+        pass
 
-def editarObj(request):
-    if not request.user.is_authenticated:
-        return redirect(reverse('login'))
+def editarObj(request, objetivo_id):
+    if request.method == 'POST':
+        nova_data = Data(request.POST.get('novaData'))
+        titulo = request.POST.get('novoTitulo')
+        valor = Decimal(request.POST.get('novoValor'))
+        objetivo = get_object_or_404(Objetivos, id=objetivo_id, user_fk__id=request.user.id)
+        pausado = Pausar(request.POST.get('pausar'))
 
-def deletarObj(request):
-    if not request.user.is_authenticated:
-        return redirect(reverse('login'))
+        operacao = OperacoesObjetivo(request.user.id)
+        operacao.editar(objetivo, titulo, valor, nova_data, pausado.valor)
 
-def depositarObj(request):
-    if not request.user.is_authenticated:
-        return redirect(reverse('login'))
+        return redirect('core:objetivos:detalhe_objetivo', id=objetivo_id)
 
-def resgatarObj(request):
-    if not request.user.is_authenticated:
-        return redirect(reverse('login'))
+def deletarObj(request, objetivo_id):
+    if request.method == 'POST':
+        objetivo = get_object_or_404(Objetivos, id=objetivo_id, user_fk__id=request.user.id)
+        operacao = OperacoesObjetivo(request.user.id)
+        operacao.deletar(objetivo)
+        return redirect('core:objetivos:menu_objetivos')
+
+def depositarObj(request, objetivo_id):
+    if request.method == 'POST':
+        data_atual = timezone.now().date()
+        valor = Decimal(request.POST.get('valorDeposito'))
+        objetivo = get_object_or_404(Objetivos, id=objetivo_id, user_fk__id=request.user.id)
+
+        operacao = OperacoesObjetivo(request.user.id)
+        operacao.deposito(objetivo, valor, data_atual) # Arrumar aqui
+
+        return redirect('core:objetivos:detalhe_objetivo', id=objetivo_id)
+
+def resgatarObj(request, objetivo_id):
+    if request.method == 'POST':
+        data_atual = timezone.now().date()
+        valor = Decimal(request.POST.get('valorResgate'))
+        objetivo = get_object_or_404(Objetivos, id=objetivo_id, user_fk__id=request.user.id)
+
+        operacao = OperacoesObjetivo(request.user.id)
+        operacao.resgate(objetivo, valor, data_atual) # Arrumar aqui
+
+        return redirect('core:objetivos:detalhe_objetivo', id=objetivo_id)
 

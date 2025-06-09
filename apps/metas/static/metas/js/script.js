@@ -18,10 +18,6 @@ document.getElementById('logout').addEventListener('click', function(e) {
     }
   }
 
-  function fecharTodosModais() {
-    document.querySelectorAll('.modal').forEach(modal => modal.classList.remove('ativo'));
-  }
-
   function fecharModalHash() {
     location.hash = '';
   }
@@ -29,10 +25,47 @@ document.getElementById('logout').addEventListener('click', function(e) {
   window.addEventListener('DOMContentLoaded', abrirModalViaHash);
   window.addEventListener('hashchange', abrirModalViaHash);
 
-  document.getElementById("formEditarMeta")?.addEventListener("submit", function(e) {
-    e.preventDefault();
-    const dados = new FormData(this);
-    alert(`Meta atualizada:\nCategoria: ${dados.get("categoria")}\nTipo: ${dados.get("tipo")}\nValor: R$ ${parseFloat(dados.get("valor")).toFixed(2)}\nData: ${dados.get("data_inicio")} a ${dados.get("data_fim")}\nDescrição: ${dados.get("descricao")}`);
-    fecharModalHash();
-    this.reset();
-  });
+
+
+
+function abrirModalConfirmacao(metaId) {
+  console.log("Abrindo modal de confirmação para meta:", metaId) // Debug
+
+  const modal = document.getElementById("modalConfirmacao")
+
+  if (modal) {
+    // Fecha outros modais primeiro
+    fecharTodosModais()
+
+    // Abre o modal de confirmação
+    modal.classList.add("ativo")
+  } else {
+    console.error("Modal não encontrado")
+  }
+}
+
+function fecharModalConfirmacao() {
+  const modal = document.getElementById("modalConfirmacao")
+  if (modal) {
+    modal.classList.remove("ativo")
+  }
+}
+
+// Event listener para fechar modal ao clicar fora dele
+document.addEventListener("DOMContentLoaded", () => {
+  const modalConfirmacao = document.getElementById("modalConfirmacao")
+  if (modalConfirmacao) {
+    modalConfirmacao.addEventListener("click", function (e) {
+      if (e.target === this) {
+        fecharModalConfirmacao()
+      }
+    })
+  }
+})
+
+function fecharTodosModais() {
+  const modals = document.querySelectorAll(".modal.ativo")
+  modals.forEach((modal) => {
+    modal.classList.remove("ativo")
+  })
+}

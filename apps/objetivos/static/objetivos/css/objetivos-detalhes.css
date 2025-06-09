@@ -111,8 +111,9 @@
 
 .tabela-container {
   flex: 1;
-  overflow-y: auto;
   margin-bottom: 1rem;
+  max-height: 75vh;
+  overflow-y: auto;
 }
 
 .tabela-historico {
@@ -240,6 +241,30 @@
 
 .status-ativo {
   color: #2ecc71;
+  background-color: rgba(46, 204, 113, 0.1);
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.status-atrasado {
+  color: #e74c3c;
+  background-color: rgba(46, 204, 113, 0.1);
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.status-pausado {
+  color: #808080;
+  background-color: rgba(46, 204, 113, 0.1);
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.status-concluido {
+  color: #27ae60;
   background-color: rgba(46, 204, 113, 0.1);
   padding: 0.25rem 0.5rem;
   border-radius: 4px;

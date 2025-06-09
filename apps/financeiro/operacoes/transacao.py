@@ -79,19 +79,27 @@ class OperacoesTransacao:
                 raise Exception(f'Erro ao criar o parcela {e}')
 
     # Função de editar a parcela (Quando a quantidade de parcelas for > 1)
-    def editarUmaParcela(self
+
+    def editarTransacaoParcelada(self
+                        , parcela: ParcelasTransacao
+                        , novo_valor: ValorTransacao
+                        , pago: Pago
+                        , descricao: str
+                        ):
+        if parcela.transacao_fk.quantidade_parcelas == 1:
+            return
+
+    def editarTransacaoUnica(self
                          , parcela: ParcelasTransacao
                          , novo_valor: ValorTransacao
                          , nova_data: Data
-                         , categoria: Categoria  # Categoria não pode ser mais editada
+                         , categoria: Categoria
                          , pago: Pago
                          , descricao: str
                          ):
+        if parcela.transacao_fk.quantidade_parcelas > 1:
+            return None
         with transaction.atomic():
-            if parcela.transacao_fk.quantidade_parcelas > 1:
-                parcela.pago = pago.status
-                parcela.descricao = descricao
-                return
 
             pago_status_anterior = parcela.pago
             valor_antigo = parcela.valor
@@ -168,8 +176,7 @@ class OperacoesTransacao:
                 raise Exception(f'Erro ao editar parcela')
 
 
-    # Voce colocou para corrigir o valor do saldo quando a quantidade de parcelas fosse apenas uma
-
+    # Aqui é pra deletar uma parcela
     def deletarUmaParcela(self, parcela: ParcelasTransacao):
         with transaction.atomic():
             transacao = parcela.transacao_fk
@@ -186,22 +193,28 @@ class OperacoesTransacao:
                     raise Exception(f'Erro deletar Transação')
             else:
                 transacao.quantidade_parcelas -= 1
+                historico.corrigirValoresHistorico(data_correcao_historico=parcela.data
+                                                   , valor_correcao=parcela.valor
+                                                   , inversor=True
+                                                   )
                 try:
                     transacao.save()
                     parcela.delete()
                 except Exception as e:
                     raise Exception(f'Erro deletar parcela')
 
+    # Aqui é pra deletar uma parcela e as próximas após ele
     def deletarProximasParcelas(self, parcela: ParcelasTransacao):
         with transaction.atomic():
             parcelas = ParcelasTransacao.objects.filter(
             parcela__transacao_fk=parcela.transacao_fk,
             ordem_parcela__gte=parcela.ordem_parcela
         ).order_by('ordem_parcela')
-        
         for parcela in parcelas:
             self.deletarUmaParcela(parcela)
 
+
+    # Aqui é para deletar todas
     def deletarTodasParcelas(self,parcela: ParcelasTransacao):
         with transaction.atomic():
             parcelas = ParcelasTransacao.objects.filter(transacao_fk__user_fk=self.user ,transacao_fk=parcela.transacao_fk)
@@ -216,11 +229,6 @@ class OperacoesTransacao:
                                                             , valor_correcao=parcela.valor
                                                             , inversor=True
                 )
-                self.user.operarSaldoAtual(valor=parcela.valor
-                                           , tipo=parcela.transacao_fk.tipo
-                                           , inversor=True
-                )
-
             try:
                 parcela.transacao_fk.delete()
             except Exception as e:

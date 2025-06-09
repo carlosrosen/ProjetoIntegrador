@@ -117,7 +117,7 @@ class GetterFinanceiro:
                 dados.append(parcela)
                 if len(dados) == 3:
                     break
-        return dados
+        return dados[::-1]
 
     def ultimaCincoParcelas(self):
         parcelas = ParcelasTransacao.objects.filter(transacao_fk__user_fk=self.user
@@ -131,3 +131,11 @@ class GetterFinanceiro:
         for parcela in parcelas[inicio:tamanho][::-1]:
             dados.append(parcela)
         return dados
+
+    def todasParcelasMes(self, mes:int, ano:int):
+        data = Data.inicializar(dia=1,mes=mes,ano=ano)
+        parcelas = ParcelasTransacao.objects.filter(transacao_fk__user_fk=self.user
+                                                    , data__gte=data.valor
+                                                    , data__lt=Data.incrementarMes(data.valor).valor
+        )
+        return parcelas

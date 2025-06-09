@@ -4,22 +4,24 @@ from typing import cast
 
 from apps.objetivos.models import Objetivos, TransacaoObjetivo
 
-from django.db.models import F, ExpressionWrapper, DecimalField
+from django.db.models import F, ExpressionWrapper, DecimalField, Sum
 
 from apps.objetivos.dominio.valorobjetivo import ValorObjetivo
 from apps.objetivos.dominio.tipoobjetivo import TipoObjetivo
 from apps.objetivos.dominio.status import Status
+
+from datetime import date
 from common.dominio.data import Data
+
+from decimal import Decimal, ROUND_DOWN
 
 from itertools import chain
 
 # Estou importando do financeiro a formatação
 
 class OperacoesObjetivo:
-    def __init__(self, user):
-        if not isinstance(user, AbstractBaseUser):
-            raise TypeError('Usuario invalido')
-        self.user = cast(CustomUser, user)
+    def __init__(self, user_id):
+        self.user = CustomUser.objects.get(id=user_id)
 
     def criar(self
                     , titulo: str
@@ -44,27 +46,25 @@ class OperacoesObjetivo:
         )
 
     def editar(self
-                       , objetivo: Objetivos
-                       , novo_titulo: str
-                       , novo_valor_objetivo: ValorObjetivo
-                       , nova_data_fim: Data
-                       , novo_status: Status
-                       ):
+               , objetivo: Objetivos
+               , novo_titulo: str
+               , novo_valor_objetivo: Decimal
+               , nova_data_fim: Data
+               , pausado: bool
+               ):
 
-        if novo_status.valor == 'P':
-            objetivo.status = 'P'
-
-        if novo_valor_objetivo.valor < objetivo.valor_guardado:
+        if novo_valor_objetivo < objetivo.valor_guardado:
             return 'O novo valor do objetivo é menor que o valor já guardado'
-        elif novo_valor_objetivo.valor == objetivo.valor_guardado:
+
+        if pausado:
+            objetivo.status = 'P'
+        elif novo_valor_objetivo == objetivo.valor_guardado:
             objetivo.status = 'C'
-        elif novo_valor_objetivo.valor > objetivo.valor_guardado and objetivo.status == 'C':
-            objetivo.status = 'A'
         else:
-            objetivo.status = novo_status.valor
+            objetivo.status = 'A'
 
         objetivo.titulo = novo_titulo
-        objetivo.valor_objetivo = novo_valor_objetivo.valor
+        objetivo.valor_objetivo = novo_valor_objetivo
         objetivo.data_fim = nova_data_fim.valor
         objetivo.save()
 
@@ -73,8 +73,8 @@ class OperacoesObjetivo:
 
     def deposito(self
                      ,Objetivo: Objetivos
-                     ,Valor: ValorObjetivo
-                     ,Data: Data
+                     ,Valor: Decimal
+                     ,data: date
                      ):
 
         # Não pode prosseguir nas operações caso o objetivo esteja pausado
@@ -90,19 +90,19 @@ class OperacoesObjetivo:
         if Objetivo.status == 'C':
             return 'Objetivo já está concluido'
 
-        if Valor.valor > valor_limite:
+        if Valor > valor_limite:
             return 'Excede o objetivo estabelecido'
-        elif Valor.valor == valor_limite:
+        elif Valor == valor_limite:
             Objetivo.status = 'C'
 
         # Fazendo a soma do valor
-        Objetivo.valor_guardado += Valor.valor
+        Objetivo.valor_guardado += Valor
 
         # Criação do registro de deposito
         TransacaoObjetivo.objects.create(objetivo_fk=Objetivo
                                              ,tipo= 'D'
-                                             ,valor=Valor.valor
-                                             ,data=Data
+                                             ,valor=Valor
+                                             ,data=data
         )
 
         try:
@@ -112,31 +112,31 @@ class OperacoesObjetivo:
 
     def resgate(self
                      ,Objetivo: Objetivos
-                     ,Valor: ValorObjetivo
-                     ,Data: Data
+                     ,Valor: Decimal
+                     ,data: date
                      ):
 
         # Não pode prosseguir caso o objetivo esteja pausado
         if Objetivo.status == 'P':
             return 'Objetivo Pausado'
 
-        if Valor.valor > Objetivo.valor_guardado:
+        if Valor > Objetivo.valor_guardado:
             return 'Valor informado para resgate excede o valor que está guardado'
 
         if Objetivo.status == 'C':
-            if(Data > Objetivo.data_fim):
+            if data > Objetivo.data_fim:
                 Objetivo.status = 'T'
             else:
                 Objetivo.status = 'A'
 
         # Fazendo a subtração do valor
-        Objetivo.valor_guardado -= Valor.valor
+        Objetivo.valor_guardado -= Valor
 
         # Criação do registro de resgate
         TransacaoObjetivo.objects.create(objetivo_fk=Objetivo
                                              ,tipo='R'
-                                             ,valor=Valor.valor
-                                             ,data=Data
+                                             ,valor=Valor
+                                             ,data=data
         )
 
         try:
@@ -156,9 +156,33 @@ class GetObjetivo:
         return TransacaoObjetivo.objects.filter(user_fk=self.user ,objetivo_fk=objetivo)
 
     def variacao(self, objetivo_id):
-        transacoes = TransacaoObjetivo.objects.filter(user_fk=self.user ,objetivo_fk=objetivo_id).order_by('data')
-        ## Fazer depois o gráfico do valor guardado
-        pass
+        hoje = date.today()
+        print(hoje)
+        data_ano_passado = Data.variarMes(hoje.month, hoje.year, -11)
+        print(data_ano_passado.valor)
+        data = Data(data_ano_passado.valor.replace(day=1))
+        transacoes = TransacaoObjetivo.objects.filter(objetivo_fk__user_fk=self.user)
+        datas = []
+        valores = []
+        valor_mes = 0
+        for i in range(12):
+            deposito_mes = transacoes.filter(tipo='D' ,data__month=data.valor.month, data__year=data.valor.year).aggregate(total_mes=Sum('valor'))['total_mes']
+            resgate_mes = transacoes.filter(tipo='R' ,data__month=data.valor.month, data__year=data.valor.year).aggregate(total_mes=Sum('valor'))['total_mes']
+            if not deposito_mes:
+                deposito_mes = 0
+            if not resgate_mes:
+                resgate_mes = 0
+            total_mes = deposito_mes - resgate_mes
+            valor_mes += total_mes
+            data = Data.incrementarMes(data.valor)
+            data_formatada = Data.formatarMesAno(data.valor.month ,data.valor.year)
+            datas.append(data_formatada)
+            valores.append(str(Decimal(valor_mes).quantize(Decimal('0.01'), ROUND_DOWN)))
+        datas = ','.join(datas)
+        valores = ','.join(valores)
+        return datas, valores
+
+
 
     def todosEmOrdem(self) -> list:
         objetivos = Objetivos.objects.filter(user_fk=self.user)

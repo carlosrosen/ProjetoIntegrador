@@ -1,3 +1,5 @@
+from datetime import date
+
 from django.db.models import Q
 from django.shortcuts import render, redirect
 from django.contrib import messages
@@ -38,6 +40,8 @@ def cadastrar(request):
         # Chamando a função de criar usuário do Django
         user = CustomUser.objects.create_user(username=usuario, email=email, password=senha)
 
+        user.dataUltimaTransacaoVerificada(date.today())
+        user.save()
 
         #Logando o usuario automaticamente e redicionando para a aplicação
         login(request, user)

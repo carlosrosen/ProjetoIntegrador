@@ -2,9 +2,9 @@ from decimal import Decimal
 
 class ValorTransacao:
     def __init__(self, valor: str | Decimal):
-        if type(valor) == str:
+        if isinstance(valor, str):
             self.valor = self.__formatacaoValor(valor)
-        elif type(valor) == Decimal:
+        elif isinstance(valor, Decimal):
             self.valor = valor
         else:
             raise TypeError('Valor invalido')

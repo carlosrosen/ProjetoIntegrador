@@ -8,6 +8,8 @@ from apps.financeiro.models import Categoria
 from apps.financeiro.operacoes.getter import GetterFinanceiro
 from apps.financeiro.operacoes.saldo import Historico
 from apps.financeiro.operacoes.transacao import OperacoesTransacao
+from apps.objetivos.models import Objetivos
+from apps.metas.models import Metas
 from common.dominio.data import Data
 
 from datetime import date
@@ -40,6 +42,9 @@ def dashboard(request):
 
         categorias = Categoria.objects.all()
 
+        objetivo_prox = Objetivos.objects.order_by('valor_guardado').first()
+        meta_prox = Metas.objects.order_by('data_fim').first()
+
         informacoes_dashboard = {'saldo_atual': saldo_atual
                                , 'username': request.user.username
                                , 'ganhos_mes': ganhos_mes
@@ -55,24 +60,12 @@ def dashboard(request):
                                , 'categorias_transacoes_receitas': ','.join(dicionario_receitas_categorias.keys())
                                , 'lista_despesas_categoria': ','.join(dicionario_despesas_categorias.values())
                                , 'categorias_transacoes_despesas': ','.join(dicionario_despesas_categorias.keys())
+                               , 'mes': hoje.month
+                               , 'ano': hoje.year
+                               , 'meta': meta_prox
+                               , 'objetivo': objetivo_prox
         }
         return render(request, 'dashboard.html', informacoes_dashboard)
-    response = None
-    if request.method == "POST":
-        tipo_criacao = request.POST.get('tipoform')
-        if tipo_criacao == 'transacao_receita':
-            response = criarTransacaoReceita(request)
-        elif tipo_criacao == 'transacao_despesa':
-            response = criarTransacaoDespesa(request)
-        elif tipo_criacao == 'meta':
-            print(tipo_criacao)
-            #criarMeta(request)
-        elif tipo_criacao == 'objetivo':
-            print(tipo_criacao)
-            #criarObjetivo(request)
-    if isinstance(response, HttpResponseRedirect):
-        return response
-
     return redirect(reverse('core:dashboard'))
 
 

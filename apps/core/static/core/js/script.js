@@ -1,109 +1,3 @@
-let modoGrafico = "gastos";
-const ctx = document.getElementById("graficoGastos").getContext("2d");
-
-let div = document.getElementById("grafico_despesa");
-
-if (!div) {
-  console.warn("#grafico_despesa não encontrado.");
-}
-
-const categorias_gasto = div.dataset.listaCategorias.split(',');
-const valores_gasto = div.dataset.listaValores.split(',');
-
-const cores_gastos = {
-    "Alimentação": "#f39c12"
-  , "Transporte": "#1abc9c"
-  , "Educação": "#3498db"
-  , "Moradia": "#9b59b6"
-  , "Despesas pessoais": "#e74c3c"
-  , "Saúde": "#2ecc71"
-  , "Tarifas": "#34495e"
-  , "Outras despesas": "#95a5a6"
-};
-
-let lista_cores_gastos = [];
-let nome_categorias_gastos = [];
-
-for(let i= 0; i < categorias_gasto.length; i++){
-  let nome = categorias_gasto[i]
-  lista_cores_gastos.push(cores_gastos[nome]);
-  nome_categorias_gastos.push(nome);
-}
-
-let dadosGastos = {
-  labels: nome_categorias_gastos,
-  datasets: [{
-    label: "Gastos por Categoria",
-    data: valores_gasto,
-    backgroundColor: lista_cores_gastos
-  }]
-};
-
-div = document.getElementById("grafico_receita")
-
-const categorias_ganhos = div.dataset.listaCategorias.split(',');
-const valores_ganhos = div.dataset.listaValores.split(',');
-
-const cores_ganhos = {
-    "Salário": "#1f77b4"
-  , "Aposentadoria": "#ff7f0e"
-  , "Bolsa de estudos": "#2ca02c"
-  , "Aluguel recebido": "#d62728"
-  , "Rendimentos de investimentos": "#9467bd"
-  , "Freelance": "#8c564b"
-  , "Venda de produtos": "#e377c2"
-  , "Comissão": "#7f7f7f"
-  , "Prêmios": "#bcbd22"
-  , "Presente": "#17becf"
-  , "Doação": "#aec7e8"
-  , "Herança": "#ffbb78"
-  , "Outras Receita": "#95a5a6"
-};
-
-
-let lista_cores_ganhos = [];
-let nome_categorias_ganhos = [];
-
-for (let i = 0; i < categorias_ganhos.length; i++){
-  let nome = categorias_ganhos[i];
-  lista_cores_ganhos.push(cores_ganhos[nome]);
-  nome_categorias_ganhos.push(nome);
-}
-
-
-const dadosGanhos = {
-  labels: nome_categorias_ganhos,
-  datasets: [{
-    label: "Ganhos por Categoria",
-    data: valores_ganhos,
-    backgroundColor: lista_cores_ganhos
-  }]
-};
-
-let meuGrafico = new Chart(ctx, {
-   type: "doughnut",
-   data: dadosGastos,
-   options: {
-     responsive: true,
-     plugins: {
-       legend: {position: 'bottom'}
-     }
-   }
-});
-
-  function alternarGrafico() {
-    if (modoGrafico === "gastos") {
-      meuGrafico.data = dadosGanhos;
-      document.getElementById("btnAlternar").innerText = "Ver Gastos";
-      modoGrafico = "ganhos";
-    } else {
-      meuGrafico.data = dadosGastos;
-      document.getElementById("btnAlternar").innerText = "Ver Ganhos";
-      modoGrafico = "gastos";
-    }
-    meuGrafico.update();
-  }
-
 // Modal - abrir e fechar
 function fecharModal() {
     const modal = document.getElementById("modalTransacao");
@@ -122,19 +16,16 @@ document.getElementById("formTransacaoReceita").addEventListener("submit", funct
   let descricao = formData.get("descricao_receita");
   let pago = formData.get("pagamentoRE_receita");
 
-
-  if (valor == null || data == null || pago == null){
-    alert("Preencha os campos corretamente.");
+  if (valor == null || data == null || pago == null) {
     event.preventDefault();
- // Cancela a URL hash
+    alert("Preencha os campos corretamente.");
+    // Cancela a URL hash
   }
   cancelarNavegacaoHash();
 });
 
 document.getElementById("formTransacaoDespesa").addEventListener("submit",function (event){
-
-  const formData = new FormData(event.target)
-
+  const formData = new FormData(event.target);
   const valor = formData.get("valor_despesa");
   const data = formData.get("data_despesa");
   const  descricao = formData.get("descricao_despesa");
@@ -142,8 +33,8 @@ document.getElementById("formTransacaoDespesa").addEventListener("submit",functi
   const  parcelas = formData.get("parcelas_despesa")
 
   if (valor == null || data == null || pago == null || parcelas == null){
-    alert("Preencha os campos corretamente.");
     event.preventDefault();
+    alert("Preencha os campos corretamente.");
   }
   cancelarNavegacaoHash();
 });
@@ -192,6 +83,7 @@ document.addEventListener("DOMContentLoaded", () => {
 // Fechar modal
 function fecharModalMeta() {
   document.getElementById("modalMeta").classList.remove("ativo");
+  cancelarNavegacaoHash();
 }
 
 // Mostrar/ocultar campo de data baseado na opção de exclusão
@@ -206,16 +98,30 @@ document.getElementById("formMeta").addEventListener("submit", function (event) 
   const valor = formData.get("valorMeta");
   const dataInicio = formData.get("dataInicio");
   const dataFinal = formData.get("dataFinal");
+  const categoria = formData.get("categoria");
 
-  alert(`Meta adicionada:
+  console.log("Campo 'nome':", nome);
+  console.log("Campo 'tipo':", tipo);
+  console.log("Campo 'valor':", valor);
+  console.log("Campo 'dataInicio':", dataInicio);
+  console.log("Campo 'dataFinal':", dataFinal);
+  console.log("Campo 'categoria':", categoria);
+
+
+  if(!nome || !tipo || !valor || !dataInicio || !dataFinal || !categoria){
+    alert("Insira as informações corretamente!")
+    return;
+  }
+
+  alert(`Meta adicionada:\n
   Nome: ${nome}
   Tipo: ${tipo}
   Valor: R$ ${valor.toFixed(2)}
   Data Início: ${dataInicio}
-  Data Final: ${dataFinal}`);
+  Data Final: ${dataFinal}
+  categoria: ${categoria}`);
 
-  fecharModalMeta();
-  event.target.reset();
+  cancelarNavegacaoHash()
 });
 
 //ADICIONADO A PARTIR DAQUI DIA 16/06/2025
@@ -223,6 +129,7 @@ document.getElementById("formMeta").addEventListener("submit", function (event) 
 // Fechar modal de objetivo
 function fecharModalObjetivo() {
   document.getElementById("modalObjetivo").classList.remove("ativo");
+  cancelarNavegacaoHash();
 }
 
 // Capturar dados do formulário de objetivo
@@ -234,6 +141,7 @@ document.getElementById("formObjetivo").addEventListener("submit", function (eve
   const valorGuardado = parseFloat(formData.get("valorGuardado"));
   const anoFinal = formData.get("anoFinal");
 
+
   alert(`Objetivo adicionado:\n
   Título: ${titulo}
   Valor desejado: R$ ${valorDesejado.toFixed(2)}
@@ -241,7 +149,6 @@ document.getElementById("formObjetivo").addEventListener("submit", function (eve
   Ano final: ${anoFinal}`);
 
   fecharModalObjetivo();
-  event.target.reset();
 });
 
 //---------------------------------------------------------------------------------
@@ -308,7 +215,3 @@ window.addEventListener("hashchange", abrirModalViaHash);
 window.addEventListener("DOMContentLoaded", () => {
   abrirModalViaHash();
 });
-
-function fecharModalEditar() {
-  document.getElementById("modalEditarTransacao")?.classList.remove("ativo");
-}

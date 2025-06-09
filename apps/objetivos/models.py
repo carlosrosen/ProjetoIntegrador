@@ -35,7 +35,13 @@ class Objetivos(models.Model):
             , 'P': 'Pausado'
             , 'C': 'Concluido'
         }
-        return formatacao[self.status]
+        return formatacao.get(self.status)
+
+    def todas_transacoes(self):
+        transacoes = TransacaoObjetivo.objects.filter(
+            objetivo_fk=self,
+        ).order_by('-id')
+        return transacoes
 
     def __str__(self):
         return f'titulo: {self.titulo} - status: {self.status}'
@@ -50,6 +56,13 @@ class TransacaoObjetivo(models.Model):
     tipo = models.CharField(max_length=1, choices=__opcoes_tipo, null=False)
     valor = models.DecimalField(max_digits=12, decimal_places=2, null=False)
     data = models.DateField(auto_now_add=True)
+
+    def tipo_formatado(self):
+        if self.tipo == 'D':
+            tipo = 'Deposito'
+        else:
+            tipo = 'Resgate'
+        return tipo
 
     def __str__(self):
         pass

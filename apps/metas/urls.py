@@ -6,6 +6,7 @@ app_name = 'metas'
 
 urlpatterns = [
     path('', views.menuMetas, name='meta'),
-    path('editar-meta/', views.editarMeta, name='editar-meta'),
-    path('deletar-meta/', views.deletarMeta, name='deletar-meta/'),
+    path('criar-meta/', views.criarMeta, name='criar-meta'),
+    path('editar-meta/<int:meta_id>/', views.editarMeta, name='editar-meta'),
+    path('deletar-meta/<int:meta_id>/', views.deletarMeta, name='deletar-meta'),
 ]

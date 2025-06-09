@@ -10,25 +10,17 @@
   <link rel="stylesheet" href="{% static 'core/css/style_dashboard.css' %}" />
 </head>
 <body>
-  <!-- pegar dados do script -->
-  <div id="grafico_receita"
-       data-lista-categorias="{{ categorias_transacoes_receitas|safe }}"
-       data-lista-valores="{{ lista_receitas_categoria|safe }}"></div>
-  <div id="grafico_despesa"
-       data-lista-categorias="{{ categorias_transacoes_despesas|safe }}"
-       data-lista-valores="{{ lista_despesas_categoria|safe }}"></div>
-
   <!-- começo do site -->
   <aside class="sidebar">
       <h1>U-Balance</h1>
       <nav>
           <a href="{% url 'core:dashboard' %}">🏠 Início</a>
-          <a href="" id="abrirModalTransacao">💲 Aicionar Transação</a>
+          <a href="" id="abrirModalTransacao">💲 Adicionar Transação</a>
           <a href="#" id="abrirModalMeta">🎯 Adicionar Meta</a>
           <a href="#" id="abrirModalObjetivo">📈 Adicionar Objetivo</a>
           <a href="{% url 'core:metas:meta' %}">🎯 Metas</a>
           <a href="{% url 'core:objetivos:menu_objetivos' %}">📈 Objetivos</a>
-          <a href="#">🧾 Extrato</a>
+          <a href="{% url 'core:menuExtrato' mes=mes ano=ano %}">🧾 Extrato</a>
           <a href="#">📊 Relatórios</a>
           <a href="#">⚙️ Configurações</a>
           <a href="{% url 'usuario:logout' %}" id="logout">Logout</a>
@@ -82,23 +74,39 @@
         </div>
 
         <div class="metas-box" style="width: 30%;">
-            <h3>Metas&nbsp;&nbsp;&nbsp;<button id="btnVermaisMeta">Ver mais</button></h3><br>
-            <ul>
-                <li><span><strong>Nome:</strong> Viajar </span>
-                <li><span><strong>Valor da meta:</strong> 15.000R$</span>
-                <li><span><strong>Valor Guardado:</strong> 8.250R$ </span>
-                <li><span><strong>Data Limite:</strong> 16/09/2025</span>
-            </ul>
-            <br>
-            <h3>Objetivos&nbsp;&nbsp;&nbsp;<button id="btnVermaisObjetivos">Ver mais</button></h3><br>
-            <ul>
-                <li><span><strong>Nome:</strong> Comprar um carro </span>
-                <li><span><strong>Valor do Objetivo:</strong> 150.000R$</span>
-                <li><span><strong>Valor Guardado:</strong> 32.500R$ </span>
-                <li><span><strong>Data Limite:</strong> 24/04/2030</span>
-            </ul>
-        </div>
-    </div>
+    <h3>
+        Metas&nbsp;&nbsp;&nbsp;
+        <a href="{% url 'core:metas:meta' %}" id="btnVermaisMeta" style="color: #0c7500">Ver mais</a>
+    </h3><br>
+    {% if meta %}
+        <ul>
+            <li><span><strong>Categoria:</strong> {{ meta.categoria_fk.nome }}</span></li>
+            <li><span><strong>Tipo:</strong> {{ meta.tipagem }}</span></li>
+            <li><span><strong>Valor da meta: R$</strong> {{ meta.valor|floatformat:2 }}R$</span></li>
+            <li><span><strong>Valor atingido: R$</strong> {{ meta.valorAcumulado|floatformat:2 }}R$</span></li>
+            <li><span><strong>Status: </strong> {{ meta.status_formatado }}</span></li>
+            <li><span><strong>Data limite:</strong> {{ meta.data_fim|date:"d/m/Y" }}</span></li>
+        </ul>
+    {% else %}
+        <p>Nenhuma meta cadastrada.</p>
+    {% endif %}
+    <br>
+    <h3>
+        Objetivos&nbsp;&nbsp;&nbsp;
+        <a href="{% url 'core:objetivos:menu_objetivos' %}" id="btnVermaisObjetivos" style="color: #0c7500">Ver mais</a>
+    </h3><br>
+    {% if objetivo %}
+        <ul>
+            <li><span><strong>Titulo:</strong> {{ objetivo.titulo }}</span></li>
+            <li><span><strong>Valor do objetivo: R$</strong> {{ objetivo.valor_objetivo|floatformat:2 }}</span></li>
+            <li><span><strong>Valor guardado: R$</strong> {{ objetivo.valor_guardado|floatformat:2 }}</span></li>
+            <li><span><strong>Status: </strong> {{ objetivo.status_formatado }}</span></li>
+            <li><span><strong>Data Limite:</strong> {{ objetivo.data_fim|date:"d/m/Y" }}</span></li>
+        </ul>
+    {% else %}
+        <p>Nenhum objetivo cadastrado.</p>
+    {% endif %}
+</div>
       <div class="future-box">
           <h3 style="padding-top: 5px;">Lançamentos Futuros</h3>
           <ul>
@@ -126,14 +134,14 @@
           <p>Aqui você irá adicionar uma transação, seja ela uma receita ou despesa para auxiliarmos no gerenciamento financeiro da sua conta! <strong>Lembre-se</strong>, é importante manter as transações atualizadas para uma maior precisão de decisões. ⚠️</p><br>
           <hr>
           <br>
-          <form id="formTransacaoDespesa" method="POST">
+          <form id="formTransacaoDespesa" action="{% url 'core:financeiro:criar-despesa' %}" method="POST">
               {% csrf_token %}
               <label></label>
               <input type="hidden" name="tipoform" value="transacao_despesa">
 
               <div id="camposDespesa">
                   <label>Valor gasto: <br>
-                      <input type="number" name="valor_despesa" step="0.01" required><br>
+                      <input type="number" name="valor_despesa" step="0.01" min="0.01" required><br>
                   </label>
 
                   <label>Categoria:<br>
@@ -151,7 +159,7 @@
                       </select></label><br>
                   <div id="campoParcelas" style="display: none;">
                       <label>Quantidade de parcelas:<br>
-                          <input type="number" name="parcelas_despesa" min="1" value="1"><br>
+                          <input type="number" name="parcelas_despesa" min="1" value="1" step="1"><br>
                       </label>
                   </div>
 
@@ -178,12 +186,13 @@
                   <button type="button" onclick="fecharModal()" class="btn-cancelar">Cancelar</button>
               </div>
           </form>
-          <form id="formTransacaoReceita" method="POST">
+          <form id="formTransacaoReceita" action="{% url 'core:financeiro:criar-receita' %}" method="POST">
               {% csrf_token %}
               <input type="hidden" name="tipoform" value="transacao_receita">
               <div id="camposReceita" style="display: none;">
                   <label>Valor ganho:<br>
-                      <input type="number" name="valor_receita" step="0.01" required><br>
+                      <input type="number" name="valor_receita" step="0.01" min="0.01" required>
+                      <br>
                   </label>
 
                   <label>Categoria:<br>
@@ -224,16 +233,16 @@
           </form>
       </div>
   </div>
-  <div id="modalMeta" class="modal">
+  <div id="modalMeta">
       <div class="modal-content">
           <h2>Adicionar Meta 🎯</h2><br>
           Aqui você irá definir uma meta, ela pode ser tratada de duas formas:<br><br>
           <strong>1° </strong>Você pode defini-la como algo a ser atingido.<strong>(Mínimo Desejado)</strong><br>
-          &nbsp;&nbsp;&nbsp;<strong>Exemplo:</strong>&nbsp;Sobrar pelo menos 1000R$ ao final do mês.<br><br>
+          &nbsp;&nbsp;&nbsp;<strong>Exemplo:</strong>&nbsp;Sobrar pelo menos R$1000 ao final do mês.<br><br>
           <strong>2°</strong> Você pode defini-la como um limite a não ser ultrapassado.<strong>(Limite Máximo)</strong><br>
-          &nbsp;&nbsp;&nbsp;<strong>Exemplo:</strong>&nbsp;Gastar até 300R$ com internet. <br><br>
+          &nbsp;&nbsp;&nbsp;<strong>Exemplo:</strong>&nbsp;Gastar até R$300 com ‘internet’. <br><br>
           <hr><br>
-          <form id="formMeta" method="POST">
+          <form id="formMeta" action="{% url 'core:metas:criar-meta' %}" method="POST">
               {% csrf_token %}
               <input type="hidden" name="tipoform" value="meta">
               <p>Tipo da meta:</p>
@@ -246,6 +255,7 @@
               <p>Categoria da meta:</p>
               <label>
               <select name="categoria" required>
+                  <option value="default" disabled selected>---------------</option>
                   {% for categoria in categorias %}
                       <option value="{{ categorias.nome }}">{{ categoria.nome }}</option>
                   {% endfor %}
@@ -276,14 +286,14 @@
   </div>
   <!--ADICIONADO 16/05/2025  3 -->
 
-  <div id="modalObjetivo" class="modal">
+  <div id="modalObjetivo">
       <div class="modal-content">
           <h2>Adicionar Objetivo 📈</h2><br>
           <p>Aqui você irá adicionar um objetivo, diferente da meta, o objetivo se trata de algo focado no longo prazo, sempre relacionado a uma poupança ou investimento para a realização de algo.<br>
-              <br><strong>Exemplo 1: Comprar um carro - 30.000R$</strong><br>
-              <strong>Exemplo 2: Comprar um apartamento - 345.000R$</strong></p><br>
+              <br><strong>Exemplo 1: Comprar um carro - R$30.000</strong><br>
+              <strong>Exemplo 2: Comprar um apartamento - R$345.000</strong></p><br>
           <hr><br>
-          <form id="formObjetivo" method="POST">
+          <form id="formObjetivo" action="{% url 'core:objetivos:criar-objetivo' %}" method="POST">
               {% csrf_token %}
               <input type="hidden" name="tipoform" value="objetivo">
               <p>Título do Objetivo:</p>
@@ -315,5 +325,112 @@
   </div>
   <!------------------------- 3 -->
   <script src="{% static 'core/js/script.js' %}" defer></script>
+<script>
+    let modoGrafico = "gastos";
+const ctx = document.getElementById("graficoGastos").getContext("2d");
+
+let div = document.getElementById("grafico_despesa");
+
+if (!div) {
+  console.warn("#grafico_despesa não encontrado.");
+}
+
+const categorias_gasto = "{{ categorias_transacoes_despesas }}".split(',');
+const valores_gasto = "{{ lista_despesas_categoria }}".split(',');
+
+const cores_gastos = {
+    "Alimentação": "#f39c12"
+  , "Transporte": "#1abc9c"
+  , "Educação": "#3498db"
+  , "Moradia": "#9b59b6"
+  , "Despesas pessoais": "#e74c3c"
+  , "Saúde": "#2ecc71"
+  , "Tarifas": "#34495e"
+  , "Outras despesas": "#95a5a6"
+};
+
+let lista_cores_gastos = [];
+let nome_categorias_gastos = [];
+
+for(let i= 0; i < categorias_gasto.length; i++){
+  let nome = categorias_gasto[i]
+  lista_cores_gastos.push(cores_gastos[nome]);
+  nome_categorias_gastos.push(nome);
+}
+
+let dadosGastos = {
+  labels: nome_categorias_gastos,
+  datasets: [{
+    label: "Gastos por Categoria",
+    data: valores_gasto,
+    backgroundColor: lista_cores_gastos
+  }]
+};
+
+div = document.getElementById("grafico_receita")
+
+const categorias_ganhos = "{{ categorias_transacoes_receitas }}".split(',');
+const valores_ganhos = "{{ lista_receitas_categoria }}".split(',');
+
+const cores_ganhos = {
+    "Salário": "#1f77b4"
+  , "Aposentadoria": "#ff7f0e"
+  , "Bolsa de estudos": "#2ca02c"
+  , "Aluguel recebido": "#d62728"
+  , "Rendimentos de investimentos": "#9467bd"
+  , "Freelance": "#8c564b"
+  , "Venda de produtos": "#e377c2"
+  , "Comissão": "#7f7f7f"
+  , "Prêmios": "#bcbd22"
+  , "Presente": "#17becf"
+  , "Doação": "#aec7e8"
+  , "Herança": "#ffbb78"
+  , "Outras Receita": "#95a5a6"
+};
+
+
+let lista_cores_ganhos = [];
+let nome_categorias_ganhos = [];
+
+for (let i = 0; i < categorias_ganhos.length; i++){
+  let nome = categorias_ganhos[i];
+  lista_cores_ganhos.push(cores_ganhos[nome]);
+  nome_categorias_ganhos.push(nome);
+}
+
+
+const dadosGanhos = {
+  labels: nome_categorias_ganhos,
+  datasets: [{
+    label: "Ganhos por Categoria",
+    data: valores_ganhos,
+    backgroundColor: lista_cores_ganhos
+  }]
+};
+
+let meuGrafico = new Chart(ctx, {
+   type: "doughnut",
+   data: dadosGastos,
+   options: {
+     responsive: true,
+     plugins: {
+       legend: {position: 'bottom'}
+     }
+   }
+});
+
+function alternarGrafico() {
+    if (modoGrafico === "gastos") {
+      meuGrafico.data = dadosGanhos;
+      document.getElementById("btnAlternar").innerText = "Ver Gastos";
+      modoGrafico = "ganhos";
+    } else {
+      meuGrafico.data = dadosGastos;
+      document.getElementById("btnAlternar").innerText = "Ver Ganhos";
+      modoGrafico = "gastos";
+    }
+    meuGrafico.update();
+  }
+</script>
 </body>
 </html>

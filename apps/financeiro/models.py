@@ -25,6 +25,11 @@ class Categoria(models.Model):
         encontrou = Categoria.objects.filter(nome=nome)
         if not encontrou:
             raise ValueError('Categoria não encontrada')
+
+    @staticmethod
+    def GetTodasCategorias():
+        categorias = Categoria.objects.all()
+        return categorias
     
     #formata o nome dos objetos de categoria
     def __str__(self):

@@ -8,7 +8,7 @@ class Data:
 
     @classmethod
     def variarMes(cls, mes:int , ano:int , quatidade_variacao):
-        data_base = date(1,mes,ano)
+        data_base = date(day=1,month=mes,year=ano)
         data = data_base + relativedelta(months=quatidade_variacao)
         return cls(data)
 

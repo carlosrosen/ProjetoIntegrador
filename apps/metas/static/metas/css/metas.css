@@ -1,3 +1,66 @@
+/* Estilos para os botões do modal */
+.modal-buttons {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1rem;
+}
+
+.buttons-right {
+  display: flex;
+  gap: 10px;
+}
+
+.btn-deletar {
+  padding: 0.5rem 1rem !important;
+  background-color: #e74c3c !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 5px !important;
+  cursor: pointer !important;
+  font-size: 1rem !important;
+}
+
+.btn-deletar:hover {
+  background-color: #c0392b !important;
+}
+
+.btn-confirmar {
+  padding: 0.5rem 1rem !important;
+  background-color: #2ecc71 !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 5px !important;
+  cursor: pointer !important;
+  margin-right: 10px !important;
+}
+
+.btn-confirmar:hover {
+  background-color: #27ae60 !important;
+}
+
+.modal-confirmacao {
+  max-width: 400px !important;
+  text-align: center !important;
+}
+
+.modal-confirmacao h2 {
+  color: #333 !important;
+  margin-bottom: 1rem !important;
+  font-size: 1.5rem !important;
+}
+
+.modal-confirmacao p {
+  color: #666 !important;
+  margin-bottom: 1.5rem !important;
+  line-height: 1.5 !important;
+}
+
+/* Garantir que o modal de confirmação apareça */
+#modalConfirmacao.ativo {
+  display: flex !important;
+}
+
 .metas-header {
   display: flex;
   justify-content: space-between;
@@ -321,7 +384,7 @@
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 1rem;
   }
-  
+
   .metas-header {
     flex-direction: column;
     align-items: flex-start;
@@ -333,15 +396,15 @@
   .metas-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .meta-card {
     margin: 0;
   }
-  
+
   .meta-content {
     padding: 1rem;
   }
-  
+
   .meta-header {
     padding: 1rem;
   }

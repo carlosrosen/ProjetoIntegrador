@@ -14,11 +14,9 @@ from itertools import chain
 
 
 
-class Meta:
-    def __init__(self, user):
-        if not isinstance(user, AbstractBaseUser):
-            raise TypeError('Usuario invalido')
-        self.user = cast(CustomUser,user)
+class OperacoesMeta:
+    def __init__(self, user_id):
+        self.user = CustomUser.objects.get(id=user_id)
 
     def criarMeta(
             self,
@@ -51,7 +49,7 @@ class Meta:
     def editarMeta(
             self,
             meta: Metas,
-            categoria: str,
+            categoria: Categoria,
             tipo: str,
             valor: Decimal,
             data_inicio: Data,
@@ -66,13 +64,17 @@ class Meta:
         elif data_fim.valor < meta.data_inicio:
             return "A data final não pode ser anterior à data inicial."
 
-        meta.data_fim = data_fim
-        meta.categoria = categoria
+        meta.data_fim = data_fim.valor
+        meta.categoria_fk = categoria
         meta.tipo = tipo
         meta.valor = valor
         meta.data_inicio = data_inicio.valor
         meta.descricao = descricao
-        meta.save()
+
+        try:
+            meta.save()
+        except Exception as e:
+            raise Exception('Não foi possivel editar a meta')
 
     def deletarMeta(self, meta: Metas):
         meta.delete()
