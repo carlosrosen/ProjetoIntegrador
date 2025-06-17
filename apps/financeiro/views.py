@@ -1,3 +1,5 @@
+from calendar import calendar
+
 from django.http import HttpResponse, Http404
 
 from common.dominio.data import Data
@@ -21,27 +23,58 @@ operacoes = {
     'e': 'edição',
     'd': 'deletar'
 }
-def menuExtrato(request, mes:int, ano:int):
+
+
+def menuExtrato(request, mes: int, ano: int):
     if not request.user.is_authenticated:
         return redirect(reverse('usuario:login'))
+
     if request.method == 'GET':
         getter = GetterFinanceiro(request.user.id)
+
         parcelas = getter.todasParcelasMes(mes, ano)
-        categorias = Categoria.objects.all()
-        despesa = getter.despesaTotalMes(mes,ano)
-        receita = getter.receitaTotalMes(mes,ano)
+
+        categoria_filtro = request.GET.get('categoria')
+        tipo_filtro = request.GET.get('tipo')
+        pago_filtro = request.GET.get('pago')
+
+        if categoria_filtro:
+            parcelas = parcelas.filter(transacao_fk__categoria_fk__nome=categoria_filtro)
+
+        if tipo_filtro:
+            parcelas = parcelas.filter(transacao_fk__tipo=tipo_filtro)
+
+        if pago_filtro is not None and pago_filtro != '':
+            pago_bool = pago_filtro.lower() in ('true', '1')
+            parcelas = parcelas.filter(pago=pago_bool)
+
+        despesa = getter.despesaTotalMes(mes, ano)
+        receita = getter.receitaTotalMes(mes, ano)
         saldo_mes = receita - despesa
+        categorias = Categoria.objects.all()
+        try:
+            meses = {
+                1: "Janeiro", 2: "Fevereiro", 3: "Março", 4: "Abril",
+                5: "Maio", 6: "Junho", 7: "Julho", 8: "Agosto",
+                9: "Setembro", 10: "Outubro", 11: "Novembro", 12: "Dezembro"
+            }
+            nome_mes = meses[mes]
+        except IndexError:
+            nome_mes = "Mês Inválido"
+
         context = {
-            'parcelas': parcelas,
+            'parcelas': parcelas.order_by('data'),
             'mes': mes,
             'ano': ano,
+            'mes_nome': nome_mes,
             'categorias': categorias,
             'despesas_mes': despesa,
             'receitas_mes': receita,
             'saldo_mes': saldo_mes,
+            'request': request
         }
         return render(request, 'extrato.html', context=context)
-    return redirect(request.session.get('ultima_url'))
+    return redirect(request.session.get('ultima_url', reverse('core:dashboard')))
 
 def criarTransacaoReceita(request) -> redirect:
     if not request.user.is_authenticated:
@@ -117,6 +150,8 @@ def editarTransacaoUnica(request, parcela_id):
         descricao = request.POST.get('descricao')
         mes = int(parcela.data.month)
         ano = int(parcela.data.year)
+
+        print(categoria)
 
         categoria = Categoria.objects.get(nome=categoria)
 
