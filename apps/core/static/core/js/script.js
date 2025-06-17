@@ -93,28 +93,24 @@ function fecharModalMeta() {
 document.getElementById("formMeta").addEventListener("submit", function (event) {
   event.preventDefault();
   const formData = new FormData(event.target);
-  const nome = formData.get("nomeMeta");
   const tipo = formData.get("tipoMeta");
-  const valor = formData.get("valorMeta");
+  const valor = parseFloat(formData.get("valorMeta"));
   const dataInicio = formData.get("dataInicio");
   const dataFinal = formData.get("dataFinal");
   const categoria = formData.get("categoria");
 
-  console.log("Campo 'nome':", nome);
   console.log("Campo 'tipo':", tipo);
   console.log("Campo 'valor':", valor);
   console.log("Campo 'dataInicio':", dataInicio);
   console.log("Campo 'dataFinal':", dataFinal);
   console.log("Campo 'categoria':", categoria);
 
-
-  if(!nome || !tipo || !valor || !dataInicio || !dataFinal || !categoria){
+  if(!tipo || !valor || !dataInicio || !dataFinal || !categoria){
     alert("Insira as informações corretamente!")
     return;
   }
 
   alert(`Meta adicionada:\n
-  Nome: ${nome}
   Tipo: ${tipo}
   Valor: R$ ${valor.toFixed(2)}
   Data Início: ${dataInicio}

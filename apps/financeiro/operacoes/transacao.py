@@ -1,8 +1,10 @@
+from decimal import Decimal
+
 from django.contrib.auth.models import AbstractBaseUser
 from django.db import transaction
 
 from apps.usuarios.models import CustomUser
-from typing import cast
+from typing import Callable
 
 from apps.financeiro.models import Transacao, ParcelasTransacao, Categoria
 
@@ -51,7 +53,7 @@ class OperacoesTransacao:
                         , quantidade_parcelas: QuantidadeParcelas
                         , status_pago: bool
     ):
-        valor_parcela = valor.valorParcela(quantidade_parcelas= quantidade_parcelas.valorDecimal)
+        valor_parcela = valor.valorParcela(quantidade_parcelas=quantidade_parcelas.valorDecimal)
 
         historico = Historico(self.user.id)
         for i in range(quantidade_parcelas.valor):
@@ -71,7 +73,7 @@ class OperacoesTransacao:
                                                  , valor_correcao= valor_parcela
                                                  , inversor=False
                     )
-                if status_pago and data.valor <= date.today():
+                if status_pago == True and data_parcela.valor <= date.today():
                     self.user.operarSaldoAtual(valor_parcela, transacao.tipo, inversor=False)
 
             except Exception as e:
@@ -79,6 +81,74 @@ class OperacoesTransacao:
                 raise Exception(f'Erro ao criar o parcela {e}')
 
     # Função de editar a parcela (Quando a quantidade de parcelas for > 1)
+
+    def __ajustarSaldoEHistoricoNaEdicaoDaTransacao(self
+                                                    , historico: Historico
+                                                    , tipo_transacao: str
+                                                    , valor_anterior: Decimal
+                                                    , valor_novo: Decimal
+                                                    , pago_status_anterior: bool
+                                                    , pago_status_novo: bool
+                                                    , data_anterior_parcela: date
+                                                    , data_nova: date
+                                                    ):
+
+        atualizar_valores_historico = lambda: historico.corrigirValoresHistorico(data_correcao_historico=data_nova
+                                                                                 , valor_correcao=valor_novo
+                                                                                 , inversor=False
+                                                                                 )
+        atualizar_valores_saldo = lambda: self.user.operarSaldoAtual(valor=valor_novo
+                                                                     , tipo=tipo_transacao
+                                                                     , inversor=False
+                                                                     )
+        cancelar_valores_historico = lambda: historico.corrigirValoresHistorico(
+            data_correcao_historico=data_anterior_parcela
+            , valor_correcao=valor_anterior
+            , inversor=True
+        )
+        cancelar_valores_saldo = lambda: self.user.operarSaldoAtual(valor=valor_anterior
+                                                                   , tipo=tipo_transacao
+                                                                   , inversor=True
+                                                                   )
+        if pago_status_anterior == True and pago_status_novo == True:
+            # pago -> pago
+
+            # cancela o saldo de todos os registros a frente
+            cancelar_valores_historico()
+            # atualiza o saldo dos valores a frente da nova data
+            atualizar_valores_historico()
+
+            if data_anterior_parcela <= date.today() and data_nova <= date.today():
+                # cancela os valores do saldo do valor antigo
+                cancelar_valores_saldo()
+                # atualiza os valores do novo saldo
+                atualizar_valores_saldo()
+
+            elif data_anterior_parcela <= date.today() and data_nova > date.today():
+                cancelar_valores_saldo()
+
+            elif data_anterior_parcela > date.today() and data_nova <= date.today():
+                atualizar_valores_saldo()
+
+        elif pago_status_anterior == True and pago_status_novo == False:
+            # pago -> não pago
+            if data_anterior_parcela <= date.today() and data_nova <= date.today():
+                # cancela os valores antigos à frente e saldo do valor antigo
+                cancelar_valores_historico()
+                cancelar_valores_saldo()
+
+            elif data_anterior_parcela <= date.today() and data_nova > date.today():
+                cancelar_valores_historico()
+                cancelar_valores_saldo()
+
+        elif pago_status_anterior == False and pago_status_novo == True:
+            # não pago -> pago
+            if data_anterior_parcela <= date.today() and data_nova <= date.today():
+                atualizar_valores_historico()
+                atualizar_valores_saldo()
+            elif data_anterior_parcela > date.today() and data_nova <= date.today():
+                atualizar_valores_historico()
+                atualizar_valores_saldo()
 
     def editarTransacaoParcelada(self
                         , parcela: ParcelasTransacao
@@ -88,6 +158,27 @@ class OperacoesTransacao:
                         ):
         if parcela.transacao_fk.quantidade_parcelas == 1:
             return
+        with transaction.atomic():
+            historico = Historico(self.user.id)
+            self.__ajustarSaldoEHistoricoNaEdicaoDaTransacao(  historico=historico
+                                                             , tipo_transacao=parcela.transacao_fk.tipo
+                                                             , valor_anterior=parcela.valor
+                                                             , valor_novo=novo_valor.valor
+                                                             , pago_status_anterior=parcela.pago
+                                                             , pago_status_novo=pago.status
+                                                             , data_anterior_parcela=parcela.data
+                                                             , data_nova=parcela.data
+            )
+            parcela.valor = novo_valor.valor
+            parcela.pago = pago.status
+            parcela.transacao_fk.descricao = descricao
+
+            try:
+                parcela.transacao_fk.save()
+                parcela.save()
+            except Exception:
+                raise Exception(f'Erro ao editar parcela')
+
 
     def editarTransacaoUnica(self
                          , parcela: ParcelasTransacao
@@ -101,68 +192,16 @@ class OperacoesTransacao:
             return None
         with transaction.atomic():
 
-            pago_status_anterior = parcela.pago
-            valor_antigo = parcela.valor
-            data_antiga_parcela = parcela.data
-
-            historico = Historico(self.user)
-
-            atualizar_valores_historico = lambda: historico.corrigirValoresHistorico(data_correcao_historico= nova_data.valor
-                                                                                   , valor_correcao= novo_valor.valor
-                                                                                   , inversor=False
+            historico = Historico(self.user.id)
+            self.__ajustarSaldoEHistoricoNaEdicaoDaTransacao(  historico=historico
+                                                             , tipo_transacao=parcela.transacao_fk.tipo
+                                                             , valor_anterior=parcela.valor
+                                                             , valor_novo=novo_valor.valor
+                                                             , pago_status_anterior=parcela.pago
+                                                             , pago_status_novo= pago.status
+                                                             , data_anterior_parcela=parcela.data
+                                                             , data_nova=nova_data.valor
             )
-            atualizar_valores_saldo = lambda: self.user.operarSaldoAtual(valor=novo_valor.valor
-                                                                       , tipo=parcela.transacao_fk.tipo
-                                                                       , inversor= False
-            )
-            cancelar_valores_historico = lambda: historico.corrigirValoresHistorico(data_correcao_historico= data_antiga_parcela
-                                                                                  , valor_correcao= valor_antigo
-                                                                                  , inversor=True
-            )
-            cancela_valores_saldo = lambda: self.user.operarSaldoAtual(valor=valor_antigo
-                                                                     , tipo=parcela.transacao_fk.tipo
-                                                                     , inversor=True
-            )
-
-            if  pago_status_anterior == True and pago.status == True:
-                #pago -> pago
-
-                #cancela o saldo de todos os registros a frente
-                cancelar_valores_historico()
-                #atualiza o saldo dos valores a frente da nova data
-                atualizar_valores_historico()
-
-                if data_antiga_parcela <= date.today() and nova_data.valor <= date.today():
-                    #cancela os valores do saldo do valor antigo
-                    cancela_valores_saldo()
-                    #atualiza os valores do novo saldo
-                    atualizar_valores_saldo()
-
-                elif data_antiga_parcela <= date.today() and nova_data.valor > date.today():
-                    cancela_valores_saldo()
-
-                elif data_antiga_parcela > date.today() and nova_data.valor <= date.today():
-                    atualizar_valores_saldo()
-
-            elif pago_status_anterior == True and pago.status == False:
-                #pago -> não pago
-                if  data_antiga_parcela <= date.today() and nova_data.valor <= date.today():
-                # cancela os valores antigos à frente e saldo do valor antigo
-                    cancelar_valores_historico()
-                    cancela_valores_saldo()
-
-                elif data_antiga_parcela <= date.today() and nova_data.valor > date.today():
-                    cancelar_valores_historico()
-                    cancela_valores_saldo()
-
-            elif pago_status_anterior == False and pago.status == True:
-                #não pago -> pago
-                if data_antiga_parcela <= date.today() and nova_data.valor <= date.today():
-                    atualizar_valores_historico()
-                    atualizar_valores_saldo()
-                elif data_antiga_parcela > date.today() and nova_data.valor <= date.today():
-                    atualizar_valores_historico()
-                    atualizar_valores_saldo()
 
             parcela.valor = novo_valor.valor
             parcela.data = nova_data.valor
@@ -171,6 +210,7 @@ class OperacoesTransacao:
             parcela.transacao_fk.descricao = descricao
 
             try:
+                parcela.transacao_fk.save()
                 parcela.save()
             except Exception as e:
                 raise Exception(f'Erro ao editar parcela')
@@ -180,9 +220,9 @@ class OperacoesTransacao:
     def deletarUmaParcela(self, parcela: ParcelasTransacao):
         with transaction.atomic():
             transacao = parcela.transacao_fk
-            historico = Historico(self.user)
+            historico = Historico(self.user.id)
             self.user.operarSaldoAtual(parcela.valor, transacao.tipo, inversor=True)
-            if transacao.quantidade_parcelas == 1:
+            if transacao.quantidade_parcelas <= 1:
                 historico.corrigirValoresHistorico(data_correcao_historico= parcela.data
                                                   , valor_correcao= parcela.valor
                                                   , inversor=True
@@ -207,7 +247,7 @@ class OperacoesTransacao:
     def deletarProximasParcelas(self, parcela: ParcelasTransacao):
         with transaction.atomic():
             parcelas = ParcelasTransacao.objects.filter(
-            parcela__transacao_fk=parcela.transacao_fk,
+            transacao_fk=parcela.transacao_fk,
             ordem_parcela__gte=parcela.ordem_parcela
         ).order_by('ordem_parcela')
         for parcela in parcelas:
@@ -218,7 +258,7 @@ class OperacoesTransacao:
     def deletarTodasParcelas(self,parcela: ParcelasTransacao):
         with transaction.atomic():
             parcelas = ParcelasTransacao.objects.filter(transacao_fk__user_fk=self.user ,transacao_fk=parcela.transacao_fk)
-            historico = Historico(self.user)
+            historico = Historico(self.user.id)
             #cancela o valor do saldo e do historico
             for parcela in parcelas:
                 if parcela.data > date.today():

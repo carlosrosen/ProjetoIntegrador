@@ -63,6 +63,7 @@ class GetterFinanceiro:
         mes, ano = abs(mes), abs(ano)
         ganhos:Decimal = ParcelasTransacao.objects.filter(transacao_fk__user_fk= self.user
                                                 , transacao_fk__tipo='R'
+                                                , pago=True
                                                 , data__month=mes, data__year=ano).aggregate(total = Sum('valor'))['total']
         if ganhos is None:
             return Decimal('0.00')
@@ -71,6 +72,7 @@ class GetterFinanceiro:
     def despesaTotalMes(self,mes:int, ano:int):
         gastos = ParcelasTransacao.objects.filter(transacao_fk__user_fk= self.user
                                                 , transacao_fk__tipo='D'
+                                                , pago=True
                                                 , data__month=mes, data__year=ano).aggregate(total = Sum('valor'))['total']
         if gastos is None:
             return Decimal('0.00')
@@ -100,7 +102,8 @@ class GetterFinanceiro:
         dicionario = {}
 
         for categoria in categorias:
-            valor_total = parcelas_mes.filter(transacao_fk__categoria_fk=categoria).aggregate(total=Sum('valor'))['total']
+            valor_total = parcelas_mes.filter(transacao_fk__categoria_fk=categoria
+                                              , pago=True).aggregate(total=Sum('valor'))['total']
             if valor_total is None:
                 continue
             dicionario[categoria.nome] = str(valor_total)

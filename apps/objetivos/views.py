@@ -25,6 +25,8 @@ def menuObjetivos(request):
     context = {'objetivos': objetivos
              , 'todas_categorias_receita': categorias.filter(tipo='R')
              , 'todas_categorias_despesa': categorias.filter(tipo='D')
+             , 'mes': date.today().month
+             , 'ano': date.today().year
     }
     return render(request, 'objetivos.html', context)
 

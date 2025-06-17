@@ -25,7 +25,6 @@ def menuExtrato(request, mes:int, ano:int):
     if not request.user.is_authenticated:
         return redirect(reverse('usuario:login'))
     if request.method == 'GET':
-
         getter = GetterFinanceiro(request.user.id)
         parcelas = getter.todasParcelasMes(mes, ano)
         categorias = Categoria.objects.all()
@@ -41,7 +40,6 @@ def menuExtrato(request, mes:int, ano:int):
             'receitas_mes': receita,
             'saldo_mes': saldo_mes,
         }
-        print(request.session.get('ultima_url'))
         return render(request, 'extrato.html', context=context)
     return redirect(request.session.get('ultima_url'))
 
@@ -108,6 +106,8 @@ def criarTransacaoDespesa(request) -> redirect :
 
 # Quando a quantidade de parcelas for igual a 1
 def editarTransacaoUnica(request, parcela_id):
+    if not request.user.is_authenticated:
+        return redirect(reverse('core:login'))
     if request.method == 'POST':
         parcela = get_object_or_404(ParcelasTransacao, id=parcela_id, transacao_fk__user_fk__id=request.user.id)
         novo_valor = ValorTransacao(request.POST.get('novoValor'))
@@ -115,26 +115,31 @@ def editarTransacaoUnica(request, parcela_id):
         categoria = request.POST.get('novaCategoria')
         pago = Pago(request.POST.get('pago'))
         descricao = request.POST.get('descricao')
+        mes = int(parcela.data.month)
+        ano = int(parcela.data.year)
 
         categoria = Categoria.objects.get(nome=categoria)
 
         operacao = OperacoesTransacao(request.user.id)
         operacao.editarTransacaoUnica(parcela, novo_valor, nova_data, categoria, pago, descricao)
+        return redirect('core:menuExtrato', mes=mes, ano=ano)
 
-    return redirect(reverse('core:extrato:menuExtrato'))
 
 # Quando a quantidade de parcelas for maior a 1
 def editarTransacaoParcelada(request, parcela_id):
+    if not request.user.is_authenticated:
+        return redirect(reverse('core:login'))
     if request.method == 'POST':
         parcela = get_object_or_404(ParcelasTransacao, id=parcela_id, transacao_fk__user_fk__id=request.user.id)
         novo_valor = ValorTransacao(request.POST.get('novoValor'))
         pago = Pago(request.POST.get('pago'))
         descricao = request.POST.get('descricao')
+        mes = int(parcela.data.month)
+        ano = int(parcela.data.year)
 
         operacao = OperacoesTransacao(request.user.id)
         operacao.editarTransacaoParcelada(parcela, novo_valor, pago, descricao)
-
-    return redirect(reverse('core:extrato:menuExtrato'))
+        return redirect('core:menuExtrato', mes=mes, ano=ano)
 
 def deletarParcela(request, parcela_id):
     if not request.user.is_authenticated:
@@ -143,15 +148,16 @@ def deletarParcela(request, parcela_id):
         parcela = get_object_or_404(ParcelasTransacao, id=parcela_id, transacao_fk__user_fk__id=request.user.id)
         deletar = request.POST.get('tipoExclusao')
         operacao = OperacoesTransacao(request.user.id)
+        mes = int(parcela.data.month)
+        ano = int(parcela.data.year)
 
-        if deletar == 'apenas':
+        if deletar == 'unica':
             operacao.deletarUmaParcela(parcela)
         elif deletar == 'estaprox':
             operacao.deletarProximasParcelas(parcela)
         elif deletar == 'todas':
             operacao.deletarTodasParcelas(parcela)
-
-    return redirect(reverse('core:extrato:menuExtrato'))
+        return redirect('core:menuExtrato', mes=mes, ano=ano)
 
 
 

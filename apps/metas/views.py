@@ -1,5 +1,8 @@
 from django.shortcuts import render, reverse, redirect, get_object_or_404
 from decimal import Decimal
+from datetime import date
+from unicodedata import category
+
 from apps.metas.operacoes.metas import GetMetas, OperacoesMeta, Metas
 from apps.financeiro.models import Categoria
 from common.dominio.data import Data
@@ -7,16 +10,41 @@ from common.dominio.data import Data
 
 def menuMetas(request):
     if not request.user.is_authenticated:
-        return redirect(reverse('login'))
+        return redirect(reverse('usuario:login'))
     gettermetas= GetMetas(request.user.id)
     metas = gettermetas.todosEmOrdem()
-    context = {'metas': metas,
-               'categorias': Categoria.GetTodasCategorias()}
+    context = {'metas': metas
+               ,'categorias': Categoria.GetTodasCategorias()
+               ,'mes': date.today().month
+               ,'ano': date.today().year
+    }
     return render(request, 'metas.html', context)
 
 def criarMeta(request):
     if not request.user.is_authenticated:
-        return redirect(reverse('login'))
+        return redirect(reverse('usuario:login'))
+    if not request.method == "POST":
+        return redirect(request.session['ultima_url'])
+    operacoes_meta = OperacoesMeta(request.user.id)
+    valor = request.POST.get('valor')
+    tipo = request.POST.get('tipo')
+    data_inicio = request.POST.get('data_inicio')
+    data_fim = request.POST.get('data_fim')
+    descricao = request.POST.get('descricao')
+    categoria = request.POST.get('categoria')
+    Categoria.verificacaoNomesCategoria(categoria)
+    categoria = Categoria.objects.get(nome=categoria)
+
+    print(valor,'\n',tipo,'\n',descricao,'\n',categoria,'\n', data_inicio,'\n', data_fim)
+
+    operacoes_meta.criarMeta(categoria=categoria
+                             , valor= Decimal(valor)
+                             , tipo=tipo
+                             , data_inicio= Data(data_inicio)
+                             , data_fim= Data(data_fim)
+                             , descricao=descricao
+    )
+    return redirect(request.session['ultima_url'])
 
 def editarMeta(request, meta_id):
     if request.method == 'POST':

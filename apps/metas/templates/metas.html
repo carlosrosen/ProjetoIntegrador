@@ -13,16 +13,16 @@
   <aside class="sidebar">
     <h1>U-Balance</h1>
     <nav>
-      <a href="{% url 'core:dashboard' %}">🏠 Início</a>
-      <a href="#" id="abrirModalTransacao">💲 Adicionar Transação</a>
-      <a href="#" id="abrirModalMeta">🎯 Adicionar Meta</a>
-      <a href="#" id="abrirModalObjetivo">📈 Adicionar Objetivo</a>
-      <a href="{% url 'core:metas:meta' %}" style="background-color: #f0f0f0; font-weight: 600;">🎯 Metas</a>
-      <a href="{% url 'core:objetivos:menu_objetivos' %}">📈 Objetivos</a>
-      <a href="#">🧾 Extrato</a>
-      <a href="#">📊 Relatórios</a>
-      <a href="#">⚙️ Configurações</a>
-      <a href="#" id="logout">Logout</a>
+        <a href="{% url 'core:dashboard' %}">🏠 Início</a>
+        <a href="" id="abrirModalTransacao">💲 Adicionar Transação</a>
+        <a href="#" id="abrirModalMeta">🎯 Adicionar Meta</a>
+        <a href="#" id="abrirModalObjetivo">📈 Adicionar Objetivo</a>
+        <a href="{% url 'core:metas:meta' %}" style="display:block; background-color: #f0f0f0; font-weight: 600;">🎯 Metas</a>
+        <a href="{% url 'core:objetivos:menu_objetivos' %}">📈 Objetivos</a>
+        <a href="{% url 'core:menuExtrato' mes=mes ano=ano %}">🧾 Extrato</a>
+        <a href="{% url 'core:erro404' %}" >📊 Relatórios</a>
+        <a href="{% url 'usuario:configuracoes' %}">⚙️ Configurações</a>
+        <a href="{% url 'usuario:logout' %}" id="logout">Logout</a>
     </nav>
   </aside>
 

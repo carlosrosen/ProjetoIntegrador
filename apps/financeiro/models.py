@@ -81,6 +81,7 @@ class ParcelasTransacao(models.Model):
     def __str__(self):
         return f'''
         transacao: {self.transacao_fk.id}
+        - parcela: {self.id}
         - numero da parcela: {self.ordem_parcela}
         - pago: {self.pago}'''
 

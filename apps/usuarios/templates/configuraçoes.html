@@ -1,0 +1,109 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>U-Balance - Configurações</title>
+  <link rel="stylesheet" href="{% static 'core/css/style_dashboard.css' %}" />
+  <link rel="stylesheet" href="{% static 'usuarios/css/style_configuracoes.css' %}" />
+</head>
+<body>
+  <aside class="sidebar">
+    <h1>U-Balance</h1>
+    <nav>
+          <a href="{% url 'core:dashboard' %}">🏠 Início</a>
+          <a href="" id="abrirModalTransacao">💲 Adicionar Transação</a>
+          <a href="#" id="abrirModalMeta">🎯 Adicionar Meta</a>
+          <a href="#" id="abrirModalObjetivo">📈 Adicionar Objetivo</a>
+          <a href="{% url 'core:metas:meta' %}">🎯 Metas</a>
+          <a href="{% url 'core:objetivos:menu_objetivos' %}">📈 Objetivos</a>
+          <a href="{% url 'core:menuExtrato' mes=mes ano=ano %}">🧾 Extrato</a>
+          <a href="{% url 'core:metas:meta' %}">📊 Relatórios</a>
+          <a href="{% url 'usuario:configuracoes' %}" style="display:block; background-color: #f0f0f0; font-weight: 600;">⚙️ Configurações</a>
+          <a href="{% url 'usuario:logout' %}" id="logout">Logout</a>
+      </nav>
+  </aside>
+  <main class="content">
+    <div class="configuracoes-container">
+      <div class="configuracoes-header">
+        <h1>Configurações</h1>
+        <p>Gerencie suas preferências e configurações da conta</p>
+      </div>
+
+      <div class="configuracoes-grid">
+        <form class="config-box" method="POST" action="{% url 'usuario:configuracoes' %}">
+          {% csrf_token %}
+          <div class="config-header">
+            <h2>Informações Pessoais</h2>
+            <p>Atualize suas informações básicas de perfil</p>
+          </div>
+          <div class="config-content">
+            <div class="form-group">
+              <label for="username">Usuário</label>
+              <input type="text" id="username" name="nome_usuario" placeholder="Seu nome de usuário" value="{{ usuario.username }}">
+            </div>
+            <div class="form-group">
+              <label for="email">Email</label>
+              <input type="email" id="email" name="email" placeholder="seu@email.com" value="{{ usuario.email }}">
+            </div>
+            <button type="submit" name="atualizar_perfil" class="btn-salvar">
+              Salvar Alterações
+            </button>
+          </div>
+        </form>
+
+        <form class="config-box" method="POST" action="{% url 'usuario:configuracoes' %}">
+          {% csrf_token %}
+          <div class="config-header">
+            <h2>Segurança</h2>
+            <p>Mantenha sua conta segura</p>
+          </div>
+          <div class="config-content">
+            <div class="form-group">
+              <label for="currentPassword">Senha Atual</label>
+              <div class="password-input">
+                <input type="password" id="currentPassword" name="senha_atual" placeholder="Digite sua senha atual">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="newPassword">Nova Senha</label>
+                <input type="password" id="newPassword" name="nova_senha" placeholder="Digite a nova senha">
+              </div>
+              <div class="form-group">
+                <label for="confirmPassword">Confirmar Senha</label>
+                <input type="password" id="confirmPassword" name="confirmar_senha" placeholder="Confirme a nova senha">
+              </div>
+            </div>
+            <button type="submit" name="mudar_senha" class="btn-salvar">
+              Atualizar Senha
+            </button>
+          </div>
+        </form>
+
+        <form class="config-box danger-zone" method="POST" action="{% url 'usuario:configuracoes' %}" onsubmit="return confirm('Tem certeza que deseja excluir sua conta? Esta ação é irreversível.');">
+          {% csrf_token %}
+          <div class="config-header">
+            <h2> Zona de Perigo</h2>
+            <p>Ações irreversíveis para sua conta</p>
+          </div>
+          <div class="config-content">
+            <div class="danger-warning">
+              <h4>Excluir Conta</h4>
+              <p>Esta ação não pode ser desfeita. Todos os seus dados serão permanentemente removidos.</p>
+              <button type="submit" name="deletar_conta" class="btn-danger">
+                Excluir Conta
+              </button>
+            </div>
+          </div>
+        </form>
+        </div>
+    </div>
+
+  </main>
+  <script>
+  </script>
+</body>
+</html>

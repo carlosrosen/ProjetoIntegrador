@@ -216,6 +216,24 @@ td {
   font-weight: bold;
 }
 
+.status-pago {
+  background: #d4edda;
+  color: #155724;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.status-nao-pago {
+  background: #f8d7da;
+  color: #721c24;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
 .valor-negativo {
   color: #dc3545;
   font-weight: bold;
@@ -233,6 +251,23 @@ td {
   transition: background 0.3s ease;
 }
 
+.btn-excluir {
+  background-color: #dc3545; /* Um tom de vermelho padrão para 'perigo' */
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 600;
+  font-family: 'Segoe UI', sans-serif; /* Garante a mesma fonte do link 'editar' */
+  transition: background 0.3s ease;
+}
+
+.btn-excluir:hover {
+  background-color: #c82333; /* Vermelho um pouco mais escuro no hover */
+}
+
 .btn-editar:hover {
   background: #16a055;
 }
@@ -242,29 +277,29 @@ td {
   body {
     flex-direction: column;
   }
-  
+
   .sidebar {
     width: 100%;
     height: auto;
   }
-  
+
   .summary-cards {
     flex-direction: column;
   }
-  
+
   .filters {
     flex-direction: column;
     align-items: stretch;
   }
-  
+
   .filters select {
     min-width: auto;
   }
-  
+
   .transactions-table {
     overflow-x: auto;
   }
-  
+
   table {
     min-width: 800px;
   }
@@ -320,7 +355,7 @@ td {
 }
 
 #modalConfirmarExclusao.ativo{
-  display: block;
+  display: flex;
 }
 
 #modalConfirmarExclusaoParcela{
@@ -338,5 +373,14 @@ td {
 }
 
 #modalConfirmarExclusaoParcela.ativo{
-  display: block;
+  display: flex;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
 }
