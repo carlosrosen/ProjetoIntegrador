@@ -1,3 +1,5 @@
+from datetime import date
+
 from django.contrib.auth.models import AbstractUser, UserManager
 from django.db import models
 
@@ -26,7 +28,7 @@ class CustomUserManager(UserManager):
 class CustomUser(AbstractUser):
     objects = CustomUserManager()
     saldoAtual = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
-    dataUltimaTransacaoVerificada = models.DateField(null=True, blank=True)
+    dataUltimaTransacaoVerificada = models.DateField(default=date.today())
 
     def operarSaldoAtual(self, valor:Decimal, tipo:str, inversor:bool = False):
         valor = abs(valor)
