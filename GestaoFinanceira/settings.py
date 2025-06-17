@@ -37,9 +37,11 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'core',
-    'usuarios',
-    'financeiro'
+    'apps.core',
+    'apps.usuarios',
+    'apps.financeiro',
+    'apps.objetivos',
+    'apps.metas',
 ]
 
 MIDDLEWARE = [
@@ -50,6 +52,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'apps.core.middlewares.middleware_salvar_url.MiddlewareSalvar'
 ]
 
 # Fazer o Django enviar o e-mail pelo console

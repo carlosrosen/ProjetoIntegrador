@@ -1,0 +1,350 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>U-Balance - Extrato de Transações</title>
+    <link rel="stylesheet" href="{% static 'extrato/css/extrato.css' %}" />
+    <link rel="stylesheet" href="{% static 'core/css/style_dashboard.css' %}"/>
+</head>
+<body>
+    <aside class="sidebar">
+        <h1>U-Balance</h1>
+        <nav>
+            <a href="{% url 'core:dashboard' %}">🏠 Início</a>
+            <a href="" id="abrirModalTransacao">💲 Adicionar Transação</a>
+            <a href="#" id="abrirModalMeta">🎯 Adicionar Meta</a>
+            <a href="#" id="abrirModalObjetivo">📈 Adicionar Objetivo</a>
+            <a href="{% url 'core:metas:meta' %}">🎯 Metas</a>
+            <a href="{% url 'core:objetivos:menu_objetivos' %}">📈 Objetivos</a>
+            <a href="{% url 'core:menuExtrato' mes=mes ano=ano %}"style="display:block; background-color: #f0f0f0; font-weight: 600;">🧾 Extrato</a>
+            <a href="{% url 'core:metas:meta' %}">📊 Relatórios</a>
+            <a href="{% url 'usuario:configuracoes' %}">⚙️ Configurações</a>
+            <a href="{% url 'usuario:logout' %}" id="logout">Logout</a>
+        </nav>
+    </aside>
+
+    <main class="content">
+        <div class="top-bar">
+            <div>
+                <h2 class="page-subtitle">Extrato de Transações</h2>
+                <h1 class="page-title">Extrato de {{ mes_nome }}/{{ ano }}</h1>
+            </div>
+            <div class="user-info">
+                <span>Usuário: {{ user.first_name }} {{ user.last_name }}</span>
+            </div>
+        </div>
+
+        <div class="summary-cards">
+    <div class="summary-card balance">
+        <h3>SALDO DO MÊS</h3>
+        <p class="amount">R$ {{ saldo_mes|floatformat:2 }}</p>
+    </div>
+    <div class="summary-card income">
+        <h3>RECEITAS DO MÊS</h3>
+        <p class="amount">R$ {{ receitas_mes|floatformat:2 }}</p>
+    </div>
+    <div class="summary-card expense">
+        <h3>DESPESAS DO MÊS</h3>
+        <p class="amount">R$ {{ despesas_mes|floatformat:2 }}</p>
+    </div>
+</div>
+
+    <form method="POST" class="filters-section">
+        {% csrf_token %}
+        <div class="filters">
+            <select name="mes" id="mes">
+                <option value="janeiro">Janeiro</option>
+                <option value="fevereiro">Fevereiro</option>
+                <option value="marco">Março</option>
+                <option value="abril">Abril</option>
+                <option value="maio" selected>Maio</option>
+                <option value="junho">Junho</option>
+                <option value="julho">Julho</option>
+                <option value="agosto">Agosto</option>
+                <option value="setembro">Setembro</option>
+                <option value="outubro">Outubro</option>
+                <option value="novembro">Novembro</option>
+                <option value="dezembro">Dezembro</option>
+            </select>
+
+            <select name="ano" id="ano">
+                <option value="2023">2023</option>
+                <option value="2024">2024</option>
+                <option value="2025" selected>2025</option>
+                <option value="2026">2026</option>
+            </select>
+
+            <select name="categoria" id="categoria">
+                {% for categoria in categorias %}
+                    <option value="{{ categoria.nome }}">{{ categoria.nome }}</option>
+                {% endfor %}
+            </select>
+
+            <select name="tipo" id="tipo">
+                <option value="todos" selected>Todos os Tipos</option>
+                <option value="receita">Receita</option>
+                <option value="despesa">Despesa</option>
+            </select>
+
+            <select name="pago" id="pago">
+                <option value="todos" selected>Todos os Status</option>
+                <option value="pago">Pago</option>
+                <option value="nao_pago">Não pago</option>
+            </select>
+
+            <button type="submit" class="filter-btn">Filtrar</button>
+        </div>
+    </form>
+
+        <div class="transactions-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Categoria</th>
+                        <th>Descrição</th>
+                        <th>Tipo</th>
+                        <th>Parcelas</th>
+                        <th>Valor (R$)</th>
+                        <th>Está pago?</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for parcela in parcelas %}
+                    <tr>
+                        <td>{{ parcela.data|date:"d/m/Y" }}</td>
+                        <td>{{ parcela.transacao_fk.categoria_fk.nome }}</td>
+                        <td>{{ parcela.transacao_fk.descricao }}</td>
+                        <td>
+                            {% if parcela.transacao_fk.tipo == 'R' %}
+                                <span class="tipo-receita">Receita</span>
+                            {% else %}
+                                <span class="tipo-despesa">Despesa</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if parcela.transacao_fk.quantidade_parcelas > 1 %}
+                                ({{ parcela.ordem_parcela }}/{{ parcela.transacao_fk.quantidade_parcelas }})
+                            {% else %}
+                                À vista
+                            {% endif %}
+                        </td>
+                        <td class="{% if parcela.transacao_fk.tipo == 'R' %}valor-positivo{% else %}valor-negativo{% endif %}">
+                            {{ parcela.valor|floatformat:2 }}
+                        </td>
+                        <td>
+                            {% if parcela.pago %}
+                                <span class="status-pago">Pago</span>
+                            {% else %}
+                                <span class="status-nao-pago">Não pago</span>
+                            {% endif %}
+                        </td>
+                        <td style="display: flex; gap: 0.5rem;">
+                            {% if parcela.transacao_fk.quantidade_parcelas == 1 %}
+                                <a href="javascript:void(0)" class="btn-editar" onclick="abrirModalEditarTransacao('{{ parcela.id }}')">Editar</a>
+                                <button type="button" class="btn-excluir" onclick="abrirModalDeletarTransacao('{{ parcela.id }}')">Excluir</button>
+                            {% else %}
+                                <a href="javascript:void(0)" class="btn-editar" onclick="abrirModalEditarParcela('{{ parcela.id }}')">Editar</a>
+                                <button type="button" class="btn-excluir" onclick="abrirModalDeletarParcela('{{ parcela.id }}')">Excluir</button>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <div id="modalEditarTransacao" class="modal">
+        <div class="modal-content">
+            <h2>Editar Transação</h2>
+            <form id="formEditarTransacao" method="POST">
+                {% csrf_token %}
+
+                <label for="data">Data:</label>
+                <input id="dataEditarUnico" type="date" name="novaData" required>
+
+                <label for="categoria">Categoria:</label>
+                <!-- trocar o input de categoria por um select e deixar o valor padrão como a categoria atual -->
+                <input id="categoriaEditarUnico" type="text" name="novaCategoria" required>
+                <label for="valor">Valor:</label>
+                <input id="valorEditarUnico" type="number" name="novoValor" step="0.01" required>
+
+                <label for="descricao">Descrição:</label>
+                <input id="descricaoEditarUnico" type="text" name="descricao">
+
+                <label for="pago">Status:</label>
+                <select name="pago" required>
+                    <option value="True">Pago</option>
+                    <option value="False">Não pago</option>
+                </select>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem;">
+                    <button type="submit" class="btn-salvar">Salvar</button>
+                    <button type="button" class="btn-cancelar" onclick="fecharModalHash()">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="modalEditarTransacaoParcela" class="modal">
+        <div class="modal-content">
+            <h2>Editar Parcela</h2>
+            <form id="formEditarParcela" method="POST">
+                {% csrf_token %}
+
+                <label for="novoValor">Valor:</label>
+                <input id="valorEdicaoParcelado" type="number" name="novoValor" step="0.01" required>
+
+                <label for="descricao">Descrição:</label>
+                <input id="descricaoEditarParcelado" type="text" name="descricao">
+
+                <label for="pago">Status:</label>
+                <select id="pagoEdicaoParcelado" name="pago" required>
+                    <option value="True">Pago</option>
+                    <option value="False">Não pago</option>
+                </select>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem;">
+                    <button type="submit" class="btn-salvar">Salvar</button>
+                    <button type="button" class="btn-cancelar" onclick="fecharModalHash()">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="modalConfirmarExclusao" class="modal">
+    <div class="modal-content">
+        <h3>Tem certeza de que deseja excluir a transação?</h3>
+        <form name="tipoExclusao" id="formDeletarTransacao" method="POST" style="margin-top: 1rem;">
+            {% csrf_token %}
+            <button type="submit" name="tipoExclusao" value="unica" class="btn-excluir">Sim, desejo excluir.</button>
+            <button type="button" class="btn-cancelar" onclick="fecharModalHash()">Cancelar</button>
+        </form>
+    </div>
+</div>
+
+    <div id="modalConfirmarExclusaoParcela" class="modal">
+        <div class="modal-content">
+            <h3>Como deseja excluir essa transação?</h3>
+            <p>Escolha uma das opções abaixo:</p>
+            <form id="formDeletarParcela" method="POST" style="margin-top: 1rem;"> {% csrf_token %}
+                <input type="hidden" name="tipoExclusao" id="tipoExclusaoInput" value="">
+
+                <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                    <button type="submit" class="btn-excluir" onclick="document.getElementById('tipoExclusaoInput').value='unica'">Apenas esta parcela</button>
+                    <button type="submit" class="btn-excluir" onclick="document.getElementById('tipoExclusaoInput').value='estaprox'">Esta e as próximas</button>
+                    <button type="submit" class="btn-excluir" onclick="document.getElementById('tipoExclusaoInput').value='todas'">Todas as parcelas</button>
+                    <button type="button" class="btn-cancelar" onclick="fecharModalHash()">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script defer>
+        const urlEditarTransacao = "{% url 'core:financeiro:editar-transacao' 0 %}";
+        const urlDeletarTransacao = "{% url 'core:financeiro:deletar-transacao' 0 %}";
+        const urlEditarParcela = "{% url 'core:financeiro:editar-parcela' 0 %}";
+        const urlDeletarParcela = "{% url 'core:financeiro:deletar-transacao' 0 %}";
+
+        function buscarTransacao(id){
+            return {
+                {% for parcela in parcelas %}
+                    {{ parcela.id }}: {
+                        id: {{ parcela.id }},
+                        valor: "{{ parcela.valor| escapejs |floatformat:2 }}",
+                        data: "{{ parcela.data.year| escapejs }}-{{ parcela.data.month| escapejs }}-{{ parcela.data.day| escapejs }}",
+                        descricao: "{{ parcela.transacao_fk.descricao| escapejs }}",
+                        categoria: "{{ parcela.transacao_fk.categoria_fk.nome| escapejs }}",
+                        pago: "{{ parcela.pago| escapejs }}"
+                    }{% if not forloop.last %},{% endif %}
+                {% endfor %}
+            }[id];
+        }
+
+        function abrirModalEditarTransacao(id) {
+            const parcela = buscarTransacao(id);
+            let valor = document.getElementById("valorEditarUnico");
+            let data = document.getElementById("dataEditarUnico");
+            let categoria = document.getElementById("categoriaEditarUnico");
+            let descricao = document.getElementById("descricaoEditarUnico");
+
+            valor.value = parseFloat(parcela.valor).toFixed(2);
+            data.value = parcela.data;
+            categoria.value = parcela.categoria;
+            descricao.value = parcela.descricao;
+
+            const form = document.getElementById('formEditarTransacao');
+            form.action = urlEditarTransacao.replace('0', id);
+            location.hash = 'editar-transacao';
+        }
+
+        function abrirModalDeletarTransacao(id) {
+            const form = document.getElementById('formDeletarTransacao');
+            form.action = urlDeletarTransacao.replace('0', id);
+            location.hash = 'deletar-transacao';
+        }
+
+        function abrirModalEditarParcela(id){
+            const parcela = buscarTransacao(id);
+            let valor = document.getElementById("valorEdicaoParcelado");
+            let descricao = document.getElementById("descricaoEditarParcelado");
+            valor.value = parseFloat(parcela.valor).toFixed(2);
+            descricao.value = parcela.descricao;
+
+            const form = document.getElementById('formEditarParcela');
+            form.action = urlEditarParcela.replace('0', id);
+
+
+            location.hash = 'editar-parcela';
+        }
+
+        function abrirModalDeletarParcela(id) {
+            const form = document.getElementById('formDeletarParcela');
+            form.action = urlDeletarParcela.replace('0', id);
+            location.hash = 'deletar-parcela';
+        }
+
+        function abrirModalViaHash() {
+            const hash = window.location.hash;
+            fecharTodosModais();
+
+            switch (hash) {
+                case '#editar-transacao':
+                    document.getElementById('modalEditarTransacao')?.classList.add('ativo');
+                    break;
+                case '#editar-parcela':
+                    document.getElementById('modalEditarTransacaoParcela')?.classList.add('ativo');
+                    break;
+                case '#deletar-transacao':
+                    document.getElementById('modalConfirmarExclusao')?.classList.add('ativo');
+                    break;
+                case '#deletar-parcela':
+                    document.getElementById('modalConfirmarExclusaoParcela')?.classList.add('ativo');
+                    break;
+            }
+        }
+
+        function fecharTodosModais() {
+            document.querySelectorAll(".modal.ativo").forEach(modal => modal.classList.remove('ativo'));
+        }
+
+        function fecharModalHash() {
+            history.pushState("", document.title, window.location.pathname + window.location.search);
+            fecharTodosModais();
+        }
+
+        window.addEventListener('DOMContentLoaded', abrirModalViaHash);
+        window.addEventListener('hashchange', abrirModalViaHash);
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape') {
+                fecharModalHash();
+            }
+        });
+    </script>
+</body>
+</html>

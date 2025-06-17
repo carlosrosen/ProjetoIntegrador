@@ -1,0 +1,41 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Error...</title>
+  <link rel="stylesheet" href="{% static 'core/css/style.css' %}" />
+</head>
+<body>
+  <header>
+    <div style="align-items: center;">
+      <div style="text-align: center; font-size: 40px; color: green;">Error</div>
+    </div>
+  </header>
+	<main>
+		<h1 style="margin-top: 12%; text-align: center; "> Sentimos muito, houve um erro inesperado!</h1><br>
+		<h1 style="font-size: 80px; color: red; font-family: serif; text-align: center;"> {{ mensagem }} </h1><br>
+        <h1 id="redirecionamento"></h1>
+		<h2 style="font-size: 60px; color: black; font-family: serif; text-align: center;"></h2>
+		<br>
+	</main>
+  <footer style="position: absolute; bottom: 0px; width: 100%;">
+    <p>&copy; 2025 - U-Balance</p>
+  </footer>
+</body>
+<script>
+    /*function sleep(ms){
+        return new Promise(resolve => setTimeout(resolve,ms));
+    }
+
+    document.addEventListener("DOMContentLoaded", async function () {
+            const texto = document.getElementById("redirecionamento");
+            texto.style.textAlign = 'center';
+            texto.innerText = "Redirecionando para a dashboard...";
+            await sleep(5000);
+            location.href = {% url 'core:dashboard' %};
+    });*/
+    </script>
+</html>

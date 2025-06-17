@@ -1,0 +1,348 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>U-Balance - Metas</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+   <link rel="stylesheet" href="{% static 'core/css/style_dashboard.css' %}" />
+  <link rel="stylesheet" href="{% static 'metas/css/metas.css' %}" />
+</head>
+<body>
+  <aside class="sidebar">
+    <h1>U-Balance</h1>
+    <nav>
+        <a href="{% url 'core:dashboard' %}">🏠 Início</a>
+        <a href="" id="abrirModalTransacao">💲 Adicionar Transação</a>
+        <a href="#" id="abrirModalMeta">🎯 Adicionar Meta</a>
+        <a href="#" id="abrirModalObjetivo">📈 Adicionar Objetivo</a>
+        <a href="{% url 'core:metas:meta' %}" style="display:block; background-color: #f0f0f0; font-weight: 600;">🎯 Metas</a>
+        <a href="{% url 'core:objetivos:menu_objetivos' %}">📈 Objetivos</a>
+        <a href="{% url 'core:menuExtrato' mes=mes ano=ano %}">🧾 Extrato</a>
+        <a href="{% url 'core:erro404' %}" >📊 Relatórios</a>
+        <a href="{% url 'usuario:configuracoes' %}">⚙️ Configurações</a>
+        <a href="{% url 'usuario:logout' %}" id="logout">Logout</a>
+    </nav>
+  </aside>
+
+  <div id="modalTransacao">
+      <div class="modal-content">
+          <div class="tabs">
+              <button type="button" class="tab active" data-tipo="saida">Despesa</button>
+              <button type="button" class="tab" data-tipo="entrada">Receita</button>
+          </div>
+
+          <h2>Adicionar Transação 💲</h2><br>
+          <p>Aqui você irá adicionar uma transação, seja ela uma receita ou despesa para auxiliarmos no gerenciamento financeiro da sua conta! <strong>Lembre-se</strong>, é importante manter as transações atualizadas para uma maior precisão de decisões. ⚠️</p><br>
+          <hr>
+          <br>
+          <form id="formTransacaoDespesa" method="POST">
+              {% csrf_token %}
+              <label></label>
+              <input type="hidden" name="tipoform" value="transacao_despesa">
+
+              <div id="camposDespesa">
+                  <label>Valor gasto: <br>
+                      <input type="number" name="valor_despesa" step="0.01" required><br>
+                  </label>
+
+                  <label>Categoria:<br>
+                      <select name="categoria_despesa" required>
+                          {% for categoria in todas_categorias_despesa %}
+                              <option value="{{ categoria.nome }}">{{ categoria.nome }}</option>
+                          {% endfor %}
+                      </select>
+                  </label>
+
+                  <label>Condição do pagamento:<br>
+                      <select id="condicaoPagamento" name="condicao_despesa">
+                          <option value="avista">À vista</option>
+                          <option value="parcelado">Parcelado</option>
+                      </select></label><br>
+                  <div id="campoParcelas" style="display: none;">
+                      <label>Quantidade de parcelas:<br>
+                          <input type="number" name="parcelas_despesa" min="1" value="1"><br>
+                      </label>
+                  </div>
+
+                  <label>Data da Transação:<br>
+                  <input type="date" name="data_despesa" required><br>
+                  </label>
+
+                  <label>Descrição:<br>
+                  <input type="text" name="descricao_despesa"><br>
+                  </label>
+                  <!-- ADICIONADO 16/05/2025   1-->
+                  <div class="radio-group">
+                      <label>Você já realizou o pagamento dessa despesa?</label>
+                      <div class="radio-option">
+                          <input type="radio" name="pagamentoRE_despesa" id="pagamentoSIM" value="true" required>
+                          <label for="pagamentoSIM">Sim, já paguei essa despesa.</label>
+                      </div>
+                      <div class="radio-option">
+                          <input type="radio" name="pagamentoRE_despesa" id="pagamentoNAO" value="false" required>
+                          <label for="pagamentoNAO">Não, não paguei essa despesa.</label>
+                      </div>
+                  </div><br>
+                  <button type="submit" class="btn-salvar">Salvar</button>
+                  <button type="button" onclick="fecharModal()" class="btn-cancelar">Cancelar</button>
+              </div>
+          </form>
+          <form id="formTransacaoReceita" method="POST">
+              {% csrf_token %}
+              <input type="hidden" name="tipoform" value="transacao_receita">
+              <div id="camposReceita" style="display: none;">
+                  <label>Valor ganho:<br>
+                      <input type="number" name="valor_receita" step="0.01" value="0.00" min="0.01" required>
+                      <br>
+                  </label>
+
+                  <label>Categoria:<br>
+                  <select name="categoria_receita" required>
+                      {% for categoria in todas_categorias_receita %}
+                    <option value="{{ categoria.nome }}">{{ categoria.nome }}</option>
+                      {% endfor %}
+                  </select>
+                  </label>
+
+                  <label>Data:<br>
+                      <input type="date" name="data_receita" required><br>
+                  </label>
+
+
+                  <label>Descrição:<br>
+                      <input type="text" name="descricao_receita" required><br>
+                  </label>
+
+                  <!-- ADIIONADO 16/05/2025    2-->
+
+                  <div class="radio-group">
+                      <label>Você já recebeu essa receita?</label>
+                      <div class="radio-option">
+                          <input type="radio" name="pagamentoRE_receita" id="pagamentoSIM" value="true" required>
+                          <label for="pagamentoSIM">Sim, já recebi essa receita.</label>
+                      </div>
+                      <div class="radio-option">
+                          <input type="radio" name="pagamentoRE_receita" id="pagamentoNAO" value="false" required>
+                          <label for="pagamentoNAO">Não, não recebi essa receita ainda.</label>
+                      </div>
+                  </div><br>
+                  <!-------------------------   2-->
+                  <button type="submit" class="btn-salvar">Salvar</button>
+                  <button type="button" onclick="fecharModal()" class="btn-cancelar">Cancelar</button>
+              </div>
+              <br>
+          </form>
+      </div>
+  </div>
+  <div id="modalMeta">
+      <div class="modal-content">
+          <h2>Adicionar Meta 🎯</h2><br>
+          Aqui você irá definir uma meta, ela pode ser tratada de duas formas:<br><br>
+          <strong>1° </strong>Você pode defini-la como algo a ser atingido.<strong>(Mínimo Desejado)</strong><br>
+          &nbsp;&nbsp;&nbsp;<strong>Exemplo:</strong>&nbsp;Sobrar pelo menos 1000R$ ao final do mês.<br><br>
+          <strong>2°</strong> Você pode defini-la como um limite a não ser ultrapassado.<strong>(Limite Máximo)</strong><br>
+          &nbsp;&nbsp;&nbsp;<strong>Exemplo:</strong>&nbsp;Gastar até 300R$ com internet. <br><br>
+          <hr><br>
+          <form id="formMeta" method="POST">
+              {% csrf_token %}
+              <input type="hidden" name="tipoform" value="meta">
+              <p>Tipo da meta:</p>
+              <label>
+              <select name="tipoMeta" required>
+                  <option value="minDesejado">Mínimo Desejado</option>
+                  <option value="limMaximo">Limite Máximo</option>
+              </select>
+              </label>
+              <p>Categoria da meta:</p>
+              <label>
+              <select name="categoria" required>
+                  <option value="default" disabled selected>---------------</option>
+                  {% for categoria in categorias %}
+                      <option value="{{ categorias.nome }}">{{ categoria.nome }}</option>
+                  {% endfor %}
+              </select>
+              </label>
+              <p>Valor desejado(Atingir/Evitar):</p>
+              <label>
+                  <input type="number" step="0.01" name="valorMeta" required />
+              </label>
+              <p>Data Início:</p>
+              <label>
+                  <input type="date" name="dataInicio"/>
+              </label>
+              <p>Data Final:</p>
+              <label>
+                  <input type="date" name="dataFinal"/>
+              </label>
+              <p>Descrição:</p>
+              <label>
+                  <input type="text" name="descricao"/>
+              </label>
+              <div style="text-align:right;">
+                  <button type="submit" class="btn-salvar">Salvar</button>
+                  <button type="button" class="btn-cancelar" onclick="fecharModalMeta()">Cancelar</button>
+              </div>
+          </form>
+      </div>
+  </div>
+  <!--ADICIONADO 16/05/2025  3 -->
+
+  <div id="modalObjetivo">
+      <div class="modal-content">
+          <h2>Adicionar Objetivo 📈</h2><br>
+          <p>Aqui você irá adicionar um objetivo, diferente da meta, o objetivo se trata de algo focado no longo prazo, sempre relacionado a uma poupança ou investimento para a realização de algo.<br>
+              <br><strong>Exemplo 1: Comprar um carro - 30.000R$</strong><br>
+              <strong>Exemplo 2: Comprar um apartamento - 345.000R$</strong></p><br>
+          <hr><br>
+          <form id="formObjetivo" method="POST">
+              {% csrf_token %}
+              <input type="hidden" name="tipoform" value="objetivo">
+              <p>Título do Objetivo:</p>
+              <label>
+                  <input type="text" name="tituloObjetivo" required />
+              </label>
+
+              <p>Valor que deseja guardar:</p>
+              <label>
+              <input type="number" step="0.01" name="valorDesejado" min="0" required />
+              </label>
+
+              <p>Valor já guardado:</p>
+              <label>
+              <input type="number" step="0.01" name="valorGuardado" min="0" required />
+              </label>
+
+              <p>Data final do Objetivo:</p>
+              <label>
+                  <input type="date" name="anoFinal"  required />
+              </label>
+
+              <div style="text-align:right;">
+                  <button type="submit" class="btn-salvar">Salvar</button>
+                  <button type="button" class="btn-cancelar" onclick="fecharModalObjetivo()">Cancelar</button>
+              </div>
+          </form>
+      </div>
+  </div>
+
+  <main class="content">
+    <div class="metas-header">
+      <h1>Metas</h1>
+      <div class="usuario-info">Usuário: {{ user.username }}</div>
+    </div>
+
+    <div class="metas-grid">
+  {% for meta in metas %}
+  <div class="meta-card">
+    <div class="meta-header">
+      <div class="meta-categoria">
+        <span class="categoria-tag categoria-{{ meta.categoria_fk.nome|lower|slugify }}">{{ meta.categoria_fk.nome }}</span>
+      </div>
+      <div class="meta-status status-{{ meta.status_formatado|lower|slugify }}">{{ meta.status_formatado }}</div>
+    </div>
+
+    <div class="meta-content">
+      <h3 class="meta-titulo">{{ meta.titulo }}</h3>
+
+      <div class="meta-info-grid">
+        <div class="info-item">
+          <span class="info-label">Tipo:</span>
+          <span class="info-valor tipo-{{ meta.tipagem|lower|slugify }}">{{ meta.tipagem }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Valor:</span>
+          <span class="info-valor valor-meta">R$ {{ meta.valor|floatformat:2 }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Período:</span>
+          <span class="info-valor">{{ meta.data_inicio|date:"d/m/Y" }} - {{ meta.data_fim|date:"d/m/Y" }}</span>
+        </div>
+      </div>
+
+      <div class="meta-progresso">
+        <div class="progresso-info">
+          <span>{{ meta.desempenho }}: R$ {{ meta.valorAcumulado|floatformat:2 }}</span>
+          <span>{{ meta.porcentagem }}%</span>
+        </div>
+        <div class="progresso-bar">
+          <div class="progresso-fill
+               {% if meta.status_formatado == 'Concluído' %}progresso-concluido
+               {% elif meta.status_formatado == 'Ultrapassado' %}progresso-ultrapassado
+               {% endif %}"
+               style="width: {{ meta.porcentagem|floatformat:0 }}%">
+          </div>
+        </div>
+      </div>
+
+      <div class="meta-descricao">
+        <p>{{ meta.descricao }}</p>
+      </div>
+    </div>
+    <button class="btn-editar-meta" onclick="editarMeta('{{ meta.id }}')">
+      Editar Meta
+    </button>
+  </div>
+      <div id="modalEditarMeta" class="modal">
+  <div class="modal-content">
+    <h2>Editar Meta</h2>
+
+    <form id="formEditarMeta" method="POST" action="{% url 'core:metas:editar-meta' meta.id %}">
+      {% csrf_token %}
+
+      <label for="categoria">Categoria:</label>
+      <select name="categoria" required>
+        {% for categoria in categorias %}
+          <option value="{{ categoria.nome }}">{{ categoria.nome }}</option>
+        {% endfor %}
+      </select>
+
+      <label for="tipo">Tipo:</label>
+      <select name="tipoMeta" required>
+        <option value="MIN">Mínimo Desejado</option>
+        <option value="MAX">Limite Máximo</option>
+      </select>
+
+      <label for="valor">Valor:</label>
+      <input type="number" name="valor" step="0.01" min="0.01" required>
+
+      <label for="data_inicio">Data Início:</label>
+      <input type="date" name="data_inicio" value="{{ meta.data_inicio }}" required>
+
+      <label for="data_fim">Data Fim:</label>
+      <input type="date" name="data_fim" required>
+
+      <label for="descricao">Descrição:</label>
+      <textarea name="descricao" rows="4" required></textarea>
+
+      <div class="modal-buttons">
+        <button type="button" class="btn-deletar" onclick="abrirModalConfirmacao('{{ meta.id }}')">Deletar</button>
+        <div class="buttons-right">
+          <button type="submit" class="btn-salvar">Salvar</button>
+          <button type="button" class="btn-cancelar" onclick="fecharModalHash()">Cancelar</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+<div id="modalConfirmacao" class="modal">
+  <div class="modal-content modal-confirmacao">
+    <h2>Apagar Meta</h2>
+    <p>Tem certeza que deseja apagar esta meta? Esta ação não pode ser desfeita.</p>
+
+    <form id="formDeletarMeta" method="POST" action="{% url 'core:metas:deletar-meta' meta.id %}">
+      {% csrf_token %}
+      <div style="text-align:right; margin-top: 2rem;">
+        <button type="submit" class="btn-confirmar">Confirmar</button>
+        <button type="button" class="btn-cancelar" onclick="fecharModalHash()">Cancelar</button>
+      </div>
+    </form>
+  </div>
+</div>
+  {% endfor %}
+</div>
+  <script src="{% static 'metas/js/script.js' %}" defer></script>
+  </main>
+</body>
+</html>
