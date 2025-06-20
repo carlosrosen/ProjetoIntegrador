@@ -17,6 +17,7 @@ from apps.usuarios.models import CustomUser
 
 #Função para cadastrar novos usuarios
 def cadastrar(request):
+    #Caso o usuario já esteja logado vai ser redirecionado para a página principal
     if request.user.is_authenticated:
         return redirect(reverse('core:index'))
     
@@ -55,17 +56,19 @@ def logar(request):
         
     if request.method == "GET":
         return render(request, 'login.html')
-    
+
+    # Váriaveis que vão receber os dados do frontend
     usuario = request.POST.get('usuario', '').strip()
     senha = request.POST.get('senha','').strip()
 
     # Autentica se o email e a senha são compativeís
     user = authenticate(request, username=usuario, password=senha)
 
+    # Caso as informações estejam certezas ele loga
     if user:
         login(request, user)
         return redirect(reverse('core:dashboard'))
-    else:
+    else:  # Se não informa erro devido que retornou nenhum objeto
         messages.error(request, 'Usuário ou senha errada')
         return redirect(reverse('usuario:login'))
 

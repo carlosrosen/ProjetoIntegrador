@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'apps.financeiro',
     'apps.objetivos',
     'apps.metas',
+    'apps.relatorio',
 ]
 
 MIDDLEWARE = [

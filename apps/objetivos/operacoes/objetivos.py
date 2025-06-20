@@ -28,21 +28,28 @@ class OperacoesObjetivo:
                     , valor_objetivo: ValorObjetivo
                     , valor_guardado: ValorObjetivo
                     , data_fim: Data
-                    , status: Status
                     ):
+        hoje = date.today()
+        status = 'A'
+        data_conclusao = None
 
         if valor_guardado.valor > valor_objetivo.valor:
             return 'Valor que já está guardado excede o valor do objetivo'
 
-        elif valor_guardado.valor == valor_objetivo.valor:
-            status.valor = 'C'
+        if data_fim.valor < hoje and status == 'A':
+            status = 'T'
+
+        if valor_guardado.valor == valor_objetivo.valor:
+            status = 'C'
+            data_conclusao = hoje
 
         Objetivos.objects.create(user_fk= self.user
                                 , titulo=titulo
                                 , valor_objetivo=valor_objetivo.valor
                                 , valor_guardado=valor_guardado.valor
                                 , data_fim=data_fim.valor
-                                , status=status.valor
+                                , status=status
+                                , data_conclusao=data_conclusao
         )
 
     def editar(self
@@ -60,6 +67,7 @@ class OperacoesObjetivo:
             objetivo.status = 'P'
         elif novo_valor_objetivo == objetivo.valor_guardado:
             objetivo.status = 'C'
+            objetivo.data_conclusao = date.today()
         else:
             objetivo.status = 'A'
 
@@ -92,8 +100,10 @@ class OperacoesObjetivo:
 
         if Valor > valor_limite:
             return 'Excede o objetivo estabelecido'
+
         elif Valor == valor_limite:
             Objetivo.status = 'C'
+            Objetivo.data_conclusao = date.today()
 
         # Fazendo a soma do valor
         Objetivo.valor_guardado += Valor
@@ -126,8 +136,10 @@ class OperacoesObjetivo:
         if Objetivo.status == 'C':
             if data > Objetivo.data_fim:
                 Objetivo.status = 'T'
+                Objetivo.data_conclusao = None
             else:
                 Objetivo.status = 'A'
+                Objetivo.data_conclusao = None
 
         # Fazendo a subtração do valor
         Objetivo.valor_guardado -= Valor
@@ -157,9 +169,7 @@ class GetObjetivo:
 
     def variacao(self, objetivo_id):
         hoje = date.today()
-        print(hoje)
         data_ano_passado = Data.variarMes(hoje.month, hoje.year, -11)
-        print(data_ano_passado.valor)
         data = Data(data_ano_passado.valor.replace(day=1))
         transacoes = TransacaoObjetivo.objects.filter(objetivo_fk__user_fk=self.user)
         datas = []
@@ -174,8 +184,8 @@ class GetObjetivo:
                 resgate_mes = 0
             total_mes = deposito_mes - resgate_mes
             valor_mes += total_mes
+            data_formatada = Data.formatarMesAno(data.valor.month,data.valor.year)
             data = Data.incrementarMes(data.valor)
-            data_formatada = Data.formatarMesAno(data.valor.month ,data.valor.year)
             datas.append(data_formatada)
             valores.append(str(Decimal(valor_mes).quantize(Decimal('0.01'), ROUND_DOWN)))
         datas = ','.join(datas)
@@ -201,6 +211,18 @@ class GetObjetivo:
 
         return list(chain( ativos, atrasados, pausado, concluidos))
 
+    def totalEconomizadoPorMes(self,mes:int,ano:int):
+        inicio_mes = Data.primeiroDiaMes(mes,ano)
+        proximo_mes = Data.incrementarMes(inicio_mes.valor)
 
-
-
+        parcelas = TransacaoObjetivo.objects.filter(user_fk=self.user
+                                                    , data__gte=inicio_mes.valor
+                                                    , data__lt=proximo_mes.valor
+        )
+        economia = Decimal('0')
+        for parcela in parcelas:
+            if parcela.tipo == 'D':
+                economia += parcela.valor
+            elif parcela.tipo == 'R':
+                economia -= parcela.valor
+        return economia

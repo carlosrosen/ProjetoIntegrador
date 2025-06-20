@@ -28,6 +28,7 @@ class Metas(models.Model):
     valor = models.DecimalField(max_digits=12, decimal_places=2, null=False)
     data_inicio = models.DateField(default=timezone.now)
     data_fim = models.DateField(null=False)
+    data_conclusao = models.DateField(null=True,blank=True)
     descricao = models.CharField(max_length=100, null=True)
 
     def valorAcumulado(self):

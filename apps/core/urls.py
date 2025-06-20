@@ -11,6 +11,7 @@ urlpatterns = [
     path('objetivos/', include('apps.objetivos.urls')),
     path('meta/', include('apps.metas.urls')),
     path('extrato/<int:mes>/<int:ano>/', menuExtrato, name='menuExtrato'),
+    path('relatorio/', include('apps.relatorio.urls'), name='relatorio'),
     path('notfound/', views.notfound, name='erro404'),
     path('erro/<str:mensagem>', views.erro, name='erro')
 ]

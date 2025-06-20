@@ -1,7 +1,4 @@
-from urllib.request import parse_http_list
 
-from django.contrib.auth.models import AbstractBaseUser
-from typing import cast
 from apps.usuarios.models import CustomUser
 
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
@@ -37,8 +34,10 @@ class Historico:
 
         while data_insercao_mais_recente.valor < mes_atual.valor:
             data_novo_registro = Data.incrementarMes(data_insercao_mais_recente.valor)
-            intervalo = ParcelasTransacao.buscaIntervaloHistoricoSaldo(data_inicio=data_insercao_mais_recente.valor
-                                                                     , data_fim=data_novo_registro.valor)
+            intervalo = ParcelasTransacao.buscaParcelasIntervalo(user=self.user
+                                                                , data_inicio=data_insercao_mais_recente.valor
+                                                                , data_fim=data_novo_registro.valor
+            )
 
             if not intervalo.exists():
                 data_insercao_mais_recente.valor = data_novo_registro.valor
@@ -60,7 +59,7 @@ class Historico:
                                  , data_correcao_historico: date
                                  , valor_correcao: Decimal
                                  , inversor: bool = False
-        ) -> None:
+                                 ) -> None:
         historico = HistoricoSaldo.objects.filter(user_fk=self.user, data__gt=data_correcao_historico)
 
         if inversor == True:
@@ -71,7 +70,7 @@ class Historico:
             tupla.save()
 
 
-    def inicializarTuplasParaParcelasAntigas(self, parcela: ParcelasTransacao) -> None:
+    def inicializarTuplasParaParcelasAntigas(self, parcela: ParcelasTransacao) -> bool:
         data_transacao = Data(parcela.data)
         mes, ano = data_transacao.valor.month, data_transacao.valor.year
         data = Data.inicializar(dia=1, mes=mes, ano=ano)
@@ -79,7 +78,7 @@ class Historico:
         data_insercao_mais_antiga = Data(historico.aggregate(primeira_data=Min('data'))['primeira_data'])
 
         if data.valor >= data_insercao_mais_antiga.valor:
-            return
+            return False
 
         while data.valor < data_insercao_mais_antiga.valor:
             HistoricoSaldo.criarTupla(user=self.user, saldo=Decimal('0.0'), data=data.valor)
@@ -91,3 +90,46 @@ class Historico:
                                     , valor_correcao= parcela.valor
                                     , inversor=False
         )
+        return True
+    def inicializarTuplasParaParcelasFuturas(self, parcela: ParcelasTransacao) -> bool:
+        data_transacao = Data(parcela.data)
+        mes, ano = data_transacao.valor.month, data_transacao.valor.year
+        data = Data.inicializar(dia=1, mes=mes, ano=ano)
+        registro_mais_recente = HistoricoSaldo.objects.filter(user_fk=self.user).order_by('-data').first()
+        data_historico_mais_recente = Data(registro_mais_recente.data)
+        if data_historico_mais_recente.valor >= data.valor:
+            return False
+
+        saldo = registro_mais_recente.saldo
+
+        while data_historico_mais_recente.valor <= data.valor:
+            mes_seguinte = Data.incrementarMes(data_historico_mais_recente.valor)
+            parcelas_mes = ParcelasTransacao.objects.filter(transacao_fk__user_fk=self.user
+                                                            , data__gte=data_historico_mais_recente.valor
+                                                            , data__lt=mes_seguinte.valor
+            )
+            if parcelas_mes.count() <= 0:
+                HistoricoSaldo.criarTupla(self.user,data.valor,saldo)
+                data_historico_mais_recente = Data.incrementarMes(data_historico_mais_recente.valor)
+                continue
+
+            for parcela in parcelas_mes:
+                if parcela.transacao_fk.tipo == 'R':
+                    saldo += parcela.valor
+                elif parcela.transacao_fk.tipo == 'D':
+                    saldo -= parcela.valor
+
+            data_historico_mais_recente = mes_seguinte
+            HistoricoSaldo.criarTupla(self.user,mes_seguinte.valor,saldo)
+        return True
+
+    def verificarExistenciaRegistro(self, parcela: ParcelasTransacao) -> None:
+        historico_mais_recente = HistoricoSaldo.objects.filter(user_fk=self.user).order_by('-data').first()
+        data_parcela_inicializada = Data.inicializar(dia=1,mes=parcela.data.month,ano=parcela.data.year).valor
+        saldo = historico_mais_recente.saldo
+        if parcela.transacao_fk.tipo == 'R':
+            saldo += parcela.valor
+        elif parcela.transacao_fk.tipo == 'D':
+            saldo -= parcela.valor
+        if historico_mais_recente.data < data_parcela_inicializada:
+            HistoricoSaldo.criarTupla(self.user,data_parcela_inicializada,saldo)

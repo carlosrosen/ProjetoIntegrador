@@ -151,8 +151,6 @@ def editarTransacaoUnica(request, parcela_id):
         mes = int(parcela.data.month)
         ano = int(parcela.data.year)
 
-        print(categoria)
-
         categoria = Categoria.objects.get(nome=categoria)
 
         operacao = OperacoesTransacao(request.user.id)
