@@ -18,6 +18,7 @@ class Objetivos(models.Model):
     valor_guardado = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     data_inicio = models.DateField(auto_now_add=True)
     data_fim = models.DateField(null=False)
+    data_conclusao = models.DateField(null=True,blank=True)
     status = models.CharField(max_length=1, choices=__opcoes_status, default='A')
 
     def porcentagem(self):

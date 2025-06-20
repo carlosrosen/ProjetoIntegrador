@@ -11,6 +11,13 @@ from common.dominio.data import Data
 def menuMetas(request):
     if not request.user.is_authenticated:
         return redirect(reverse('usuario:login'))
+
+    # Atualiza as metas ativas
+    metas_ativas = Metas.objects.filter(user_fk=request.user.id, status='A')
+    operacoes = OperacoesMeta(request.user.id)
+    for meta in metas_ativas:
+        operacoes.atualizarStatusMeta(meta)
+
     gettermetas= GetMetas(request.user.id)
     metas = gettermetas.todosEmOrdem()
     context = {'metas': metas
@@ -24,27 +31,28 @@ def criarMeta(request):
     if not request.user.is_authenticated:
         return redirect(reverse('usuario:login'))
     if not request.method == "POST":
-        return redirect(request.session['ultima_url'])
+        return redirect(reverse('core:dashboard'))
     operacoes_meta = OperacoesMeta(request.user.id)
-    valor = request.POST.get('valor')
-    tipo = request.POST.get('tipo')
-    data_inicio = request.POST.get('data_inicio')
-    data_fim = request.POST.get('data_fim')
+    valor = request.POST.get('valorMeta')
+    tipo = request.POST.get('tipoMeta')
+    data_inicio = request.POST.get('dataInicio')
+    data_fim = request.POST.get('dataFinal')
     descricao = request.POST.get('descricao')
     categoria = request.POST.get('categoria')
     Categoria.verificacaoNomesCategoria(categoria)
     categoria = Categoria.objects.get(nome=categoria)
-
     print(valor,'\n',tipo,'\n',descricao,'\n',categoria,'\n', data_inicio,'\n', data_fim)
 
-    operacoes_meta.criarMeta(categoria=categoria
+
+    a = operacoes_meta.criarMeta(categoria=categoria
                              , valor= Decimal(valor)
                              , tipo=tipo
                              , data_inicio= Data(data_inicio)
                              , data_fim= Data(data_fim)
                              , descricao=descricao
     )
-    return redirect(request.session['ultima_url'])
+    print(a)
+    return redirect(reverse('core:dashboard'))
 
 def editarMeta(request, meta_id):
     if request.method == 'POST':

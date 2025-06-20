@@ -91,7 +91,6 @@ function fecharModalMeta() {
 
 // Capturar dados do formulário de meta
 document.getElementById("formMeta").addEventListener("submit", function (event) {
-  event.preventDefault();
   const formData = new FormData(event.target);
   const tipo = formData.get("tipoMeta");
   const valor = parseFloat(formData.get("valorMeta"));
@@ -106,7 +105,8 @@ document.getElementById("formMeta").addEventListener("submit", function (event) 
   console.log("Campo 'categoria':", categoria);
 
   if(!tipo || !valor || !dataInicio || !dataFinal || !categoria){
-    alert("Insira as informações corretamente!")
+    event.preventDefault();
+    alert("Insira as informações corretamente!");
     return;
   }
 
@@ -117,7 +117,7 @@ document.getElementById("formMeta").addEventListener("submit", function (event) 
   Data Final: ${dataFinal}
   categoria: ${categoria}`);
 
-  cancelarNavegacaoHash()
+  cancelarNavegacaoHash();
 });
 
 //ADICIONADO A PARTIR DAQUI DIA 16/06/2025
@@ -130,12 +130,23 @@ function fecharModalObjetivo() {
 
 // Capturar dados do formulário de objetivo
 document.getElementById("formObjetivo").addEventListener("submit", function (event) {
-  event.preventDefault();
   const formData = new FormData(event.target);
   const titulo = formData.get("tituloObjetivo");
   const valorDesejado = parseFloat(formData.get("valorDesejado"));
   const valorGuardado = parseFloat(formData.get("valorGuardado"));
   const anoFinal = formData.get("anoFinal");
+
+  console.log(titulo);
+  console.log(valorDesejado);
+  console.log(valorGuardado);
+  console.log(anoFinal);
+
+  if(!titulo || !valorDesejado || !valorGuardado || !anoFinal){
+    event.preventDefault();
+    alert("insira as informações corretamente!");
+    fecharModalObjetivo();
+    return;
+  }
 
 
   alert(`Objetivo adicionado:\n

@@ -53,11 +53,24 @@ def detalheObjetivo(request, id):
 
 def criarObjetivo(request):
     if not request.user.is_authenticated:
-        return redirect(reverse('login'))
-    if request.method == 'GET':
-        return redirect(request.session.get('ultima_url'))
-    if request.method == 'POST':
-        pass
+        return redirect(reverse('usuario:login'))
+    if not request.method == 'POST':
+        return redirect(reverse('core:dashboard'))
+
+    operacoes = OperacoesObjetivo(request.user.id)
+
+    titulo = request.POST.get('tituloObjetivo')
+    valor_desejado = ValorObjetivo(request.POST.get('valorDesejado'))
+    valor_guardado  = ValorObjetivo(request.POST.get('valorGuardado'))
+    data_fim = Data(request.POST.get('anoFinal'))
+
+    print('\n\n', titulo,'\n',valor_desejado,'\n',valor_guardado,'\n',data_fim,'\n\n')
+
+    operacoes.criar(titulo, valor_desejado, valor_guardado, data_fim)
+
+    return redirect(reverse('core:dashboard'))
+
+
 
 def editarObj(request, objetivo_id):
     if request.method == 'POST':

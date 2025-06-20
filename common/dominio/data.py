@@ -1,5 +1,6 @@
 from datetime import datetime, date
 from dateutil.relativedelta import relativedelta
+import calendar
 
 class Data:
     def __init__(self, data: str | date) -> None:
@@ -47,6 +48,15 @@ class Data:
     def mesAnterior(self, quantidade_meses: int):
         quantidade_meses = abs(quantidade_meses)
         return self.valor + relativedelta(months=-quantidade_meses)
+
+    @staticmethod
+    def ultimoDiaMes(mes:int, ano:int):
+        ultimo_dia = calendar.monthrange(ano, mes)[1]
+        return date(ano, mes, ultimo_dia)
+
+    @staticmethod
+    def primeiroDiaMes(mes:int,ano:int):
+        return date(ano, mes, 1)
 
     @staticmethod
     def formatarMesAno(mes:int, ano:int):

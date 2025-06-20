@@ -58,7 +58,7 @@
 
 /* Garantir que o modal de confirmação apareça */
 #modalConfirmacao.ativo {
-  display: flex !important;
+  display: flex;
 }
 
 .metas-header {

@@ -34,24 +34,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    window.abrirModalConfirmacao = function() {
-        if (modalConfirmacao) {
-            modalConfirmacao.classList.add('ativo');
-        }
-    }
-
-    window.fecharModalEditar = function() {
-        if (modalEditar) {
-            modalEditar.classList.remove('ativo');
-        }
-    }
-
-    window.fecharModalConfirmacao = function() {
-        if (modalConfirmacao) {
-            modalConfirmacao.classList.remove('ativo');
-        }
-    }
-
     [modalEditar, modalConfirmacao].forEach(modal => {
         if (modal) {
             modal.addEventListener('click', function(event) {
@@ -62,3 +44,24 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
+
+    window.abrirModalConfirmacao = function() {
+        const modalConfirmacao = document.getElementById('modalConfirmacao');
+        if (modalConfirmacao) {
+            modalConfirmacao.classList.add('ativo');
+        }
+    }
+
+    window.fecharModalEditar = function() {
+        const modalEditar = document.getElementById('modalEditarMeta');
+        if (modalEditar) {
+            modalEditar.classList.remove('ativo');
+        }
+    }
+
+    window.fecharModalConfirmacao = function() {
+        const modalConfirmacao = document.getElementById('modalConfirmacao');
+        if (modalConfirmacao) {
+            modalConfirmacao.classList.remove('ativo');
+        }
+    }

@@ -1,161 +1,270 @@
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Segoe UI', sans-serif;
-    }
-    body {
-      display: flex;
-      background: #f5f7fa;
-    }
-    .sidebar {
-      width: 250px;
-      background-color: #ffffff;
-      border-right: 1px solid #ddd;
-      height: 108vh;
-      padding: 1rem;
-    }
-    .sidebar h1 {
-      font-size: 1.5rem;
-      color: #1abf63;
-      margin-bottom: 2rem;
-    }
-    .sidebar nav a {
-      display: block;
-      padding: 0.75rem;
-      text-decoration: none;
-      color: #333;
-      margin: 0.25rem 0;
-      border-radius: 8px;
-    }
-    .sidebar nav a:hover {
-      background-color: #f0f0f0;
-	  transition: 0.5s ease;
-    }
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', sans-serif;
+}
 
-    .content {
-      flex: 1;
-      padding: 2rem;
-    }
-    .top-bar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 2rem;
-    }
-    .saldo-box, .desempenho-box, .grafico-box, .transacoes-box, .metas-box, .future-box{
-      background-color: #fff;
-      padding: 1.5rem;
-      border-radius: 10px;
-      box-shadow: 0 0 8px rgba(0,0,0,0.05);
-      margin-bottom: 2rem;
-	  
-    }
-    .saldo-box {
-      background-color: #00994c;
-      color: white;
-    }
-    .saldo-box h2 {
-      font-size: 1.5rem;
-    }
-    .flex {
-      display: flex;
-      gap: 1rem;
-    }
-    .grafico-box canvas {
-      max-width: 300px;
-    }
-    .transacoes-box ul {
-      list-style: none;
-      padding: 0;
-    }
-	.metas-box ul {
-      list-style: none;
-      padding: 0;
-    }
-	.future-box ul {
-      list-style: none;
-      padding: 0;
-    }
-    .transacoes-box li {
-      padding: 0.5rem 0;
-      border-bottom: 1px solid #eee;
-      display: flex;
-      justify-content: space-between;
-    }
-	.metas-box li {
-      padding: 0.5rem 0;
-      border-bottom: 1px solid #eee;
-      display: flex;
-      justify-content: space-between;
-    }
-	.future-box li {
-      padding: 0.5rem 0;
-      display: flex;
-      justify-content: space-between;
-    }
-    .transacoes-box li span.valor {
-      font-weight: bold;
-    }
-	#logout{
-		background-color: red;
-		color: white;
-	}
-	#logout:hover{
-		background-color: darkRed;
-		transition: 0.5s ease;
-	}
-	button#btnAlternar {
-		margin-bottom: 10px;
-		padding: 6px 12px;
-		background-color: #2ecc71;
-		color: white;
-		border: none;
-		border-radius: 5px;
-		cursor: pointer;
-	}
-	button#btnAlternar:hover {
-		background-color: #27ae60;
-	}
-	button#btnVermaisMeta {
-		margin-top: 10px;
-		padding: 6px 12px;
-		background-color: #2ecc71;
-		color: white;
-		border: none;
-		border-radius: 5px;
-		cursor: pointer;
-	}
-  button#btnVermaisObjetivos {
-		margin-top: 10px;
-		padding: 6px 12px;
-		background-color: #2ecc71;
-		color: white;
-		border: none;
-		border-radius: 5px;
-		cursor: pointer;
-	}
-  button#btnVermaisObjetivos:hover {
-		background-color: #27ae60;
-	}
-	button#btnVermaisMeta:hover {
-		background-color: #27ae60;
-	}
-	button#btnVermaisFuture{
-		margin-top: 10px;
-		padding: 6px 12px;
-		background-color: #2ecc71;
-		color: white;
-		border: none;
-		border-radius: 5px;
-		cursor: pointer;
-	}
-	button#btnVermaisFuture:hover {
-		background-color: #27ae60;
-	}
+body {
+  display: flex;
+  background: #f5f7fa;
+}
 
-    /* Modal */
-/* Estilo base para o modal */
+.sidebar {
+  width: 250px;
+  background-color: #ffffff;
+  border-right: 1px solid #ddd;
+  height: 120vh;
+  padding: 1rem;
+}
+
+.sidebar h1 {
+  font-size: 1.5rem;
+  color: #1abf63;
+  margin-bottom: 2rem;
+}
+
+.sidebar nav a {
+  display: block;
+  padding: 0.75rem;
+  text-decoration: none;
+  color: #333;
+  margin: 0.25rem 0;
+  border-radius: 8px;
+}
+
+.sidebar nav a:hover {
+  background-color: #f0f0f0;
+  transition: 0.5s ease;
+}
+
+#logout {
+  background-color: #dc3545;
+  color: white;
+}
+
+#logout:hover {
+  background-color: #c82333;
+  transition: 0.5s ease;
+}
+
+.content {
+  flex: 1;
+  padding: 2rem;
+  overflow-y: auto;
+}
+
+.top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.top-bar h2 {
+  font-size: 2rem;
+  color: #1abf63;
+  font-weight: bold;
+}
+
+.flex {
+  display: flex;
+  gap: 1.5rem;
+  align-items: flex-start;
+}
+
+.flex > div {
+    flex: 1;
+}
+
+/* --- ESTILOS INDIVIDUAIS DOS CARDS --- */
+
+/* Cards com tamanho padrão */
+.saldo-box, .desempenho-box {
+  background-color: #fff;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  margin-bottom: 2rem;
+}
+
+.transacoes-box {
+  background-color: #fff;
+  padding: 1.5rem 0rem 0rem 0rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  margin-bottom: 2rem;
+}
+
+.future-box {
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.metas-box {
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.grafico-box {
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.future-box {
+  padding-bottom: 34rem;
+}
+
+.metas-box {
+  padding-bottom: 9.5rem;
+}
+
+.grafico-box {
+  padding-bottom: 13.4rem;
+}
+
+.future-box ul, .metas-box ul {
+    flex-grow: 1;
+}
+
+.grafico-box canvas {
+  flex-grow: 1;
+  margin-top: 5rem;
+}
+
+.saldo-box {
+  background-color: #1abf63;
+  color: white;
+  box-shadow: 0 4px 12px rgba(26, 191, 99, 0.2);
+}
+
+/* --- Tabela de Transações --- */
+.transacoes-box {
+    overflow: visible;
+}
+
+.transacoes-box h3 {
+    padding-bottom: 0.8rem;
+}
+
+.tabela-transacoes {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tabela-transacoes thead {
+  background: #1abf63;
+  color: white;
+}
+
+/* ... resto do CSS que não precisa de alteração ... */
+.tabela-transacoes th, .tabela-transacoes td {
+  padding: 1rem 1.5rem;
+  text-align: left;
+  font-size: 0.9rem;
+  border-bottom: 1px solid #f0f0f0;
+}
+.tabela-transacoes th {
+  font-weight: 600;
+}
+.tabela-transacoes tbody tr:last-child td {
+  border-bottom: none;
+}
+.valor-receita {
+  color: #28a745;
+  font-weight: bold;
+}
+
+.valor-despesa {
+  color: #dc3545;
+  font-weight: bold;
+}
+
+.metas-box h3, .future-box h3, .grafico-box h3 {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.metas-box ul, .future-box ul {
+  list-style: none;
+  padding: 0;
+}
+
+.metas-box li, .future-box li {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+}
+.metas-box li:last-child, .future-box li:last-child {
+  border-bottom: none;
+}
+#btnAlternar, #btnVermaisMeta, #btnVermaisObjetivos {
+  padding: 0.5rem 1rem;
+  background: #1abf63;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  font-size: 0.8rem;
+  transition: background 0.3s ease;
+}
+#btnAlternar:hover, #btnVermaisMeta:hover, #btnVermaisObjetivos:hover {
+  background: #16a055;
+}
+#modalTransacao, #modalMeta, #modalObjetivo {
+  display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); z-index: 999; justify-content: center;
+  align-items: center; animation: fadeIn 0.3s ease forwards;
+}
+#modalTransacao.ativo, #modalMeta.ativo, #modalObjetivo.ativo { display: flex; }
+.modal-content {
+  background: white; padding: 2rem; border-radius: 12px; width: 700px;
+  max-width: 90%; animation: scaleIn 0.3s ease forwards;
+}
+.tabs {
+  display: flex; justify-content: center; margin-bottom: 1rem;
+}
+.tab {
+  flex: 1; padding: 0.7rem; cursor: pointer; background-color: #eee;
+  border: none; outline: none; transition: 0.2s; font-weight: bold;
+  border-radius: 8px 8px 0 0;
+}
+.tab.active { background-color: #1abf63; color: white; }
+.modal-content input, .modal-content select {
+  width: 100%; padding: 0.75rem; margin-bottom: 1rem; border-radius: 8px;
+  border: 1px solid #ddd; font-size: 0.9rem;
+}
+.btn-salvar, .btn-cancelar {
+  padding: 0.75rem 1.5rem; border: none; border-radius: 8px; font-weight: 600;
+  cursor: pointer; transition: background 0.3s ease;
+}
+.btn-salvar { background-color: #1abf63; color: white; }
+.btn-salvar:hover { background-color: #16a055; }
+.btn-cancelar { background-color: #6c757d; color: white; margin-left: 10px; }
+.btn-cancelar:hover { background-color: #5a6268; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes scaleIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+
 #modalTransacao {
   display: none;
   position: fixed;
@@ -237,13 +346,11 @@
   border-radius: 5px;
 }
 
-/* Animação de fundo escurecido */
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
 }
 
-/* Animação de entrada do conteúdo */
 @keyframes scaleIn {
   to {
     opacity: 1;
@@ -283,12 +390,12 @@
 
 .radio-option {
   display: flex;
-  align-items: center; /* alinha verticalmente */
+  align-items: center;
   gap: 8px;
 }
 
 .radio-option input[type="radio"] {
-  transform: translateY(10px); /* micro ajuste vertical da bolinha */
+  transform: translateY(10px);
 }
 
 .radio-option label {
@@ -312,4 +419,3 @@
 #modalObjetivo.ativo {
   display: flex;
 }
-

@@ -1,0 +1,218 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>U-Balance - Relatórios</title>
+    <link rel="stylesheet" href="{% static 'core/css/style_dashboard.css' %}"/>
+    <link rel="stylesheet" href="{% static 'relatorio/css/relatorios.css' %}"/>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{% static 'relatorio/js/scriptRelatorios.js' %}" defer></script>
+</head>
+<body>
+<aside class="sidebar">
+    <h1>U-Balance</h1>
+    <nav>
+        <a href="{% url 'core:dashboard' %}">🏠 Início</a>
+        <a href="#transacao" id="abrirModalTransacao">💲 Adicionar Transação</a>
+        <a href="#meta" id="abrirModalMeta">🎯 Adicionar Meta</a>
+        <a href="#objetivo" id="abrirModalObjetivo">📈 Adicionar Objetivo</a>
+        <a href="{% url 'core:metas:meta' %}">🎯 Metas</a>
+        <a href="{% url 'core:objetivos:menu_objetivos' %}">📈 Objetivos</a>
+        <a href="{% url 'core:menuExtrato' mes=mes ano=ano %}">🧾 Extrato </a>
+        <a href="{% url 'core:relatorios' %}" style="display:block; background-color: #f0f0f0; font-weight: 600;">📊
+            Relatórios</a>
+        <a href="{% url 'usuario:configuracoes' %}">⚙️ Configurações</a>
+        <a href="{% url 'usuario:logout' %}" id="logout">Logout</a>
+    </nav>
+</aside>
+
+<main class="content">
+    <div class="top-bar">
+        <h2>Relatório Financeiro de {{ mes }}/{{ ano }}</h2>
+        <span class="usuario">Usuário: {{ request.user.username }}</span>
+    </div>
+
+    <div class="cards">
+        <div class="card">Saldo atual<br>
+            <h1>R$ {{ relatorio.saldo_atual|intcomma }}</h1></div>
+        <div class="card">Saldo Total:<h1>R$ {{ relatorio.saldo_total|intcomma }}</h1></div>
+        <div class="card">Receita Total:<h1>R$ {{ relatorio.receita_total|intcomma }}</h1></div>
+        <div class="card">Despesa Total:<h1>R$ {{ relatorio.despesa_total|intcomma }}</h1></div>
+    </div>
+
+    <section class="relatorios-content">
+        <div class="resumo-container">
+            <div class="resumo-coluna">
+                <h3>Resumo Geral</h3><br>
+                <ul>
+                    <li>Saldo no Início: R$ {{ relatorio.resumo.saldo_inicio|intcomma }}</li>
+                    <br>
+                    <li>Saldo Final: R$ {{ relatorio.resumo.saldo_final|intcomma }}</li>
+                    <br>
+                    <li>Ganho/Lucro: R$ {{ relatorio.resumo.ganho_lucro|intcomma }}</li>
+                    <br>
+                    <li>Transações de Receitas: {{ relatorio.resumo.transacoes_receitas }}</li>
+                    <br>
+                    <li>Transações de Despesas: {{ relatorio.resumo.transacoes_despesas }}</li>
+                    <br>
+                    <li>Total de Transações no Mês: {{ relatorio.transacoes_totaisMes }}</li>
+                    <br>
+                </ul>
+                <br>
+
+                <h3>🎯 Metas financeiras</h3><br>
+                <ul>
+                    <li>Total de Metas: {{ relatorio.metas.total }}</li>
+                    <br>
+                    <li>Metas Ativas: {{ relatorio.metas.ativas }}</li>
+                    <br>
+                    <li>Metas Concluídas: {{ relatorio.metas.concluidas }}</li>
+                    <br>
+                    <li>Metas Ultrapassadas: {{ relatorio.metas.ultrapassadas }}</li>
+                    <br>
+                    <li>Metas Não Atingidas: {{ relatorio.metas.nao_atingidas }}</li>
+                    <br>
+                    <li>Taxa de Sucesso: {{ relatorio.metas.taxa_sucesso|floatformat:1 }}%</li>
+                    <br>
+                </ul>
+                <br>
+            </div>
+
+            <div class="resumo-coluna">
+                <h3>💰 Objetivos de Poupança</h3><br>
+                <ul>
+                    <li>Total de Objetivos: {{ relatorio.objetivos.total }}</li>
+                    <br>
+                    <li>Objetivos Ativos: {{ relatorio.objetivos.ativos }}</li>
+                    <br>
+                    <li>Objetivos Pausados: {{ relatorio.objetivos.pausados }}</li>
+                    <br>
+                    <li>Objetivos Concluídos: {{ relatorio.objetivos.concluidos }}</li>
+                    <br>
+                    <li>Objetivos Criados este mês: {{ relatorio.objetivos.criadosMes }}</li>
+                    <br>
+                    <li>Objetivos Concluídos este mês: {{ relatorio.objetivos.concluidosMes }}</li>
+                    <br>
+                    <li>Total Economizado: R$ {{ relatorio.objetivos.total_economizado|intcomma }}</li>
+                    <br>
+                </ul>
+                <br>
+
+                <h3>📊 Análise Detalhada</h3><br>
+                <ul>
+                    <li>Categoria com Maior Gasto: {{ relatorio.analise.categoria_maior_gasto }}
+                        ({{ relatorio.analise.percentual_maior_gasto|floatformat:0 }}%)
+                    </li>
+                    <br>
+                    <li>Categoria com Menor Gasto: {{ relatorio.analise.categoria_menor_gasto }}
+                        ({{ relatorio.analise.percentual_menor_gasto|floatformat:0 }}%)
+                    </li>
+                    <br>
+                    <li>Maior Receita: R$ {{ relatorio.analise.maior_receita|intcomma }}</li>
+                    <br>
+                    <li>Maior Despesa: R$ {{ relatorio.analise.maior_despesa|intcomma }}</li>
+                    <br>
+                    <li>Frequência de Transações: {{ relatorio.analise.frequencia_transacoes|floatformat:1 }} por dia
+                    </li>
+                    <br>
+                </ul>
+            </div>
+        </div>
+
+        <div class="graficos-container">
+            <div class="grafico-switch">
+                <div class="chart-header">
+                    <h3>Gráfico da variação do saldo do mês</h3>
+                    <button onclick="alternarGrafico()" class="btn-grafico">Alternar para fluxo de caixa</button>
+                </div>
+                <canvas id="graficoLinha"></canvas>
+            </div>
+
+            <div class="graficos-row">
+                <div class="grafico-categorias">
+                    <div class="chart-header">
+                        <h3>Gráfico de categorias</h3>
+                        <button onclick="alternarCategoria()" class="btn-grafico">Alternar para categorias de receita
+                        </button>
+                    </div>
+                    <canvas id="graficoPizza"></canvas>
+                </div>
+                <div class="grafico-barras">
+                    <div class="chart-header">
+                        <h3 id="tituloGraficoBarras">Gastos por dia da semana</h3>
+                    </div>
+                    <canvas id="graficoBarras"></canvas>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        try {
+            const dadosLinha = JSON.parse('{{ grafico_linha_json|escapejs }}');
+            const dadosPizzaGastos = JSON.parse('{{ grafico_pizza_gastos_json|escapejs }}');
+            const dadosPizzaReceitas = JSON.parse('{{ grafico_pizza_receitas_json|escapejs }}');
+            const dadosBarras = JSON.parse('{{ grafico_barras_json|escapejs }}');
+
+            graficoLinha = new Chart(document.getElementById("graficoLinha"), {
+                type: "line",
+                data: {
+                    labels: dadosLinha.labels,
+                    datasets: [{
+                        label: "Saldo",
+                        data: dadosLinha.data,
+                        borderColor: "#2ecc71",
+                        backgroundColor: "rgba(46, 204, 113, 0.1)",
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {legend: {display: false}}
+                }
+            });
+
+            graficoPizza = new Chart(document.getElementById("graficoPizza"), {
+                type: "pie",
+                data: {
+                    labels: dadosPizzaGastos.labels,
+                    datasets: [{
+                        data: dadosPizzaGastos.data,
+                        backgroundColor: dadosPizzaGastos.colors
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+
+            graficoBarras = new Chart(document.getElementById("graficoBarras").getContext("2d"), {
+                type: "bar",
+                data: {
+                    labels: dadosBarras.labels,
+                    datasets: [{
+                        label: "Gastos",
+                        data: dadosBarras.data,
+                        backgroundColor: "#e74c3c"
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {legend: {display: false}}
+                }
+            });
+        } catch (e) {
+            console.error("Erro ao carregar dados dos gráficos.", e);
+        }
+    });
+</script>
+</body>
+</html>

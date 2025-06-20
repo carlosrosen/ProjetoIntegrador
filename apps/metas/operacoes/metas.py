@@ -1,3 +1,5 @@
+from dateutil.utils import today
+
 from apps.metas.models import Metas
 from apps.financeiro.models import ParcelasTransacao, Categoria
 
@@ -11,8 +13,6 @@ from common.dominio.data import Data
 from decimal import Decimal
 from datetime import date
 from itertools import chain
-
-
 
 class OperacoesMeta:
     def __init__(self, user_id):
@@ -31,7 +31,7 @@ class OperacoesMeta:
 
         if tipo not in ['MAX', 'MIN']:
             return "Tipo de meta inválido. Use 'MAX' para limite máximo ou 'MIN' para mínimo desejado."
-        if data_fim < data_inicio:
+        if data_fim.valor < data_inicio.valor:
             return "A data final não pode ser anterior à data inicial."
         if valor <= 0:
             return "Valor inserido menor ou igual a zero"
@@ -39,10 +39,10 @@ class OperacoesMeta:
         Metas.objects.create(
             user_fk=self.user,
             tipo=tipo,
-            categoria=categoria.id,
+            categoria_fk=categoria,
             valor=valor,
-            data_inicio=data_inicio,
-            data_fim=data_fim,
+            data_inicio=data_inicio.valor,
+            data_fim=data_fim.valor,
             descricao=descricao
         )
 
@@ -88,7 +88,7 @@ class OperacoesMeta:
         parcelas = ParcelasTransacao.objects.filter(
             # O underline duplo é uma forma de navegar pelas chaves estrangeiras no Django
             transacao_fk__user_fk=self.user,
-            categoria_fk__nome=meta.categoria_fk,
+            transacao_fk__categoria_fk=meta.categoria_fk,
             data__gte=meta.data_inicio,             # __gte maior ou igual
             data__lte=meta.data_fim,                # __lte menor ou igual
             pago=True,
@@ -99,15 +99,19 @@ class OperacoesMeta:
         hoje = date.today()
 
         if meta.tipo == 'MAX':
-            if total > meta.valor:
+            if total > meta.valor and hoje <= meta.data_fim:
                 meta.status = 'U'
-            elif hoje > meta.data_fim and meta.status != 'U':
+                meta.data_conclusao = hoje
+            elif hoje > meta.data_fim and total <= meta.valor:
                 meta.status = 'C'
+                meta.data_conclusao = hoje
         elif meta.tipo == 'MIN':
-            if total >= meta.valor:
+            if total >= meta.valor and hoje <= meta.data_fim:
                 meta.status = 'C'
-            elif hoje > meta.data_fim and meta.status != 'C':
+                meta.data_conclusao = hoje
+            elif hoje > meta.data_fim and total < meta.valor:
                 meta.status = 'N'
+                meta.data_conclusao = hoje
         try:
             meta.save()
         except Exception:

@@ -6,7 +6,7 @@ from django.db import transaction
 from apps.usuarios.models import CustomUser
 from typing import Callable
 
-from apps.financeiro.models import Transacao, ParcelasTransacao, Categoria
+from apps.financeiro.models import Transacao, ParcelasTransacao, Categoria, HistoricoSaldo
 
 from apps.financeiro.dominio import *
 from common.dominio.data import Data
@@ -67,15 +67,19 @@ class OperacoesTransacao:
                                                          , pago = status_pago
                 )
                 if i == 0:
-                    historico.inicializarTuplasParaParcelasAntigas(parcela=parcela)
+                    if not historico.inicializarTuplasParaParcelasAntigas(parcela=parcela) and not historico.inicializarTuplasParaParcelasFuturas(parcela=parcela):
+                        historico.corrigirValoresHistorico(data_correcao_historico=data_parcela.valor
+                                                           , valor_correcao=valor_parcela
+                                                           ,inversor=False
+                        )
                 else:
+                    historico.verificarExistenciaRegistro(parcela=parcela)
                     historico.corrigirValoresHistorico(data_correcao_historico= data_parcela.valor
                                                  , valor_correcao= valor_parcela
                                                  , inversor=False
                     )
                 if status_pago == True and data_parcela.valor <= date.today():
                     self.user.operarSaldoAtual(valor_parcela, transacao.tipo, inversor=False)
-
             except Exception as e:
                 transacao.delete()
                 raise Exception(f'Erro ao criar o parcela {e}')
@@ -122,13 +126,15 @@ class OperacoesTransacao:
                 # cancela os valores do saldo do valor antigo
                 cancelar_valores_saldo()
                 # atualiza os valores do novo saldo
-                atualizar_valores_saldo()
+                if data_nova <= self.user.dataUltimaTransacaoVerificada or data_nova > date.today():
+                    atualizar_valores_saldo()
 
             elif data_anterior_parcela <= date.today() and data_nova > date.today():
                 cancelar_valores_saldo()
 
             elif data_anterior_parcela > date.today() and data_nova <= date.today():
-                atualizar_valores_saldo()
+                if data_nova <= self.user.dataUltimaTransacaoVerificada or data_nova > date.today():
+                    atualizar_valores_saldo()
 
         elif pago_status_anterior == True and pago_status_novo == False:
             # pago -> não pago
@@ -145,10 +151,14 @@ class OperacoesTransacao:
             # não pago -> pago
             if data_anterior_parcela <= date.today() and data_nova <= date.today():
                 atualizar_valores_historico()
-                atualizar_valores_saldo()
+                #para evitar colisões com o verificador de transação paga,
+                #so altera o valor se estiver fora do intevalo de checkagem do verificador
+                if data_nova <= self.user.dataUltimaTransacaoVerificada or data_nova > date.today():
+                    atualizar_valores_saldo()
             elif data_anterior_parcela > date.today() and data_nova <= date.today():
                 atualizar_valores_historico()
-                atualizar_valores_saldo()
+                if data_nova <= self.user.dataUltimaTransacaoVerificada or data_nova > date.today():
+                    atualizar_valores_saldo()
 
     def editarTransacaoParcelada(self
                         , parcela: ParcelasTransacao
@@ -221,7 +231,10 @@ class OperacoesTransacao:
         with transaction.atomic():
             transacao = parcela.transacao_fk
             historico = Historico(self.user.id)
-            self.user.operarSaldoAtual(parcela.valor, transacao.tipo, inversor=True)
+
+            if parcela.data <= date.today() and parcela.pago == True:
+                self.user.operarSaldoAtual(parcela.valor, transacao.tipo, inversor=True)
+
             if transacao.quantidade_parcelas <= 1:
                 historico.corrigirValoresHistorico(data_correcao_historico= parcela.data
                                                   , valor_correcao= parcela.valor
@@ -236,7 +249,7 @@ class OperacoesTransacao:
                 historico.corrigirValoresHistorico(data_correcao_historico=parcela.data
                                                    , valor_correcao=parcela.valor
                                                    , inversor=True
-                                                   )
+                )
                 try:
                     transacao.save()
                     parcela.delete()
@@ -252,7 +265,6 @@ class OperacoesTransacao:
         ).order_by('ordem_parcela')
         for parcela in parcelas:
             self.deletarUmaParcela(parcela)
-
 
     # Aqui é para deletar todas
     def deletarTodasParcelas(self,parcela: ParcelasTransacao):
@@ -277,6 +289,9 @@ class OperacoesTransacao:
     def verificarParcelasPagas(self):
         with transaction.atomic():
             ultima_verificao = self.user.dataUltimaTransacaoVerificada
+            if not ultima_verificao:
+                self.user.dataUltimaTransacaoVerificada = date.today()
+                return
             if ultima_verificao == date.today():
                 return
             intervalo = ParcelasTransacao.objects.filter(transacao_fk__user_fk=self.user
@@ -285,13 +300,16 @@ class OperacoesTransacao:
                                                        , pago= True
             )
 
+            if intervalo.count() == 0:
+                return
+
             for parcela in intervalo:
                 self.user.operarSaldoAtual(tipo=parcela.transacao_fk.tipo
                                          , valor=parcela.valor
                                          , inversor=False
                 )
 
-            self.user.dataUltimaTransacaoVerificada = intervalo.latest('data')
+            self.user.dataUltimaTransacaoVerificada = intervalo.latest('data').data
             try:
                 self.user.save()
             except Exception as e:
