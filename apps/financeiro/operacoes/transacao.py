@@ -60,6 +60,9 @@ class OperacoesTransacao:
             try:
                 data_parcela = Data(data.proximoMes(quantidade_meses=i))
 
+                if data_parcela.valor > date.today():
+                    status_pago = False
+
                 parcela = ParcelasTransacao.objects.create(transacao_fk = transacao
                                                          , data = data_parcela.valor
                                                          , valor = abs(valor_parcela)
@@ -246,6 +249,17 @@ class OperacoesTransacao:
                     raise Exception(f'Erro deletar Transação')
             else:
                 transacao.quantidade_parcelas -= 1
+                if transacao.quantidade_parcelas > 0:
+                    parcelas = ParcelasTransacao.objects.filter(transacao_fk__user_fk=self.user
+                                                              , transacao_fk=transacao
+                                                              , ordem_parcela__gt=parcela.ordem_parcela
+                    )
+                    if parcelas.count() > 0:
+                        for parcela_transacao in parcelas:
+                            parcela_transacao.ordem_parcela -= 1
+                            parcela_transacao.save()
+
+
                 historico.corrigirValoresHistorico(data_correcao_historico=parcela.data
                                                    , valor_correcao=parcela.valor
                                                    , inversor=True

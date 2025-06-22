@@ -131,19 +131,43 @@
         </div>
         <div class="future-box">
             <h3 style="padding-top: 5px;">Lançamentos Futuros</h3>
-            <ul>
+            <table class="tabela-transacoes">
+                <thead>
+                <tr>
+                    <th>Categoria</th>
+                    <th>Parcelas</th>
+                    <th>Valor</th>
+                    <th>Data</th>
+                </tr>
+                </thead>
+                <tbody>
                 {% if lancamentos_futuros|length > 0 %}
                     {% for parcela in lancamentos_futuros %}
-                        <li><span>{{ parcela.transacao_fk.categoria_fk.nome }} {{ parcela.data }}</span>
-                            <span class="valor">{% if transacao.tipo == 'entrada' %}+{% else %}
-                                -{% endif %}{{ transacao.valor }}</span></li>
+                        <tr>
+                            <td>{{ parcela.transacao_fk.categoria_fk.nome }}</td>
+                            <td>
+                                {% if parcela.transacao_fk.quantidade_parcelas > 1 %}
+                                    ({{ parcela.ordem_parcela }}/{{ parcela.transacao_fk.quantidade_parcelas }})
+                                {% else %}
+                                    À vista
+                                {% endif %}
+                            </td>
+                            <td class="{% if parcela.transacao_fk.tipo == 'R' %}valor-receita{% else %}valor-despesa{% endif %}">
+                                {% if parcela.transacao_fk.tipo == 'R' %}+ R$
+                                    {{ parcela.valor|floatformat:2 }}{% else %}- R$
+                                    {{ parcela.valor|floatformat:2 }}{% endif %}
+                            </td>
+                            <td>{{ parcela.data|date:"d/m/Y" }}</td>
+                        </tr>
                     {% endfor %}
                 {% else %}
-                    <li><span>Nenhuma Transação futura</span></li>
+                    <tr>
+                        <td colspan="4" style="text-align: center;">Nenhuma transação futura</td>
+                    </tr>
                 {% endif %}
-            </ul>
+                </tbody>
+            </table>
         </div>
-    </div>
 </main>
 
 <div id="modalTransacao">
@@ -166,7 +190,7 @@
 
             <div id="camposDespesa">
                 <label>Valor gasto: <br>
-                    <input type="number" name="valor_despesa" step="0.01" min="0.01" required><br>
+                    <input type="number" name="valor_despesa" step="0.01" min="0.01" maxlength="12" required><br>
                 </label>
 
                 <label>Categoria:<br>
@@ -185,7 +209,7 @@
                     </select></label><br>
                 <div id="campoParcelas" style="display: none;">
                     <label>Quantidade de parcelas:<br>
-                        <input type="number" name="parcelas_despesa" min="1" value="1" step="1"><br>
+                        <input type="number" name="parcelas_despesa" min="1" maxlength="2" value="1" step="1"><br>
                     </label>
                 </div>
 
@@ -210,7 +234,7 @@
                 </div>
                 <br>
                 <button type="submit" class="btn-salvar">Salvar</button>
-                <button type="button" onclick="fecharModal()" class="btn-cancelar">Cancelar</button>
+                <button type="button" onclick="fecharModalTransacao()" class="btn-cancelar">Cancelar</button>
             </div>
         </form>
         <form id="formTransacaoReceita" action="{% url 'core:financeiro:criar-receita' %}" method="POST">
@@ -218,7 +242,7 @@
             <input type="hidden" name="tipoform" value="transacao_receita">
             <div id="camposReceita" style="display: none;">
                 <label>Valor ganho:<br>
-                    <input type="number" name="valor_receita" step="0.01" min="0.01" required>
+                    <input type="number" name="valor_receita" step="0.01" min="0.01" maxlength="12" required>
                     <br>
                 </label>
 
@@ -254,7 +278,7 @@
                 <br>
                 <!-------------------------   2-->
                 <button type="submit" class="btn-salvar">Salvar</button>
-                <button type="button" onclick="fecharModal()" class="btn-cancelar">Cancelar</button>
+                <button type="button" onclick="fecharModalTransacao()" class="btn-cancelar">Cancelar</button>
             </div>
             <br>
         </form>
@@ -361,7 +385,7 @@
     let modoGrafico = "gastos";
     const ctx = document.getElementById("graficoGastos").getContext("2d");
 
-    let div = document.getElementById("grafico_despesa");
+    let div = document.getElementById("graficoGastos");
 
     if (!div) {
         console.warn("#grafico_despesa não encontrado.");

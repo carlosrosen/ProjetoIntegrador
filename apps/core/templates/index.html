@@ -13,8 +13,13 @@
     <div class="container">
         <div class="logo">U-Balance</div>
         <nav>
+            {% if not user.is_authenticated %}
             <a href="{% url 'usuario:login' %}">Entrar</a>
             <a href="{% url 'usuario:cadastro' %}">Cadastrar</a>
+            {% else %}
+            <a href="{% url 'core:dashboard' %}">Acessar dashboard</a>
+            <a href="{% url 'usuario:logout' %}">Logout</a>
+            {% endif %}
         </nav>
     </div>
 </header>
@@ -32,15 +37,24 @@
     <h2>Nossos Serviços</h2>
     <div class="cards">
         <div class="card">
+            <h3>Crie metas</h3>
+            <p>Gerencie as suas metas financeira, sabendo exatamente o qual valor atingir.
+                <br>Com acompanhamento direto com as transações </p>
+        </div>
+        <div class="card">
             <h3>Organização de Gastos</h3>
             <p>Saiba exatamente para onde vai seu dinheiro e como economizar mais.</p>
+        </div>
+        <div class="card">
+            <h3>Defina Objetivos</h3>
+            <p>Esta planejando juntar dinheiro para realizar aquele sonho?<br>Defina objetivos e tenha um fácil acompanhamento dos valores guardados para atingir o seu sonho!</p>
         </div>
     </div>
 </section>
 
 <section class="cta">
-    <h2>Pronto para transformar sua vida financeira?</h2>
-    <button onclick="alert('Entrando em contato!')">Fale Conosco</button>
+    <h2>Está com dúvidas ou com problemas na plataforma?</h2>
+    <button onclick="alert('Apenas pra exemplo')">Fale Conosco</button>
 </section>
 
 <footer>

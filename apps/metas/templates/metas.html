@@ -2,154 +2,155 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>U-Balance - Metas</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <link rel="stylesheet" href="{% static 'core/css/style_dashboard.css' %}" />
-  <link rel="stylesheet" href="{% static 'metas/css/metas.css' %}" />
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>U-Balance - Metas</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="{% static 'core/css/style_dashboard.css' %}"/>
+    <link rel="stylesheet" href="{% static 'metas/css/metas.css' %}"/>
 </head>
 <body>
-  <aside class="sidebar">
+<aside class="sidebar">
     <h1>U-Balance</h1>
     <nav>
         <a href="{% url 'core:dashboard' %}">🏠 Início</a>
         <a href="" id="abrirModalTransacao">💲 Adicionar Transação</a>
         <a href="#" id="abrirModalMeta">🎯 Adicionar Meta</a>
         <a href="#" id="abrirModalObjetivo">📈 Adicionar Objetivo</a>
-        <a href="{% url 'core:metas:meta' %}" style="display:block; background-color: #f0f0f0; font-weight: 600;">🎯 Metas</a>
+        <a href="{% url 'core:metas:meta' %}" style="display:block; background-color: #f0f0f0; font-weight: 600;">🎯
+            Metas</a>
         <a href="{% url 'core:objetivos:menu_objetivos' %}">📈 Objetivos</a>
         <a href="{% url 'core:menuExtrato' mes=mes ano=ano %}">🧾 Extrato</a>
-        <a href="{% url 'core:erro404' %}" >📊 Relatórios</a>
+        <a href="{% url 'core:relatorio:relatorio_mensal' %}">📊 Relatórios</a>
         <a href="{% url 'usuario:configuracoes' %}">⚙️ Configurações</a>
         <a href="{% url 'usuario:logout' %}" id="logout">Logout</a>
     </nav>
-  </aside>
+</aside>
 
-  <main class="content">
+<main class="content">
     <div class="metas-header">
-      <h1>Metas</h1>
-      <div class="usuario-info">Usuário: {{ user.username }}</div>
+        <h1>Metas</h1>
+        <div class="usuario-info">Usuário: {{ user.username }}</div>
     </div>
 
     <div class="metas-grid">
-      {% for meta in metas %}
-      <div class="meta-card">
-        <div class="meta-header">
-          <div class="meta-categoria">
-            <span class="categoria-tag categoria-{{ meta.categoria_fk.nome|lower|slugify }}">{{ meta.categoria_fk.nome }}</span>
-          </div>
-          <div class="meta-status status-{{ meta.status_formatado|lower|slugify }}">{{ meta.status_formatado }}</div>
-        </div>
+        {% for meta in metas %}
+            <div class="meta-card">
+                <div class="meta-header">
+                    <div class="meta-categoria">
+                        <span class="categoria-tag categoria-{{ meta.categoria_fk.nome|lower|slugify }}">{{ meta.categoria_fk.nome }}</span>
+                    </div>
+                    <div class="meta-status status-{{ meta.status_formatado|lower|slugify }}">{{ meta.status_formatado }}</div>
+                </div>
 
-        <div class="meta-content">
-          <h3 class="meta-titulo">{{ meta.titulo }}</h3>
+                <div class="meta-content">
+                    <h3 class="meta-titulo">{{ meta.titulo }}</h3>
 
-          <div class="meta-info-grid">
-            <div class="info-item">
-              <span class="info-label">Tipo:</span>
-              <span class="info-valor tipo-{{ meta.tipagem|lower|slugify }}">{{ meta.tipagem }}</span>
-            </div>
-            <div class="info-item">
-              <span class="info-label">Valor:</span>
-              <span class="info-valor valor-meta">R$ {{ meta.valor|floatformat:2 }}</span>
-            </div>
-            <div class="info-item">
-              <span class="info-label">Período:</span>
-              <span class="info-valor">{{ meta.data_inicio|date:"d/m/Y" }} - {{ meta.data_fim|date:"d/m/Y" }}</span>
-            </div>
-          </div>
+                    <div class="meta-info-grid">
+                        <div class="info-item">
+                            <span class="info-label">Tipo:</span>
+                            <span class="info-valor tipo-{{ meta.tipagem|lower|slugify }}">{{ meta.tipagem }}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Valor:</span>
+                            <span class="info-valor valor-meta">R$ {{ meta.valor|floatformat:2 }}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Período:</span>
+                            <span class="info-valor">{{ meta.data_inicio|date:"d/m/Y" }} - {{ meta.data_fim|date:"d/m/Y" }}</span>
+                        </div>
+                    </div>
 
-          <div class="meta-progresso">
-            <div class="progresso-info">
-              <span>{{ meta.desempenho }}: R$ {{ meta.valorAcumulado|floatformat:2 }}</span>
-              <span>{{ meta.porcentagem }}%</span>
-            </div>
-            <div class="progresso-bar">
-              <div class="progresso-fill
+                    <div class="meta-progresso">
+                        <div class="progresso-info">
+                            <span>{{ meta.desempenho }}: R$ {{ meta.valorAcumulado|floatformat:2 }}</span>
+                            <span>{{ meta.porcentagem }}%</span>
+                        </div>
+                        <div class="progresso-bar">
+                            <div class="progresso-fill
                    {% if meta.status_formatado == 'Concluído' %}progresso-concluido
                    {% elif meta.status_formatado == 'Ultrapassado' %}progresso-ultrapassado
                    {% endif %}"
-                   style="width: {{ meta.porcentagem|floatformat:0 }}%">
-              </div>
-            </div>
-          </div>
+                                 style="width: {{ meta.porcentagem|floatformat:0 }}%">
+                            </div>
+                        </div>
+                    </div>
 
-          <div class="meta-descricao">
-            <p>{{ meta.descricao }}</p>
-          </div>
+                    <div class="meta-descricao">
+                        <p>{{ meta.descricao }}</p>
+                    </div>
+                </div>
+                <button class="btn-editar-meta"
+                        data-id="{{ meta.id }}"
+                        data-categoria="{{ meta.categoria_fk.nome }}"
+                        data-tipo="{{ meta.tipo }}"
+                        data-valor="{{ meta.valor|stringformat:'0.2f' }}"
+                        data-inicio="{{ meta.data_inicio|date:'Y-m-d' }}"
+                        data-fim="{{ meta.data_fim|date:'Y-m-d' }}"
+                        data-descricao="{{ meta.descricao }}">
+                    Editar Meta
+                </button>
+            </div>
+        {% endfor %}
+    </div>
+    <div id="modalEditarMeta" class="modal">
+        <div class="modal-content">
+            <h2>Editar Meta</h2>
+            <form id="formEditarMeta" method="POST" action="">
+                {% csrf_token %}
+
+                <label for="categoria">Categoria:</label>
+                <select name="categoria" required>
+                    {% for categoria in categorias %}
+                        <option value="{{ categoria.nome }}">{{ categoria.nome }}</option>
+                    {% endfor %}
+                </select>
+
+                <label for="tipo">Tipo:</label>
+                <select name="tipoMeta" required>
+                    <option value="MIN">Mínimo Desejado</option>
+                    <option value="MAX">Limite Máximo</option>
+                </select>
+
+                <label for="valor">Valor:</label>
+                <input type="number" name="valor" step="0.01" min="0.01" value="" required>
+
+                <label for="data_inicio">Data Início:</label>
+                <input type="date" name="data_inicio" value="" required>
+
+                <label for="data_fim">Data Fim:</label>
+                <input type="date" name="data_fim" value="" required>
+
+                <label for="descricao">Descrição:</label>
+                <input name="descricao" value="">
+
+                <div class="modal-buttons">
+                    <button type="button" class="btn-deletar" onclick="abrirModalConfirmacao()">Deletar</button>
+                    <div class="buttons-right">
+                        <button type="submit" class="btn-salvar">Salvar</button>
+                        <button type="button" class="btn-cancelar" onclick="fecharModalEditar()">Cancelar</button>
+                    </div>
+                </div>
+            </form>
         </div>
-
-        <button class="btn-editar-meta"
-                data-id="{{ meta.id }}"
-                data-categoria="{{ meta.categoria_fk.nome }}"
-                data-tipo="{{ meta.tipo }}"
-                data-valor="{{ meta.valor|stringformat:'0.2f' }}"
-                data-inicio="{{ meta.data_inicio|date:'Y-m-d' }}"
-                data-fim="{{ meta.data_fim|date:'Y-m-d' }}"
-                data-descricao="{{ meta.descricao }}">
-          Editar Meta
-        </button>
-      </div>
-      {% endfor %}
-    </div> <div id="modalEditarMeta" class="modal">
-      <div class="modal-content">
-        <h2>Editar Meta</h2>
-        <form id="formEditarMeta" method="POST" action="">
-          {% csrf_token %}
-
-          <label for="categoria">Categoria:</label>
-          <select name="categoria" required>
-            {% for categoria in categorias %}
-              <option value="{{ categoria.nome }}">{{ categoria.nome }}</option>
-            {% endfor %}
-          </select>
-
-          <label for="tipo">Tipo:</label>
-          <select name="tipoMeta" required>
-              <option value="MIN">Mínimo Desejado</option>
-              <option value="MAX">Limite Máximo</option>
-          </select>
-
-          <label for="valor">Valor:</label>
-          <input type="number" name="valor" step="0.01" min="0.01" value="" required>
-
-          <label for="data_inicio">Data Início:</label>
-          <input type="date" name="data_inicio" value="" required>
-
-          <label for="data_fim">Data Fim:</label>
-          <input type="date" name="data_fim" value="" required>
-
-          <label for="descricao">Descrição:</label>
-          <input name="descricao" value="">
-
-          <div class="modal-buttons">
-              <button type="button" class="btn-deletar" onclick="abrirModalConfirmacao()">Deletar</button>
-              <div class="buttons-right">
-                  <button type="submit" class="btn-salvar">Salvar</button>
-                  <button type="button" class="btn-cancelar" onclick="fecharModalEditar()">Cancelar</button>
-            </div>
-          </div>
-        </form>
-      </div>
     </div>
 
     <div id="modalConfirmacao" class="modal">
-      <div class="modal-content modal-confirmacao">
-        <h2>Apagar Meta</h2>
-        <p>Tem certeza que deseja apagar esta meta? Esta ação não pode ser desfeita.</p>
-        <form id="formDeletarMeta" method="POST" action="">
-          {% csrf_token %}
-          <div style="text-align:right; margin-top: 2rem;">
-            <button type="submit" class="btn-confirmar">Confirmar</button>
-            <button type="button" class="btn-cancelar" onclick="fecharModalConfirmacao()">Cancelar</button>
-          </div>
-        </form>
-      </div>
+        <div class="modal-content modal-confirmacao">
+            <h2>Apagar Meta</h2>
+            <p>Tem certeza que deseja apagar esta meta? Esta ação não pode ser desfeita.</p>
+            <form id="formDeletarMeta" method="POST" action="">
+                {% csrf_token %}
+                <div style="text-align:right; margin-top: 2rem;">
+                    <button type="submit" class="btn-confirmar">Confirmar</button>
+                    <button type="button" class="btn-cancelar" onclick="fecharModalConfirmacao()">Cancelar</button>
+                </div>
+            </form>
+        </div>
     </div>
 
-  </main>
+</main>
 
-  <script src="{% static 'metas/js/script.js' %}" defer></script>
+<script src="{% static 'metas/js/script.js' %}" defer></script>
 </body>
 </html>

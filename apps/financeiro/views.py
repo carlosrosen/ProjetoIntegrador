@@ -1,6 +1,7 @@
 from calendar import calendar
 
 from django.http import HttpResponse, Http404
+from django.template.context_processors import request
 
 from common.dominio.data import Data
 from .models import Categoria
@@ -16,7 +17,7 @@ from apps.financeiro.dominio import *
 from apps.financeiro.models import ParcelasTransacao
 from decimal import Decimal
 
-
+from ..usuarios.models import CustomUser
 
 operacoes = {
     'c': 'criação',
@@ -62,6 +63,8 @@ def menuExtrato(request, mes: int, ano: int):
         except IndexError:
             nome_mes = "Mês Inválido"
 
+        saldoAtual = CustomUser.objects.get(id=request.user.id).saldoAtual
+
         context = {
             'parcelas': parcelas.order_by('data'),
             'mes': mes,
@@ -71,14 +74,15 @@ def menuExtrato(request, mes: int, ano: int):
             'despesas_mes': despesa,
             'receitas_mes': receita,
             'saldo_mes': saldo_mes,
-            'request': request
+            'request': request,
+            'saldoAtual': saldoAtual,
         }
         return render(request, 'extrato.html', context=context)
     return redirect(request.session.get('ultima_url', reverse('core:dashboard')))
 
 def criarTransacaoReceita(request) -> redirect:
     if not request.user.is_authenticated:
-        return redirect(reverse('core:login'))
+        return redirect(reverse('usuario:login'))
     if not request.method == 'POST':
         return redirect(reverse('core:dashboard'))
 
@@ -109,7 +113,7 @@ def criarTransacaoReceita(request) -> redirect:
 
 def criarTransacaoDespesa(request) -> redirect :
     if not request.user.is_authenticated:
-        return redirect(reverse('core:login'))
+        return redirect(reverse('usuario:login'))
     if not request.method == 'POST':
         return redirect(reverse('core:dashboard'))
     try:
@@ -140,7 +144,7 @@ def criarTransacaoDespesa(request) -> redirect :
 # Quando a quantidade de parcelas for igual a 1
 def editarTransacaoUnica(request, parcela_id):
     if not request.user.is_authenticated:
-        return redirect(reverse('core:login'))
+        return redirect(reverse('usuario:login'))
     if request.method == 'POST':
         parcela = get_object_or_404(ParcelasTransacao, id=parcela_id, transacao_fk__user_fk__id=request.user.id)
         novo_valor = ValorTransacao(request.POST.get('novoValor'))
@@ -161,7 +165,7 @@ def editarTransacaoUnica(request, parcela_id):
 # Quando a quantidade de parcelas for maior a 1
 def editarTransacaoParcelada(request, parcela_id):
     if not request.user.is_authenticated:
-        return redirect(reverse('core:login'))
+        return redirect(reverse('usuario:login'))
     if request.method == 'POST':
         parcela = get_object_or_404(ParcelasTransacao, id=parcela_id, transacao_fk__user_fk__id=request.user.id)
         novo_valor = ValorTransacao(request.POST.get('novoValor'))
@@ -176,7 +180,7 @@ def editarTransacaoParcelada(request, parcela_id):
 
 def deletarParcela(request, parcela_id):
     if not request.user.is_authenticated:
-        return redirect(reverse('core:login'))
+        return redirect(reverse('usuario:login'))
     if request.method == 'POST':
         parcela = get_object_or_404(ParcelasTransacao, id=parcela_id, transacao_fk__user_fk__id=request.user.id)
         deletar = request.POST.get('tipoExclusao')
