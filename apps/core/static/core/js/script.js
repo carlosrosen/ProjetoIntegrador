@@ -2,7 +2,7 @@
 function fecharModalTransacao() {
     const modal = document.getElementById("modalTransacao");
     modal.classList.remove("ativo");
-    cancelarNavegacaoHash()
+    cancelarNavegacaoHash_menu();
 }
 
 // Lista de transações
@@ -22,7 +22,7 @@ document.getElementById("formTransacaoReceita").addEventListener("submit", funct
         return;
     }
 
-    if (parseFloat(valor) > 99999999) {
+    if (parseFloat(valor) > 999999999) {
         event.preventDefault();
         alert("valor muito grande");
         return;
@@ -39,7 +39,7 @@ document.getElementById("formTransacaoReceita").addEventListener("submit", funct
         esta pago?: ${pago}
         descrição: ${descricao}
     `);
-    cancelarNavegacaoHash();
+    cancelarNavegacaoHash_menu();
 });
 
 document.getElementById("formTransacaoDespesa").addEventListener("submit", function (event) {
@@ -57,7 +57,7 @@ document.getElementById("formTransacaoDespesa").addEventListener("submit", funct
 
     console.log(parseFloat(valor));
 
-    if (parseFloat(valor) > 9999999) {
+    if (parseFloat(valor) > 999999999) {
         event.preventDefault();
         alert("valor muito grande");
         return;
@@ -77,7 +77,7 @@ document.getElementById("formTransacaoDespesa").addEventListener("submit", funct
   `);
 
 
-    cancelarNavegacaoHash();
+    cancelarNavegacaoHash_menu();
 });
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -122,7 +122,7 @@ document.addEventListener("DOMContentLoaded", () => {
 // Fechar modal
 function fecharModalMeta() {
     document.getElementById("modalMeta").classList.remove("ativo");
-    cancelarNavegacaoHash();
+    cancelarNavegacaoHash_menu();
 }
 
 // Mostrar/ocultar campo de data baseado na opção de exclusão
@@ -150,7 +150,7 @@ document.getElementById("formMeta").addEventListener("submit", function (event) 
   Data Final: ${dataFinal}
   categoria: ${categoria}`);
 
-    cancelarNavegacaoHash();
+    cancelarNavegacaoHash_menu();
 });
 
 //ADICIONADO A PARTIR DAQUI DIA 16/06/2025
@@ -158,7 +158,7 @@ document.getElementById("formMeta").addEventListener("submit", function (event) 
 // Fechar modal de objetivo
 function fecharModalObjetivo() {
     document.getElementById("modalObjetivo").classList.remove("ativo");
-    cancelarNavegacaoHash();
+    cancelarNavegacaoHash_menu();
 }
 
 // Capturar dados do formulário de objetivo
@@ -188,13 +188,13 @@ document.getElementById("formObjetivo").addEventListener("submit", function (eve
 
 //---------------------------------------------------------------------------------
 
-function cancelarNavegacaoHash() {
+function cancelarNavegacaoHash_menu() {
     history.pushState("", document.title, window.location.pathname + window.location.search);
-    fecharTodosModais();
+    fecharTodosModais_menu();
     location.reload()
 }
 
-function navegarParaHash(forcadoHash) {
+function navegarParaHash_menu(forcadoHash) {
     if (location.hash === forcadoHash) {
         // Força o hashchange manualmente se o hash já for igual
         location.hash = "";
@@ -207,24 +207,24 @@ function navegarParaHash(forcadoHash) {
 
 document.getElementById("abrirModalTransacao").addEventListener("click", function (e) {
     e.preventDefault();
-    navegarParaHash("#transacao");
+    navegarParaHash_menu("#transacao");
 });
 
 document.getElementById("abrirModalMeta").addEventListener("click", function (e) {
     e.preventDefault();
-    navegarParaHash("#meta");
+    navegarParaHash_menu("#meta");
 });
 
 document.getElementById("abrirModalObjetivo").addEventListener("click", function (e) {
     e.preventDefault();
-    navegarParaHash("#objetivo");
+    navegarParaHash_menu("#objetivo");
 });
 
 
-function abrirModalViaHash() {
+function abrirModalViaHash_menu() {
     const hash = window.location.hash;
 
-    fecharTodosModais();
+    fecharTodosModais_menu();
 
     if (hash === "#transacao") {
         document.getElementById("modalTransacao").classList.add("ativo");
@@ -235,17 +235,17 @@ function abrirModalViaHash() {
     }
 }
 
-function fecharTodosModais() {
+function fecharTodosModais_menu() {
     document.querySelectorAll(".modal").forEach(modal => modal.classList.remove("ativo"));
 }
 
 // Dispara quando hash muda (botão voltar, link direto etc.)
-window.addEventListener("hashchange", abrirModalViaHash);
+window.addEventListener("hashchange", abrirModalViaHash_menu);
 
 // Dispara ao carregar a página
-window.addEventListener("DOMContentLoaded", abrirModalViaHash);
+window.addEventListener("DOMContentLoaded", abrirModalViaHash_menu);
 
-window.addEventListener("hashchange", abrirModalViaHash);
+window.addEventListener("hashchange", abrirModalViaHash_menu);
 window.addEventListener("DOMContentLoaded", () => {
-    abrirModalViaHash();
+    abrirModalViaHash_menu();
 });

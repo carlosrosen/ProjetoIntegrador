@@ -1,4 +1,5 @@
 from calendar import calendar
+from datetime import date
 
 from django.http import HttpResponse, Http404
 from django.template.context_processors import request
@@ -63,22 +64,30 @@ def menuExtrato(request, mes: int, ano: int):
         except IndexError:
             nome_mes = "Mês Inválido"
 
-        saldoAtual = CustomUser.objects.get(id=request.user.id).saldoAtual
+        saldoAtual = CustomUser.objects.get(id=request.user.id).saldoAtual # apagar
 
         context = {
-            'parcelas': parcelas.order_by('data'),
+            'parcelas': parcelas.order_by('-data'),
             'mes': mes,
             'ano': ano,
             'mes_nome': nome_mes,
             'categorias': categorias,
+            'todas_categorias': Categoria.GetTodasCategorias(),
             'despesas_mes': despesa,
             'receitas_mes': receita,
             'saldo_mes': saldo_mes,
             'request': request,
+
+
             'saldoAtual': saldoAtual,
+
+
+            'hoje': date.today(),
+            'todas_categorias_receita': categorias.filter(tipo='R'),
+            'todas_categorias_despesa': categorias.filter(tipo='D')
         }
         return render(request, 'extrato.html', context=context)
-    return redirect(request.session.get('ultima_url', reverse('core:dashboard')))
+    return redirect('core:menuExtrato',mes=mes,ano=ano)
 
 def criarTransacaoReceita(request) -> redirect:
     if not request.user.is_authenticated:
@@ -107,8 +116,8 @@ def criarTransacaoReceita(request) -> redirect:
         transacoes_usuario.criar(valor,data,tipo,quantidade_parcelas,descricao,pago,categoria)
     except Exception as e:
         return redirect(reverse('core:erro', args=[str(e)]))
-
-    return redirect(request.session.get('ultima_url'))
+    url = request.POST.get('next') or reverse('core:dashboard')
+    return redirect(url)
 
 
 def criarTransacaoDespesa(request) -> redirect :
@@ -137,8 +146,8 @@ def criarTransacaoDespesa(request) -> redirect :
         transacoes_usuario.criar(valor, data, tipo, quantidade_parcelas, descricao, pago, categoria)
     except Exception as e:
         return redirect(reverse('core:erro', args=[str(e)]))
-
-    return redirect(request.session.get('ultima_url'))
+    url = request.POST.get('next') or reverse('core:dashboard')
+    return redirect(url)
 
 
 # Quando a quantidade de parcelas for igual a 1

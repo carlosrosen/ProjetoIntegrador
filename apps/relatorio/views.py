@@ -179,6 +179,9 @@ def relatorioMensal(request):
 
         # Categorias (caso precise renderizar filtros ou tabelas)
         'categorias': categorias,
+        'todas_categorias_receita': categorias.filter(tipo='R'),
+        'todas_categorias_despesa': categorias.filter(tipo='D'),
+        'hoje': date.today(),
 
         # Gráfico de variação do saldo
         'valores_historico': ','.join(valores_historico),

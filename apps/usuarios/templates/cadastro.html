@@ -3,40 +3,49 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cadastro - U-Balance</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="{% static 'core/css/style-login-cadastro.css' %}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro - U-Balance</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'core/css/style-login-cadastro.css' %}">
 </head>
 <body>
-  <header>
+<header>
     <div class="logo"><a href="{% url 'core:index' %}">U-Balance</a></div>
-  </header>
+</header>
 
-  <main class="form-container">
+<main class="form-container">
     <form class="form-box" method="POST">
-      {% csrf_token %}
-      <h2>Cadastro</h2>
-      <label for="login">Login</label>
-      <input type="text" id="login" name="usuario" required>
+        {% csrf_token %}
+        <h2>Cadastro</h2>
 
-      <label for="email">E-mail</label>
-      <input type="email" id="email" name="email" required>
+        {% if messages %}
+            {% for message in messages %}
+                <div id="mensagem" class="alert alert-{{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
 
-      <label for="senha">Senha</label>
-      <input type="password" id="senha" name="senha" required>
+        <label for="login">Login</label>
+        <input type="text" id="login" name="usuario" required>
 
-      <label for="confirmar">Repetir senha</label>
-      <input type="password" id="confirmar" name="repetir_senha" required>
+        <label for="email">E-mail</label>
+        <input type="email" id="email" name="email" required>
 
-      <button type="submit" href="{% url 'usuario:cadastro' %}">Cadastrar</button>
-      <p class="link">Já tem uma conta? <a href="{% url 'usuario:login' %}">Entrar</a></p>
+        <label for="senha">Senha</label>
+        <input type="password" id="senha" name="senha" required>
+
+        <label for="confirmar">Repetir senha</label>
+        <input type="password" id="confirmar" name="repetir_senha" required>
+
+        <button type="submit" href="{% url 'usuario:cadastro' %}">Cadastrar</button>
+        <p class="link">Já tem uma conta? <a href="{% url 'usuario:login' %}">Entrar</a></p>
     </form>
-  </main>
+</main>
 
-  <footer>
+<footer>
     <p>&copy; 2025 - U-Balance</p>
-  </footer>
+</footer>
+
+
 </body>
 </html>

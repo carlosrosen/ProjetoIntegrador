@@ -23,8 +23,10 @@ def menuObjetivos(request):
     categorias = Categoria.objects.all()
 
     context = {'objetivos': objetivos
+             , 'categorias': categorias
              , 'todas_categorias_receita': categorias.filter(tipo='R')
              , 'todas_categorias_despesa': categorias.filter(tipo='D')
+             , 'hoje': date.today()
              , 'mes': date.today().month
              , 'ano': date.today().year
     }
@@ -41,11 +43,16 @@ def detalheObjetivo(request, id):
 
     getter = GetObjetivo(request.user.id)
     datas, valores = getter.variacao(id)
+    categorias = Categoria.objects.all()
     context = {'objetivo': objetivo
         , 'valoresHistorico': valores
         , 'datas': datas
         , 'mes': date.today().month
         , 'ano': date.today().year
+        , 'categorias': categorias
+        , 'todas_categorias_receita': categorias.filter(tipo='R')
+        , 'todas_categorias_despesa': categorias.filter(tipo='D')
+        , 'hoje': date.today()
         }
 
     return render(request, 'objetivo-detalhes.html', context)
@@ -64,11 +71,10 @@ def criarObjetivo(request):
     valor_guardado  = ValorObjetivo(request.POST.get('valorGuardado'))
     data_fim = Data(request.POST.get('anoFinal'))
 
-    print('\n\n', titulo,'\n',valor_desejado,'\n',valor_guardado,'\n',data_fim,'\n\n')
-
     operacoes.criar(titulo, valor_desejado, valor_guardado, data_fim)
 
-    return redirect(reverse('core:dashboard'))
+    url = request.POST.get('next') or reverse('core:dashboard')
+    return redirect(url)
 
 
 
