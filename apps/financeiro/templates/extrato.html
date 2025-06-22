@@ -18,7 +18,8 @@
         <a href="#" id="abrirModalObjetivo">📈 Adicionar Objetivo</a>
         <a href="{% url 'core:metas:meta' %}">🎯 Metas</a>
         <a href="{% url 'core:objetivos:menu_objetivos' %}">📈 Objetivos</a>
-        <a href="{% url 'core:menuExtrato' mes=mes ano=ano %}" style="display:block; background-color: #f0f0f0; font-weight: 600;">🧾 Extrato</a>
+        <a href="{% url 'core:menuExtrato' mes=mes ano=ano %}"
+           style="display:block; background-color: #f0f0f0; font-weight: 600;">🧾 Extrato</a>
         <a href="{% url 'core:relatorio:relatorio_mensal' %}">📊 Relatórios</a>
         <a href="{% url 'usuario:configuracoes' %}">⚙️ Configurações</a>
         <a href="{% url 'usuario:logout' %}" id="logout">Logout</a>
@@ -52,6 +53,17 @@
             <h3>DESPESAS DO MÊS</h3>
             <p class="amount">R$ {{ despesas_mes|floatformat:2 }}</p>
         </div>
+
+        <!-- APAGAR ESSA DIV abaixo -->
+
+
+        <div class="summary-card expense">
+            <h3>saldo atual (apagar dps) </h3>
+            <p class="amount">R$ {{ saldoAtual|floatformat:2 }}</p>
+        </div>
+
+        <!-- APAGAR ESSA DIV acima -->
+
     </div>
 
     <form id="filtroForm" class="filters-section">
@@ -259,23 +271,309 @@
     </div>
 </div>
 
+
+<div id="modalTransacao">
+    <div class="modal-content">
+        <div class="tabs">
+            <button type="button" class="tab active" data-tipo="saida">Despesa</button>
+            <button type="button" class="tab" data-tipo="entrada">Receita</button>
+        </div>
+
+        <h2>Adicionar Transação 💲</h2><br>
+        <p>Aqui você irá adicionar uma transação, seja ela uma receita ou despesa para auxiliarmos no gerenciamento
+            financeiro da sua conta! <strong>Lembre-se</strong>, é importante manter as transações atualizadas para uma
+            maior precisão de decisões. ⚠️</p><br>
+        <hr>
+        <br>
+        <form id="formTransacaoDespesa" action="{% url 'core:financeiro:criar-despesa' %}?next={{ request.path }}"
+              method="POST">
+            {% csrf_token %}
+            <label></label>
+            <input type="hidden" name="next" value="{{ request.path }}">
+
+            <div id="camposDespesa">
+                <label>Valor gasto: <br>
+                    <input type="number" name="valor_despesa" step="0.01" min="0.01" maxlength="12" required><br>
+                </label>
+
+                <label>Categoria:<br>
+                    <select name="categoria_despesa" required>
+                        {% for categoria in todas_categorias_despesa %}
+                            <option value="{{ categoria.nome }}">{{ categoria.nome }}</option>
+                        {% endfor %}
+
+                    </select>
+                </label>
+
+                <label>Condição do pagamento:<br>
+                    <select id="condicaoPagamento" name="condicao_despesa">
+                        <option value="avista">À vista</option>
+                        <option value="parcelado">Parcelado</option>
+                    </select></label><br>
+                <div id="campoParcelas" style="display: none;">
+                    <label>Quantidade de parcelas:<br>
+                        <input type="number" name="parcelas_despesa" min="1" maxlength="2" value="1" step="1"><br>
+                    </label>
+                </div>
+
+                <label>Data da Transação:<br>
+                    <input type="date" name="data_despesa" value="{{ hoje|date:'Y-m-d' }}" required><br>
+                </label>
+
+                <label>Descrição:<br>
+                    <input type="text" name="descricao_despesa"><br>
+                </label>
+                <!-- ADICIONADO 16/05/2025   1-->
+                <div class="radio-group">
+                    <label>Você já realizou o pagamento dessa despesa?</label>
+                    <div class="radio-option">
+                        <input type="radio" name="pagamentoRE_despesa" id="pagamentoSIM" value="true" checked required>
+                        <label for="pagamentoSIM">Sim, já paguei essa despesa.</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" name="pagamentoRE_despesa" id="pagamentoNAO" value="false" required>
+                        <label for="pagamentoNAO">Não, não paguei essa despesa.</label>
+                    </div>
+                </div>
+                <br>
+                <button type="submit" class="btn-salvar">Salvar</button>
+                <button type="button" onclick="fecharModalTransacao()" class="btn-cancelar">Cancelar</button>
+            </div>
+        </form>
+        <form id="formTransacaoReceita" action="{% url 'core:financeiro:criar-receita' %}?next={{ request.path }}"
+              method="POST">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ request.path }}">
+            <div id="camposReceita" style="display: none;">
+                <label>Valor ganho:<br>
+                    <input type="number" name="valor_receita" step="0.01" min="0.01" maxlength="12" required>
+                    <br>
+                </label>
+
+                <label>Categoria:<br>
+                    <select name="categoria_receita" required>
+                        {% for categoria in todas_categorias_receita %}
+                            <option value="{{ categoria.nome }}">{{ categoria.nome }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+
+                <label>Data:<br>
+                    <input type="date" name="data_receita" value="{{ hoje|date:'Y-m-d' }}" required><br>
+                </label>
+
+                <label>Descrição:<br>
+                    <input type="text" name="descricao_receita"><br>
+                </label>
+
+                <!-- ADIIONADO 16/05/2025    2-->
+
+                <div class="radio-group">
+                    <label>Você já recebeu essa receita?</label>
+                    <div class="radio-option">
+                        <input type="radio" name="pagamentoRE_receita" id="pagamentoSIM" value="true" checked required>
+                        <label for="pagamentoSIM">Sim, já recebi essa receita.</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" name="pagamentoRE_receita" id="pagamentoNAO" value="false" required>
+                        <label for="pagamentoNAO">Não, não recebi essa receita ainda.</label>
+                    </div>
+                </div>
+                <br>
+                <!-------------------------   2-->
+                <button type="submit" class="btn-salvar">Salvar</button>
+                <button type="button" onclick="fecharModalTransacao()" class="btn-cancelar">Cancelar</button>
+            </div>
+            <br>
+        </form>
+    </div>
+</div>
+<div id="modalMeta">
+    <div class="modal-content">
+        <h2>Adicionar Meta 🎯</h2><br>
+        Aqui você irá definir uma meta, ela pode ser tratada de duas formas:<br><br>
+        <strong>1° </strong>Você pode defini-la como algo a ser atingido.<strong>(Mínimo Desejado)</strong><br>
+        &nbsp;&nbsp;&nbsp;<strong>Exemplo:</strong>&nbsp;Sobrar pelo menos R$1000 ao final do mês.<br><br>
+        <strong>2°</strong> Você pode defini-la como um limite a não ser ultrapassado.<strong>(Limite
+        Máximo)</strong><br>
+        &nbsp;&nbsp;&nbsp;<strong>Exemplo:</strong>&nbsp;Gastar até R$300 com ‘internet’. <br><br>
+        <hr>
+        <br>
+        <form id="formMeta" action="{% url 'core:metas:criar-meta' %}" method="POST">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ request.path }}">
+            <p>Tipo da meta:</p>
+            <label>
+                <select name="tipoMeta" required>
+                    <option value="MIN">Mínimo Desejado</option>
+                    <option value="MAX">Limite Máximo</option>
+                </select>
+            </label>
+            <p>Categoria da meta:</p>
+            <label>
+                <select name="categoria" required>
+                    <option value="default" disabled selected>---------------</option>
+                    {% for categoria in categorias %}
+                        <option value="{{ categoria.nome }}">{{ categoria.nome }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+            <p>Valor desejado(Atingir/Evitar):</p>
+            <label>
+                <input type="number" step="0.01" name="valorMeta" required/>
+            </label>
+            <p>Data Início:</p>
+            <label>
+                <input type="date" name="dataInicio" value="{{ hoje|date:"Y-m-d" }}"/>
+            </label>
+            <p>Data Final:</p>
+            <label>
+                <input type="date" name="dataFinal"/>
+            </label>
+            <p>Descrição:</p>
+            <label>
+                <input type="text" name="descricao"/>
+            </label>
+            <div style="text-align:right;">
+                <button type="submit" class="btn-salvar">Salvar</button>
+                <button type="button" class="btn-cancelar" onclick="fecharModalMeta()">Cancelar</button>
+            </div>
+        </form>
+    </div>
+</div>
+<!--ADICIONADO 16/05/2025  3 -->
+
+<div id="modalObjetivo">
+    <div class="modal-content">
+        <h2>Adicionar Objetivo 📈</h2><br>
+        <p>Aqui você irá adicionar um objetivo, diferente da meta, o objetivo se trata de algo focado no longo prazo,
+            sempre relacionado a uma poupança ou investimento para a realização de algo.<br>
+            <br><strong>Exemplo 1: Comprar um carro - R$30.000</strong><br>
+            <strong>Exemplo 2: Comprar um apartamento - R$345.000</strong></p><br>
+        <hr>
+        <br>
+        <form id="formObjetivo" action="{% url 'core:objetivos:criar-objetivo' %}" method="POST">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ request.path }}">
+            <p>Título do Objetivo:</p>
+            <label>
+                <input type="text" name="tituloObjetivo" required/>
+            </label>
+
+            <p>Valor que deseja guardar:</p>
+            <label>
+                <input type="number" step="0.01" name="valorDesejado" min="0" required/>
+            </label>
+
+            <p>Valor já guardado:</p>
+            <label>
+                <input type="number" step="0.01" name="valorGuardado" min="0" required/>
+            </label>
+
+            <p>Data final do Objetivo:</p>
+            <label>
+                <input type="date" name="anoFinal" required/>
+            </label>
+
+            <div style="text-align:right;">
+                <button type="submit" class="btn-salvar">Salvar</button>
+                <button type="button" class="btn-cancelar" onclick="fecharModalObjetivo()">Cancelar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
 <script defer>
+    // -------------------- CONFIGURAÇÃO DAS URLS --------------------
     const urlEditarTransacao = "{% url 'core:financeiro:editar-transacao' 0 %}";
     const urlDeletarTransacao = "{% url 'core:financeiro:deletar-transacao' 0 %}";
     const urlEditarParcela = "{% url 'core:financeiro:editar-parcela' 0 %}";
     const urlDeletarParcela = "{% url 'core:financeiro:deletar-transacao' 0 %}";
 
+
+    // -------------------- CONTROLE DE HASH E MODAIS --------------------
+    const hashParaModal = {
+        "#editar-transacao": "modalEditarTransacao",
+        "#editar-parcela": "modalEditarTransacaoParcela",
+        "#deletar-transacao": "modalConfirmarExclusao",
+        "#deletar-parcela": "modalConfirmarExclusaoParcela",
+        "#transacao": "modalTransacao",
+        "#meta": "modalMeta",
+        "#objetivo": "modalObjetivo"
+    };
+
+    function abrirModalViaHash() {
+        const hash = window.location.hash;
+        fecharTodosModais();
+
+        const modalId = hashParaModal[hash];
+        if (modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.add('ativo');
+            }
+        }
+    }
+
+    function fecharTodosModais() {
+        document.querySelectorAll(".modal.ativo").forEach(modal => modal.classList.remove('ativo'));
+    }
+
+    function fecharModalHash() {
+        history.pushState("", document.title, window.location.pathname + window.location.search);
+        fecharTodosModais();
+    }
+
+    function navegarParaHash(hash) {
+        if (location.hash === hash) {
+            location.hash = "";
+            setTimeout(() => location.hash = hash, 1);
+        } else {
+            location.hash = hash;
+        }
+    }
+
+    function cancelarNavegacaoHash() {
+        fecharModalHash();
+        location.reload();
+    }
+
+    window.addEventListener('DOMContentLoaded', abrirModalViaHash);
+    window.addEventListener('hashchange', abrirModalViaHash);
+
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') {
+            fecharModalHash();
+        }
+    });
+
+    document.getElementById("abrirModalTransacao").addEventListener("click", (e) => {
+        e.preventDefault();
+        navegarParaHash("#transacao");
+    });
+    document.getElementById("abrirModalMeta").addEventListener("click", (e) => {
+        e.preventDefault();
+        navegarParaHash("#meta");
+    });
+    document.getElementById("abrirModalObjetivo").addEventListener("click", (e) => {
+        e.preventDefault();
+        navegarParaHash("#objetivo");
+    });
+
+
+    // -------------------- BUSCAR E EDITAR TRANSAÇÃO --------------------
     function buscarTransacao(id) {
         return {
             {% for parcela in parcelas %}
                 {{ parcela.id }}: {
                     id: {{ parcela.id }},
                     tipo: "{{ parcela.transacao_fk.tipo }}",
-                    valor: "{{ parcela.valor| escapejs |floatformat:2 }}",
-                    data: "{{ parcela.data | date:'Y-m-d' | escapejs }}",
-                    descricao: "{{ parcela.transacao_fk.descricao| escapejs }}",
-                    categoria: "{{ parcela.transacao_fk.categoria_fk.nome| escapejs }}",
-                    pago: "{{ parcela.pago| escapejs }}"
+                    valor: "{{ parcela.valor|escapejs|floatformat:2 }}",
+                    data: "{{ parcela.data|date:'Y-m-d'|escapejs }}",
+                    descricao: "{{ parcela.transacao_fk.descricao|escapejs }}",
+                    categoria: "{{ parcela.transacao_fk.categoria_fk.nome|escapejs }}",
+                    pago: "{{ parcela.pago|escapejs }}"
                 }{% if not forloop.last %},{% endif %}
             {% endfor %}
         }[id];
@@ -283,6 +581,7 @@
 
     function abrirModalEditarTransacao(id) {
         const parcela = buscarTransacao(id);
+
         const valor = document.getElementById("valorEditarUnico");
         const data = document.getElementById("dataEditarUnico");
         const categoria = document.getElementById("categoriaEditarUnico");
@@ -298,8 +597,7 @@
 
         const lista_categorias = {
             {% for categoria in categorias %}
-                "{{ categoria.nome }}": "{{ categoria.tipo }}"
-                {% if not forloop.last %},{% endif %}
+                "{{ categoria.nome }}": "{{ categoria.tipo }}"{% if not forloop.last %},{% endif %}
             {% endfor %}
         };
 
@@ -312,130 +610,222 @@
                 categoria.appendChild(option);
             }
         }
-        const option_pago = document.createElement('option');
-        const option_nao_pago = document.createElement('option');
-        option_pago.value = "true";
-        option_pago.innerHTML = "Pago";
-        option_nao_pago.value = "false";
-        option_nao_pago.innerHTML = "Não pago";
 
-        if (parcela.pago.toLowerCase() === 'true') {
-            option_pago.selected = true;
-        } else {
-            option_nao_pago.selected = true;
-        }
+        const option_pago = new Option("Pago", "true", false, parcela.pago.toLowerCase() === 'true');
+        const option_nao_pago = new Option("Não pago", "false", false, parcela.pago.toLowerCase() !== 'true');
 
         pago.appendChild(option_pago);
         pago.appendChild(option_nao_pago);
 
         const form = document.getElementById('formEditarTransacao');
         form.action = urlEditarTransacao.replace('0', id);
-        location.hash = 'editar-transacao';
+
+        navegarParaHash("#editar-transacao");
     }
 
     function abrirModalDeletarTransacao(id) {
         const form = document.getElementById('formDeletarTransacao');
         form.action = urlDeletarTransacao.replace('0', id);
-        location.hash = 'deletar-transacao';
+        navegarParaHash("#deletar-transacao");
     }
 
     function abrirModalEditarParcela(id) {
         const parcela = buscarTransacao(id);
-        let valor = document.getElementById("valorEdicaoParcelado");
-        let descricao = document.getElementById("descricaoEditarParcelado");
+
+        const valor = document.getElementById("valorEdicaoParcelado");
+        const descricao = document.getElementById("descricaoEditarParcelado");
+
         valor.value = parseFloat(parcela.valor).toFixed(2);
         descricao.value = parcela.descricao;
 
         const form = document.getElementById('formEditarParcela');
         form.action = urlEditarParcela.replace('0', id);
 
-
-        location.hash = 'editar-parcela';
+        navegarParaHash("#editar-parcela");
     }
 
     function abrirModalDeletarParcela(id) {
         const form = document.getElementById('formDeletarParcela');
         form.action = urlDeletarParcela.replace('0', id);
-        location.hash = 'deletar-parcela';
+        navegarParaHash("#deletar-parcela");
     }
 
-    function abrirModalViaHash() {
-        const hash = window.location.hash;
-        fecharTodosModais();
 
-        switch (hash) {
-            case '#editar-transacao':
-                document.getElementById('modalEditarTransacao')?.classList.add('ativo');
-                break;
-            case '#editar-parcela':
-                document.getElementById('modalEditarTransacaoParcela')?.classList.add('ativo');
-                break;
-            case '#deletar-transacao':
-                document.getElementById('modalConfirmarExclusao')?.classList.add('ativo');
-                break;
-            case '#deletar-parcela':
-                document.getElementById('modalConfirmarExclusaoParcela')?.classList.add('ativo');
-                break;
-        }
-    }
-
-    function fecharTodosModais() {
-        document.querySelectorAll(".modal.ativo").forEach(modal => modal.classList.remove('ativo'));
-    }
-
-    function fecharModalHash() {
-        history.pushState("", document.title, window.location.pathname + window.location.search);
-        fecharTodosModais();
-    }
-
-    window.addEventListener('DOMContentLoaded', abrirModalViaHash);
-    window.addEventListener('hashchange', abrirModalViaHash);
-
-    document.addEventListener('keydown', (event) => {
-        if (event.key === 'Escape') {
-            fecharModalHash();
-        }
-    });
-
+    // -------------------- FILTRO DE EXTRATO --------------------
     document.getElementById('filtroForm').addEventListener('submit', function (event) {
-        // Previne o envio padrão do formulário
         event.preventDefault();
 
-        // Pega os valores selecionados de mês e ano
         const mes = document.getElementById('mes').value;
         const ano = document.getElementById('ano').value;
 
-        // Constrói a URL base
-        // Assumindo que sua URL está configurada como /extrato/<int:mes>/<int:ano>/
-        // A tag 'url' do Django não funciona diretamente em JS puro, então montamos a URL manualmente
         let url = `/extrato/${mes}/${ano}/`;
 
-        // Pega os outros valores de filtro
         const categoria = document.getElementById('categoria').value;
         const tipo = document.getElementById('tipo').value;
         const pago = document.getElementById('pago').value;
 
-        // Usa URLSearchParams para construir a query string de forma segura
         const params = new URLSearchParams();
-        if (categoria) {
-            params.append('categoria', categoria);
-        }
-        if (tipo) {
-            params.append('tipo', tipo);
-        }
-        if (pago) {
-            params.append('pago', pago);
-        }
+        if (categoria) params.append('categoria', categoria);
+        if (tipo) params.append('tipo', tipo);
+        if (pago) params.append('pago', pago);
 
-        // Adiciona a query string à URL se houver parâmetros
         const queryString = params.toString();
-        if (queryString) {
-            url += `?${queryString}`;
-        }
+        if (queryString) url += `?${queryString}`;
 
-        // Redireciona o navegador para a nova URL
         window.location.href = url;
     });
+
+
+    // -------------------- FORMULÁRIO DE TRANSAÇÃO --------------------
+    document.getElementById("formTransacaoReceita").addEventListener("submit", function (event) {
+        const formData = new FormData(event.target);
+
+        const valor = formData.get("valor_receita");
+        const data = formData.get("data_receita");
+        const descricao = formData.get("descricao_receita");
+        let pago = formData.get("pagamentoRE_receita");
+
+
+        if (!valor || !data || !pago) {
+            event.preventDefault();
+            alert("Preencha os campos corretamente.");
+            return;
+        }
+
+        if (parseFloat(valor) > 999999999) {
+            event.preventDefault();
+            alert("Valor muito grande.");
+            return;
+        }
+
+        pago = pago === "true" ? "Sim" : "Não";
+
+        alert(`Transação de receita adicionada:
+Valor: 1x R$${valor}
+Data: ${data}
+Pago?: ${pago}
+Descrição: ${descricao}`);
+
+        cancelarNavegacaoHash();
+    });
+
+    document.getElementById("formTransacaoDespesa").addEventListener("submit", function (event) {
+        const formData = new FormData(event.target);
+
+        const valor = parseFloat(formData.get("valor_despesa"));
+        const data = formData.get("data_despesa");
+        const descricao = formData.get("descricao_despesa");
+        let pago = formData.get("pagamentoRE_despesa");
+        const parcelas = parseInt(formData.get("parcelas_despesa"));
+
+        if (!valor || !data || !pago || !parcelas) {
+            event.preventDefault();
+            alert("Preencha os campos corretamente.");
+            return;
+        }
+
+        if (valor > 999999999) {
+            event.preventDefault();
+            alert("Valor muito grande.");
+            return;
+        }
+
+        pago = pago === "true" ? "Sim" : "Não";
+
+        alert(`Transação de despesa adicionada:
+Valor: ${parcelas}x R$${(valor / parcelas).toFixed(2)}
+Data: ${data}
+Pago?: ${pago}
+Descrição: ${descricao}`);
+
+        cancelarNavegacaoHash();
+    });
+
+
+    // -------------------- FORMULÁRIO DE META --------------------
+    document.getElementById("formMeta").addEventListener("submit", function (event) {
+        const formData = new FormData(event.target);
+
+        const tipo = formData.get("tipoMeta");
+        const valor = parseFloat(formData.get("valorMeta"));
+        const dataInicio = formData.get("dataInicio");
+        const dataFinal = formData.get("dataFinal");
+        const categoria = formData.get("categoria");
+
+        if (!tipo || !valor || !dataInicio || !dataFinal || !categoria) {
+            event.preventDefault();
+            alert("Insira as informações corretamente!");
+            return;
+        }
+
+        alert(`Meta adicionada:
+Tipo: ${tipo}
+Valor: R$ ${valor.toFixed(2)}
+Data Início: ${dataInicio}
+Data Final: ${dataFinal}
+Categoria: ${categoria}`);
+
+        cancelarNavegacaoHash();
+    });
+
+
+    // -------------------- FORMULÁRIO DE OBJETIVO --------------------
+    document.getElementById("formObjetivo").addEventListener("submit", function (event) {
+        const formData = new FormData(event.target);
+
+        const titulo = formData.get("tituloObjetivo");
+        const valorDesejado = parseFloat(formData.get("valorDesejado"));
+        const valorGuardado = parseFloat(formData.get("valorGuardado"));
+        const anoFinal = formData.get("anoFinal");
+
+        if (!titulo || !valorDesejado || !valorGuardado || !anoFinal) {
+            event.preventDefault();
+            alert("Insira as informações corretamente!");
+            return;
+        }
+
+        alert(`Objetivo adicionado:
+Título: ${titulo}
+Valor desejado: R$ ${valorDesejado.toFixed(2)}
+Valor guardado: R$ ${valorGuardado.toFixed(2)}
+Ano final: ${anoFinal}`);
+
+        cancelarNavegacaoHash();
+    });
+
+
+    // -------------------- ABAS DE RECEITA E DESPESA --------------------
+    document.addEventListener("DOMContentLoaded", () => {
+        const tabs = document.querySelectorAll(".tab");
+        const camposDespesa = document.getElementById("camposDespesa");
+        const camposReceita = document.getElementById("camposReceita");
+
+        const condicaoPagamento = document.getElementById("condicaoPagamento");
+        const campoParcelas = document.getElementById("campoParcelas");
+
+        tabs.forEach(tab => {
+            tab.addEventListener("click", () => {
+                tabs.forEach(t => t.classList.remove("active"));
+                tab.classList.add("active");
+
+                const tipo = tab.getAttribute("data-tipo");
+
+                if (tipo === "saida") {
+                    camposDespesa.style.display = "block";
+                    camposReceita.style.display = "none";
+                } else {
+                    camposDespesa.style.display = "none";
+                    camposReceita.style.display = "block";
+                }
+            });
+        });
+
+        condicaoPagamento.addEventListener("change", () => {
+            campoParcelas.style.display = (condicaoPagamento.value === "parcelado") ? "block" : "none";
+        });
+    });
+
+
 </script>
 </body>
 </html>

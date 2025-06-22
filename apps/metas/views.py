@@ -18,14 +18,19 @@ def menuMetas(request):
     for meta in metas:
         operacoes.atualizarStatusMeta(meta)
 
-    gettermetas= GetMetas(request.user.id)
+    gettermetas = GetMetas(request.user.id)
     metas = gettermetas.todosEmOrdem()
+    categorias = Categoria.GetTodasCategorias()
     context = {'metas': metas
-               ,'categorias': Categoria.GetTodasCategorias()
-               ,'mes': date.today().month
-               ,'ano': date.today().year
+        , 'categorias': categorias
+        , 'todas_categorias_receita': categorias.filter(tipo='R')
+        , 'todas_categorias_despesa': categorias.filter(tipo='D')
+        , 'hoje': date.today()
+        , 'mes': date.today().month
+        , 'ano': date.today().year
     }
     return render(request, 'metas.html', context)
+
 
 def criarMeta(request):
     if not request.user.is_authenticated:
@@ -41,18 +46,17 @@ def criarMeta(request):
     categoria = request.POST.get('categoria')
     Categoria.verificacaoNomesCategoria(categoria)
     categoria = Categoria.objects.get(nome=categoria)
-    print(valor,'\n',tipo,'\n',descricao,'\n',categoria,'\n', data_inicio,'\n', data_fim)
 
-
-    a = operacoes_meta.criarMeta(categoria=categoria
-                             , valor= Decimal(valor)
+    operacoes_meta.criarMeta(categoria=categoria
+                             , valor=Decimal(valor)
                              , tipo=tipo
-                             , data_inicio= Data(data_inicio)
-                             , data_fim= Data(data_fim)
+                             , data_inicio=Data(data_inicio)
+                             , data_fim=Data(data_fim)
                              , descricao=descricao
     )
-    print(a)
-    return redirect(reverse('core:dashboard'))
+    url = request.POST.get('next') or reverse('core:dashboard')
+    return redirect(url)
+
 
 def editarMeta(request, meta_id):
     if request.method == 'POST':
@@ -72,6 +76,7 @@ def editarMeta(request, meta_id):
         operacao.editarMeta(meta, categoria, tipo, valor, data_inicio, data_fim, descricao)
 
     return redirect("core:metas:meta")
+
 
 def deletarMeta(request, meta_id):
     if request.method == 'POST':

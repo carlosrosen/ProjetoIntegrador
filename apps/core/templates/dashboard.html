@@ -168,6 +168,7 @@
                 </tbody>
             </table>
         </div>
+    </div>
 </main>
 
 <div id="modalTransacao">
@@ -183,10 +184,10 @@
             maior precisão de decisões. ⚠️</p><br>
         <hr>
         <br>
-        <form id="formTransacaoDespesa" action="{% url 'core:financeiro:criar-despesa' %}" method="POST">
+        <form id="formTransacaoDespesa" action="{% url 'core:financeiro:criar-despesa' %}?next={{ request.path }}" method="POST">
             {% csrf_token %}
             <label></label>
-            <input type="hidden" name="tipoform" value="transacao_despesa">
+            <input type="hidden" name="next" value="{{ request.path }}">
 
             <div id="camposDespesa">
                 <label>Valor gasto: <br>
@@ -214,7 +215,7 @@
                 </div>
 
                 <label>Data da Transação:<br>
-                    <input type="date" name="data_despesa" required><br>
+                    <input type="date" name="data_despesa" value="{{ hoje|date:'Y-m-d' }}" required><br>
                 </label>
 
                 <label>Descrição:<br>
@@ -224,7 +225,7 @@
                 <div class="radio-group">
                     <label>Você já realizou o pagamento dessa despesa?</label>
                     <div class="radio-option">
-                        <input type="radio" name="pagamentoRE_despesa" id="pagamentoSIM" value="true" required>
+                        <input type="radio" name="pagamentoRE_despesa" id="pagamentoSIM" value="true" checked required>
                         <label for="pagamentoSIM">Sim, já paguei essa despesa.</label>
                     </div>
                     <div class="radio-option">
@@ -237,9 +238,9 @@
                 <button type="button" onclick="fecharModalTransacao()" class="btn-cancelar">Cancelar</button>
             </div>
         </form>
-        <form id="formTransacaoReceita" action="{% url 'core:financeiro:criar-receita' %}" method="POST">
+        <form id="formTransacaoReceita" action="{% url 'core:financeiro:criar-receita' %}?next={{ request.path }}" method="POST">
             {% csrf_token %}
-            <input type="hidden" name="tipoform" value="transacao_receita">
+            <input type="hidden" name="next" value="{{ request.path }}">
             <div id="camposReceita" style="display: none;">
                 <label>Valor ganho:<br>
                     <input type="number" name="valor_receita" step="0.01" min="0.01" maxlength="12" required>
@@ -255,7 +256,7 @@
                 </label>
 
                 <label>Data:<br>
-                    <input type="date" name="data_receita" required><br>
+                    <input type="date" name="data_receita" value="{{ hoje|date:'Y-m-d' }}" required><br>
                 </label>
 
                 <label>Descrição:<br>
@@ -267,7 +268,7 @@
                 <div class="radio-group">
                     <label>Você já recebeu essa receita?</label>
                     <div class="radio-option">
-                        <input type="radio" name="pagamentoRE_receita" id="pagamentoSIM" value="true" required>
+                        <input type="radio" name="pagamentoRE_receita" id="pagamentoSIM" value="true" checked required>
                         <label for="pagamentoSIM">Sim, já recebi essa receita.</label>
                     </div>
                     <div class="radio-option">
@@ -295,9 +296,9 @@
         &nbsp;&nbsp;&nbsp;<strong>Exemplo:</strong>&nbsp;Gastar até R$300 com ‘internet’. <br><br>
         <hr>
         <br>
-        <form id="formMeta" action="{% url 'core:metas:criar-meta' %}" method="POST">
+        <form id="formMeta" action="{% url 'core:metas:criar-meta' %}?next={{ request.path }}" method="POST">
             {% csrf_token %}
-            <input type="hidden" name="tipoform" value="meta">
+            <input type="hidden" name="next" value="{{ request.path }}">
             <p>Tipo da meta:</p>
             <label>
                 <select name="tipoMeta" required>
@@ -350,7 +351,7 @@
         <br>
         <form id="formObjetivo" action="{% url 'core:objetivos:criar-objetivo' %}" method="POST">
             {% csrf_token %}
-            <input type="hidden" name="tipoform" value="objetivo">
+            <input type="hidden" name="next" value="{{ request.path }}">
             <p>Título do Objetivo:</p>
             <label>
                 <input type="text" name="tituloObjetivo" required/>

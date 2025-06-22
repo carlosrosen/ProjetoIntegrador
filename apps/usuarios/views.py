@@ -82,10 +82,15 @@ def configuraçoes(request):
     if not user.is_authenticated:
         return redirect(reverse('core:index'))
 
+    categorias = Categoria.objects.all()
     context = {
         'mes': date.today().month
         , 'ano': date.today().year
         , 'usuario': user
+        , 'categorias': categorias
+        , 'todas_categorias_receita': categorias.filter(tipo='R')
+        , 'todas_categorias_despesa': categorias.filter(tipo='D')
+        , 'hoje': date.today()
     }
 
     if not request.method == "POST":
