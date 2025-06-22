@@ -18,7 +18,11 @@ def menuObjetivos(request):
     if not request.user.is_authenticated:
         return redirect(reverse('usuario:login'))
     getterobjetivos = GetObjetivo(request.user.id)
+    operacaoobjetivos = OperacoesObjetivo(request.user.id)
     objetivos = getterobjetivos.todosEmOrdem()
+
+    for objetivo in objetivos:
+        operacaoobjetivos.atualizarObjetivo(objetivo)
 
     categorias = Categoria.objects.all()
 

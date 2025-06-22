@@ -79,6 +79,19 @@ class OperacoesObjetivo:
     def deletar(self, objetivo: Objetivos):
         objetivo.delete()
 
+    def atualizarObjetivo(self, objetivo: Objetivos):
+        if not objetivo.status == 'A':
+            return 'Objetivo pausado ou concluido'
+        else:
+            hoje = date.today()
+            if objetivo.data_fim < hoje and objetivo.valor_guardado < objetivo.valor_objetivo:
+                objetivo.status = 'T'
+                objetivo.save()
+        try:
+            objetivo.save()
+        except Exception as e:
+            raise Exception('Não foi possivel atualizar o objetivo')
+
     def deposito(self
                      ,Objetivo: Objetivos
                      ,Valor: Decimal
