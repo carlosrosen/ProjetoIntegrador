@@ -59,22 +59,22 @@ class GetterFinanceiro:
             dados.extend(self.historicoSaldoMes(mes=mes,ano=ano))
         return dados
 
-    def receitaTotalMes(self,mes:int, ano:int) -> str:
+    def receitaTotalMes(self,mes:int, ano:int) -> str | Decimal:
         mes, ano = abs(mes), abs(ano)
         ganhos:Decimal = ParcelasTransacao.objects.filter(transacao_fk__user_fk= self.user
                                                 , transacao_fk__tipo='R'
                                                 , data__month=mes, data__year=ano).aggregate(total = Sum('valor'))['total']
         if ganhos is None:
-            return '0,00'
-        return  str(ganhos.quantize(Decimal("0.01"), rounding=ROUND_DOWN))
+            return Decimal('0.00')
+        return  ganhos.quantize(Decimal("0.01"), rounding=ROUND_DOWN)
 
     def despesaTotalMes(self,mes:int, ano:int):
         gastos = ParcelasTransacao.objects.filter(transacao_fk__user_fk= self.user
                                                 , transacao_fk__tipo='D'
                                                 , data__month=mes, data__year=ano).aggregate(total = Sum('valor'))['total']
-        if gastos == None:
-            return '0,00'
-        return str(gastos.quantize(Decimal('0.01'), rounding=ROUND_DOWN))
+        if gastos is None:
+            return Decimal('0.00')
+        return gastos.quantize(Decimal('0.01'), rounding=ROUND_DOWN)
 
     def saldoAtual(self):
         return self.user.saldoAtual
@@ -128,6 +128,6 @@ class GetterFinanceiro:
         inicio = tamanho - 5
         if inicio < 0:
             inicio = 0
-        for parcela in parcelas[inicio:tamanho]:
+        for parcela in parcelas[inicio:tamanho][::-1]:
             dados.append(parcela)
         return dados

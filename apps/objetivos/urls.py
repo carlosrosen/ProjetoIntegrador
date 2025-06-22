@@ -6,6 +6,7 @@ app_name = 'objetivos'
 
 urlpatterns = [
     path('', views.menuObjetivos, name='menu_objetivos'),
+    path('objetivo/<int:id>/', views.detalheObjetivo, name='detalhe_objetivo'),
     path('editar-objetivo/', views.editarObj, name='editar-objetivo'),
     path('deletar-objetivo/', views.deletarObj, name='deletar-objetivo/'),
     path('depositar-objetivo/', views.depositarObj, name='depositar-objetivo/'),

@@ -1,0 +1,77 @@
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 999;
+    background-color: rgba(0, 0, 0, 0.5);
+    justify-content: center;
+    align-items: center;
+    animation: fadeIn 0.3s ease forwards;
+  }
+
+  .modal.ativo {
+    display: flex;
+  }
+
+  .modal-content {
+    background: white;
+    padding: 2rem;
+    border-radius: 10px;
+    width: 100%;
+    max-width: 600px;
+    opacity: 0;
+    transform: scale(0.95);
+    animation: scaleIn 0.3s ease forwards;
+  }
+
+  .modal-content input,
+  .modal-content select,
+  .modal-content label {
+    display: block;
+    width: 100%;
+    margin-bottom: 1rem;
+  }
+
+  .modal-content input,
+  .modal-content select {
+    padding: 0.5rem;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+  }
+
+  .btn-salvar {
+    padding: 0.5rem 1rem;
+    background-color: #2ecc71;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+
+  .btn-salvar:hover {
+    background-color: #27ae60;
+  }
+
+  .btn-cancelar {
+    padding: 0.5rem 1rem;
+    background-color: #ccc;
+    margin-left: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes scaleIn {
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }

@@ -72,10 +72,9 @@
             </div>
           </div>
         </div>
-
-        <button class="btn-ver-mais" onclick="verMaisObjetivo('{{ objetivo.slug }}')">
-          Ver Detalhes
-        </button>
+        <a href="{% url 'core:objetivos:detalhe_objetivo' objetivo.id %}" class="btn-ver-mais">
+           Ver Detalhes
+        </a>
       </div>
       {% endfor %}
     </div>

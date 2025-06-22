@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -5,8 +6,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>U-Balance - Detalhes do Objetivo</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <link rel="stylesheet" href="css/style_dashboard.css" />
-  <link rel="stylesheet" href="css/objetivo-detalhes.css" />
+    <link rel="stylesheet" href="{% static 'core/css/style_dashboard.css' %}" />
+    <link rel="stylesheet" href="{% static 'objetivos/css/objetivos-detalhes.css' %}" />
+    <link rel="stylesheet" href="{% static 'objetivos/css/modais-detalhes.css' %}" />
 </head>
 <body>
   <aside class="sidebar">
@@ -18,26 +20,25 @@
       <a href="#" id="abrirModalObjetivo">📈 Adicionar Objetivo</a>
       <a href="{% url 'core:metas:meta' %}">🎯 Metas</a>
       <a href="{% url 'core:objetivos:menu_objetivos' %}" style="background-color: #f0f0f0; font-weight: 600;">📈 Objetivos</a>
-      <a href="extrato.html">🧾 Extrato</a>
+      <a href="#">🧾 Extrato</a>
       <a href="#">📊 Relatórios</a>
       <a href="#">⚙️ Configurações</a>
-      <a href="#" id="logout">Logout</a>
+      <a href="{% url 'usuario:logout' %}" id="logout">Logout</a>
     </nav>
   </aside>
-
   <main class="content">
     <div class="objetivo-header">
-      <h1 id="tituloObjetivo">Viagem para Europa</h1>
-      <div class="usuario-info">Usuário: DF</div>
+      <h1 id="tituloObjetivo">{{ objetivo.titulo }}</h1>
+      <div class="usuario-info">Usuário: {{ username }}</div>
     </div>
-<div class="acoes-container">
-  <button class="btn-acao btn-deposito" onclick="location.hash = '#deposito'">Deposito</button>
-  <button class="btn-acao btn-resgate" onclick="location.hash = '#resgate'">Resgate</button>
-  <button class="btn-acao btn-apagar" onclick="location.hash = '#apagar'">Apagar</button>
-  <button class="btn-acao btn-editar" onclick="location.hash = '#editar'">
-    <span class="icon-editar" style="color: white;">Editar</span>
-  </button>
-</div>
+    <div class="acoes-container">
+      <button class="btn-acao btn-deposito" onclick="location.hash = '#deposito'">Depósito</button>
+      <button class="btn-acao btn-resgate" onclick="location.hash = '#resgate'">Resgate</button>
+      <button class="btn-acao btn-apagar" onclick="location.hash = '#apagar'">Apagar</button>
+      <button class="btn-acao btn-editar" onclick="location.hash = '#editar'">
+        <span class="icon-editar" style="color: white;">Editar</span>
+      </button>
+    </div>
     <div class="conteudo-principal">
       <div class="painel-esquerdo">
         <div class="historico-container">
@@ -52,47 +53,25 @@
                 </tr>
               </thead>
               <tbody id="historicoTransacoes">
+                {% for transacao in objetivo.transacoes %}
                 <tr>
-                  <td>15/12/2024</td>
-                  <td>Depósito</td>
-                  <td class="valor-positivo">+R$ 500,00</td>
+                  <td>{{ transacao.data|date:"d/m/Y" }}</td>
+                  <td>{{ transacao.tipo }}</td>
+                  <td class="{% if transacao.tipo == 'D' %}valor-positivo{% else %}valor-negativo{% endif %}">
+                    {% if transacao.tipo == 'D' %}+{% else %}-{% endif %}R$ {{ transacao.valor|floatformat:2 }}</td>
                 </tr>
-                <tr>
-                  <td>01/12/2024</td>
-                  <td>Depósito</td>
-                  <td class="valor-positivo">+R$ 1.000,00</td>
-                </tr>
-                <tr>
-                  <td>15/11/2024</td>
-                  <td>Depósito</td>
-                  <td class="valor-positivo">+R$ 800,00</td>
-                </tr>
-                <tr>
-                  <td>01/11/2024</td>
-                  <td>Depósito</td>
-                  <td class="valor-positivo">+R$ 700,00</td>
-                </tr>
-                <tr>
-                  <td>20/10/2024</td>
-                  <td>Resgate</td>
-                  <td class="valor-negativo">-R$ 200,00</td>
-                </tr>
-                <tr>
-                  <td>15/10/2024</td>
-                  <td>Depósito</td>
-                  <td class="valor-positivo">+R$ 600,00</td>
-                </tr>
-                <tr>
-                  <td>01/10/2024</td>
-                  <td>Depósito</td>
-                  <td class="valor-positivo">+R$ 500,00</td>
-                </tr>
+                {% empty %}
+                <tr><td colspan="3">Nenhuma transação encontrada.</td></tr>
+                {% endfor %}
               </tbody>
             </table>
           </div>
+          <div class="ordem-info">
+            <span class="seta-ordem">▼</span>
+            Em ordem de data
+          </div>
         </div>
       </div>
-
       <div class="painel-direito">
         <div class="grafico-container">
           <h3>Gráfico da variação do saldo do objetivo</h3>
@@ -100,29 +79,28 @@
             <canvas id="graficoVariacao"></canvas>
           </div>
         </div>
-
         <div class="informacoes-container">
           <h3>Informações do objetivo</h3>
           <div class="info-grid">
             <div class="info-item">
               <span class="info-label">Valor guardado:</span>
-              <span class="info-valor valor-guardado">R$ 4.000,00</span>
+              <span class="info-valor valor-guardado">R$ {{ objetivo.valor_guardado|floatformat:2 }}</span>
             </div>
             <div class="info-item">
               <span class="info-label">Valor objetivo:</span>
-              <span class="info-valor">R$ 10.000,00</span>
+              <span class="info-valor">R$ {{ objetivo.valor_objetivo|floatformat:2 }}</span>
             </div>
             <div class="info-item">
               <span class="info-label">Status:</span>
-              <span class="info-valor status-ativo">Ativo</span>
+              <span class="info-valor {% if objetivo.status == 'Ativo' %}status-ativo{% else %}status-inativo{% endif %}">{{ objetivo.status }}</span>
             </div>
             <div class="info-item">
               <span class="info-label">Progresso:</span>
-              <span class="info-valor">40%</span>
+              <span class="info-valor">{{ objetivo.progresso }}%</span>
             </div>
             <div class="info-item">
               <span class="info-label">Data limite:</span>
-              <span class="info-valor">31/12/2025</span>
+              <span class="info-valor">{{ objetivo.data_limite|date:"d/m/Y" }}</span>
             </div>
           </div>
         </div>
@@ -131,10 +109,11 @@
   </main>
 <div id="modalDeposito" class="modal">
   <div class="modal-content">
-    <h2>Fazer Dep sito</h2>
-    <form id="formDeposito">
+    <h2>Fazer Depósito</h2>
+    <form id="formDeposito" method="post" action="{% url 'adicionar_deposito' objetivo.id %}">
+      {% csrf_token %}
       <label for="valorDeposito">Valor a depositar:</label>
-      <input type="number" name="valorDeposito" step="0.01" required>
+      <input type="number" name="valorDeposito" step="0.01" min="0" required>
       <div style="text-align:right;">
         <button type="submit" class="btn-salvar">Confirmar</button>
         <button type="button" class="btn-cancelar" onclick="fecharModalHash()">Cancelar</button>
@@ -142,14 +121,13 @@
     </form>
   </div>
 </div>
-
-<!-- Modal Resgate -->
 <div id="modalResgate" class="modal">
   <div class="modal-content">
     <h2>Fazer Resgate</h2>
-    <form id="formResgate">
+    <form id="formResgate" method="post" action="{% url 'adicionar_resgate' objetivo.id %}">
+      {% csrf_token %}
       <label for="valorResgate">Valor a resgatar:</label>
-      <input type="number" name="valorResgate" step="0.01" required>
+      <input type="number" name="valorResgate" step="0.01" min="0" required>
       <div style="text-align:right;">
         <button type="submit" class="btn-salvar">Confirmar</button>
         <button type="button" class="btn-cancelar" onclick="fecharModalHash()">Cancelar</button>
@@ -160,15 +138,16 @@
 <div id="modalEditar" class="modal">
   <div class="modal-content">
     <h2>Editar Objetivo</h2>
-    <form id="formEditar">
-      <label for="novoTitulo">Novo T tulo:</label>
-      <input type="text" name="novoTitulo" required>
+    <form id="formEditar" method="post" action="{% url 'editar_objetivo' objetivo.id %}">
+      {% csrf_token %}
+      <label for="novoTitulo">Novo Título:</label>
+      <input type="text" name="novoTitulo" value="{{ objetivo.titulo }}" required>
 
       <label for="novoValor">Novo Valor do Objetivo:</label>
-      <input type="number" name="novoValor" step="0.01" required>
+      <input type="number" name="novoValor" step="0.01" min="0" value="{{ objetivo.valor_objetivo }}" required>
 
       <label for="novaData">Nova Data Final:</label>
-      <input type="date" name="novaData" required>
+      <input type="date" name="novaData" value="{{ objetivo.data_limite|date:'Y-m-d' }}" required>
 
       <div style="text-align:right;">
         <button type="submit" class="btn-salvar">Salvar</button>
@@ -177,18 +156,68 @@
     </form>
   </div>
 </div>
-
-<!-- Modal Apagar Objetivo -->
 <div id="modalApagar" class="modal">
   <div class="modal-content">
     <h2>Apagar Objetivo</h2>
-    <p>Tem certeza que deseja apagar este objetivo? Esta a  o n o pode ser desfeita.</p>
+    <p>Tem certeza que deseja apagar este objetivo? Esta ação não pode ser desfeita.</p>
     <div style="text-align:right;">
-      <button class="btn-salvar" onclick="confirmarApagarObjetivo()">Confirmar</button>
-      <button class="btn-cancelar" onclick="fecharModalHash()">Cancelar</button>
+      <form method="post" action="{% url 'apagar_objetivo' objetivo.id %}">
+        {% csrf_token %}
+        <button type="submit" class="btn-salvar">Confirmar</button>
+        <button type="button" class="btn-cancelar" onclick="fecharModalHash()">Cancelar</button>
+      </form>
     </div>
   </div>
 </div>
-  <script src="{% static 'objetivos/js/scripts.js' %}" defer></script>
+  <script src="{% static 'objetivos/js/script-detalhe.js' %}" defer></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+  const ctx = document.getElementById('graficoVariacao').getContext('2d');
+  const monthsLabels = []
+  const saldoData = []
+
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: monthsLabels,
+      datasets: [{
+        label: 'Variação do saldo',
+        data: saldoData,
+        backgroundColor: 'rgba(26, 191, 99, 0.7)',
+        borderColor: 'rgba(26, 191, 99, 1)',
+        borderWidth: 1,
+        borderRadius: 5
+      }]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: {
+            callback: function(value) {
+              return 'R$ ' + value.toLocaleString('pt-BR', {minimumFractionDigits: 2});
+            }
+          }
+        }
+      },
+      plugins: {
+        legend: {
+          display: false
+        },
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              let val = context.parsed.y;
+              return 'R$ ' + val.toLocaleString('pt-BR', {minimumFractionDigits: 2});
+            }
+          }
+        }
+      }
+    }
+  });
+});
+</script>
 </body>
 </html>
+

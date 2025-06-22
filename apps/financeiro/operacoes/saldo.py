@@ -71,7 +71,7 @@ class Historico:
             tupla.save()
 
 
-    def inicializarTuplasParaParcelasAntigas(self,parcela: ParcelasTransacao) -> None:
+    def inicializarTuplasParaParcelasAntigas(self, parcela: ParcelasTransacao) -> None:
         data_transacao = Data(parcela.data)
         mes, ano = data_transacao.valor.month, data_transacao.valor.year
         data = Data.inicializar(dia=1, mes=mes, ano=ano)
@@ -82,7 +82,7 @@ class Historico:
             return
 
         while data.valor < data_insercao_mais_antiga.valor:
-            HistoricoSaldo.criarTupla(user=self.user, saldo=Decimal('0.0'), data=data)
+            HistoricoSaldo.criarTupla(user=self.user, saldo=Decimal('0.0'), data=data.valor)
             data = data.incrementarMes(data.valor)
 
         self.user.operarSaldoAtual(valor=parcela.valor, tipo=parcela.transacao_fk.tipo, inversor=True)
@@ -91,7 +91,3 @@ class Historico:
                                     , valor_correcao= parcela.valor
                                     , inversor=False
         )
-
-
-
-

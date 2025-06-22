@@ -32,8 +32,8 @@ def dashboard(request):
         saldo_atual = infos_financeiro.saldoAtual()
         hoje = date.today()
 
-        ganhos_mes = Decimal(infos_financeiro.receitaTotalMes(hoje.month, hoje.year))
-        gastos_mes = Decimal(infos_financeiro.despesaTotalMes(hoje.month, hoje.year))
+        ganhos_mes = infos_financeiro.receitaTotalMes(hoje.month, hoje.year)
+        gastos_mes = infos_financeiro.despesaTotalMes(hoje.month, hoje.year)
 
         dicionario_despesas_categorias = infos_financeiro.valorTotalDasCategorias(hoje.month, hoje.year, 'despesa')
         dicionario_receitas_categorias = infos_financeiro.valorTotalDasCategorias(hoje.month, hoje.year, 'receita')
