@@ -13,9 +13,9 @@ def menuMetas(request):
         return redirect(reverse('usuario:login'))
 
     # Atualiza as metas ativas
-    metas_ativas = Metas.objects.filter(user_fk=request.user.id, status='A')
+    metas = Metas.objects.filter(user_fk__id=request.user.id)
     operacoes = OperacoesMeta(request.user.id)
-    for meta in metas_ativas:
+    for meta in metas:
         operacoes.atualizarStatusMeta(meta)
 
     gettermetas= GetMetas(request.user.id)

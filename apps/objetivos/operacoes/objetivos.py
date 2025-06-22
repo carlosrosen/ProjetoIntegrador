@@ -176,8 +176,8 @@ class GetObjetivo:
         valores = []
         valor_mes = 0
         for i in range(12):
-            deposito_mes = transacoes.filter(tipo='D' ,data__month=data.valor.month, data__year=data.valor.year).aggregate(total_mes=Sum('valor'))['total_mes']
-            resgate_mes = transacoes.filter(tipo='R' ,data__month=data.valor.month, data__year=data.valor.year).aggregate(total_mes=Sum('valor'))['total_mes']
+            deposito_mes = transacoes.filter(objetivo_fk__id=objetivo_id ,tipo='D' ,data__month=data.valor.month, data__year=data.valor.year).aggregate(total_mes=Sum('valor'))['total_mes']
+            resgate_mes = transacoes.filter(objetivo_fk__id=objetivo_id ,tipo='R' ,data__month=data.valor.month, data__year=data.valor.year).aggregate(total_mes=Sum('valor'))['total_mes']
             if not deposito_mes:
                 deposito_mes = 0
             if not resgate_mes:

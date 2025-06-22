@@ -23,7 +23,7 @@ def dashboard(request):
 
     user = request.user.id
 
-    metas_ativas = Metas.objects.filter(user_fk=user, status='A')
+    metas_ativas = Metas.objects.filter(user_fk__id=user)
     operacoes = OperacoesMeta(user)
     for meta in metas_ativas:
         operacoes.atualizarStatusMeta(meta)

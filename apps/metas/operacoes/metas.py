@@ -80,9 +80,6 @@ class OperacoesMeta:
         meta.delete()
 
     def atualizarStatusMeta(self, meta: Metas):
-        # Se o status não for ativo ele não atualiza
-        if not meta.status == 'A':
-            return
 
         # Retorna um QuerySet [Uma lista de objetos do banco de dados que seguem algumas condições]
         parcelas = ParcelasTransacao.objects.filter(
@@ -97,6 +94,14 @@ class OperacoesMeta:
         total = parcelas.aggregate(soma=Sum('valor'))['soma'] or Decimal('0.00')
 
         hoje = date.today()
+
+        if meta.status in ['C', 'U'] and meta.data_inicio <= hoje <= meta.data_fim:
+            if meta.tipo == 'MAX' and total < meta.valor:
+                meta.status = 'A'
+                meta.data_conclusao = None
+            elif meta.tipo == 'MIN' and total < meta.valor:
+                meta.status = 'A'
+                meta.data_conclusao = None
 
         if meta.tipo == 'MAX':
             if total > meta.valor and hoje <= meta.data_fim:
@@ -128,6 +133,7 @@ class OperacoesMeta:
             "status": meta.status
         }
 
+
 class GetMetas:
     def __init__(self, user):
         self.user = CustomUser.objects.get(id=user)
@@ -139,3 +145,9 @@ class GetMetas:
         nao_atingidos = metas.filter(status='N').order_by('data_inicio')
         concluidos = metas.filter(status='C').order_by('data_inicio')
         return list(chain(ativos, ultrapassados, nao_atingidos, concluidos))
+
+    def taxaConclusao(self) -> str:
+        metas = Metas.objects.filter(user_fk=self.user)
+        if metas.count() <= 0:
+            return '0'
+        return str(metas.filter(status="C").count()/metas.count() * 100)

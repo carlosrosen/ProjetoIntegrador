@@ -77,6 +77,16 @@ class ParcelasTransacao(models.Model):
         return ParcelasTransacao.objects.filter(data__gt=data_inicio, data__lt=data_fim)
 
     @staticmethod
+    def todasParcelasMes(user:CustomUser,mes:int,ano:int):
+        data_inicio = Data.primeiroDiaMes(mes,ano)
+        inicio_proximo_mes = Data.incrementarMes(data_inicio).valor
+        intervalo = ParcelasTransacao.objects.filter(transacao_fk__user_fk=user ,data__gte=data_inicio, data__lt=inicio_proximo_mes)
+        if intervalo:
+            intervalo = intervalo.order_by('data')
+        return intervalo
+
+
+    @staticmethod
     def buscaParcelasIntervalo(user:CustomUser ,data_inicio: date, data_fim: date):
         if data_inicio > data_fim:
             data_inicio, data_fim = data_fim, data_inicio
@@ -100,8 +110,8 @@ class HistoricoSaldo(models.Model):
     @staticmethod
     def getSaldoInicioMes(user:CustomUser, mes:int ,ano:int):
         historico = HistoricoSaldo.objects.filter(user_fk=user)
-        saldo =  Decimal
-        data_busca = Data.inicializar(dia=1,mes=mes,ano=ano)
+        saldo = Decimal
+        data_busca = Data(Data.primeiroDiaMes(mes=mes,ano=ano))
         try:
             saldo = historico.get(data=data_busca.valor).saldo
         except ObjectDoesNotExist:
@@ -115,7 +125,7 @@ class HistoricoSaldo(models.Model):
                 )
                 if parcelas.count() > 0:
                     for parcela in parcelas:
-                        if parcela.transacao_fk.tipo == 'D':
+                        if parcela.transacao_fk.tipo == 'R':
                             saldo += parcela.valor
                         elif parcela.transacao_fk.tipo == 'D':
                             saldo -= parcela.valor

@@ -21,7 +21,8 @@
         <a href="{% url 'core:metas:meta' %}">🎯 Metas</a>
         <a href="{% url 'core:objetivos:menu_objetivos' %}">📈 Objetivos</a>
         <a href="{% url 'core:menuExtrato' mes=mes ano=ano %}">🧾 Extrato </a>
-        <a href="{% url 'core:relatorios' %}" style="display:block; background-color: #f0f0f0; font-weight: 600;">📊
+        <a href="{% url 'core:relatorio:relatorio_mensal' %}"
+           style="display:block; background-color: #f0f0f0; font-weight: 600;">📊
             Relatórios</a>
         <a href="{% url 'usuario:configuracoes' %}">⚙️ Configurações</a>
         <a href="{% url 'usuario:logout' %}" id="logout">Logout</a>
@@ -31,15 +32,15 @@
 <main class="content">
     <div class="top-bar">
         <h2>Relatório Financeiro de {{ mes }}/{{ ano }}</h2>
-        <span class="usuario">Usuário: {{ request.user.username }}</span>
+        <span class="usuario">Usuário: {{ user.username }}</span>
     </div>
 
     <div class="cards">
         <div class="card">Saldo atual<br>
-            <h1>R$ {{ relatorio.saldo_atual|intcomma }}</h1></div>
-        <div class="card">Saldo Total:<h1>R$ {{ relatorio.saldo_total|intcomma }}</h1></div>
-        <div class="card">Receita Total:<h1>R$ {{ relatorio.receita_total|intcomma }}</h1></div>
-        <div class="card">Despesa Total:<h1>R$ {{ relatorio.despesa_total|intcomma }}</h1></div>
+            <h1>R$ {{ saldo_atual|floatformat:2 }}</h1></div>
+        <div class="card">Saldo do mês:<h1>R$ {{ saldo_total|floatformat:2 }}</h1></div>
+        <div class="card">Receita do mês:<h1>R$ {{ receita_total|floatformat:2 }}</h1></div>
+        <div class="card">Despesa do mês:<h1>R$ {{ despesa_total|floatformat:2 }}</h1></div>
     </div>
 
     <section class="relatorios-content">
@@ -47,34 +48,34 @@
             <div class="resumo-coluna">
                 <h3>Resumo Geral</h3><br>
                 <ul>
-                    <li>Saldo no Início: R$ {{ relatorio.resumo.saldo_inicio|intcomma }}</li>
+                    <li>Saldo no início do mês: R$ {{ saldo_inicio|floatformat:2 }}</li>
                     <br>
-                    <li>Saldo Final: R$ {{ relatorio.resumo.saldo_final|intcomma }}</li>
+                    <li>Saldo final do mês: R$ {{ saldo_final|floatformat:2 }}</li>
                     <br>
-                    <li>Ganho/Lucro: R$ {{ relatorio.resumo.ganho_lucro|intcomma }}</li>
+                    <li>Ganho/Lucro: R$ {{ lucro|floatformat:2 }}</li>
                     <br>
-                    <li>Transações de Receitas: {{ relatorio.resumo.transacoes_receitas }}</li>
+                    <li>Transações de Receitas: {{ transacoes_receitasMes }}</li>
                     <br>
-                    <li>Transações de Despesas: {{ relatorio.resumo.transacoes_despesas }}</li>
+                    <li>Transações de Despesas: {{ transacoes_despesasMes }}</li>
                     <br>
-                    <li>Total de Transações no Mês: {{ relatorio.transacoes_totaisMes }}</li>
+                    <li>Total de Transações no Mês: {{ transacoes_totaisMes }}</li>
                     <br>
                 </ul>
                 <br>
 
                 <h3>🎯 Metas financeiras</h3><br>
                 <ul>
-                    <li>Total de Metas: {{ relatorio.metas.total }}</li>
+                    <li>Total de metas: {{ total_quantidade_metas }}</li>
                     <br>
-                    <li>Metas Ativas: {{ relatorio.metas.ativas }}</li>
+                    <li>Metas ativas no total: {{ metas_ativas }}</li>
                     <br>
-                    <li>Metas Concluídas: {{ relatorio.metas.concluidas }}</li>
+                    <li>Metas concluídas no mês: {{ metas_concluidas }}</li>
                     <br>
-                    <li>Metas Ultrapassadas: {{ relatorio.metas.ultrapassadas }}</li>
+                    <li>Metas ultrapassadas no mês: {{ metas_ultrapassadas }}</li>
                     <br>
-                    <li>Metas Não Atingidas: {{ relatorio.metas.nao_atingidas }}</li>
+                    <li>Metas não atingidas no mês: {{ metas_naoatingidas }}</li>
                     <br>
-                    <li>Taxa de Sucesso: {{ relatorio.metas.taxa_sucesso|floatformat:1 }}%</li>
+                    <li>Taxa de Sucesso: {{ taxa_sucesso_metas|floatformat:2 }}%</li>
                     <br>
                 </ul>
                 <br>
@@ -83,38 +84,46 @@
             <div class="resumo-coluna">
                 <h3>💰 Objetivos de Poupança</h3><br>
                 <ul>
-                    <li>Total de Objetivos: {{ relatorio.objetivos.total }}</li>
+                    <li>Total de objetivos existentes: {{ total_objetivos }}</li>
                     <br>
-                    <li>Objetivos Ativos: {{ relatorio.objetivos.ativos }}</li>
+                    <li>Objetivos ativos no total: {{ objetivos_ativosTotal }}</li>
                     <br>
-                    <li>Objetivos Pausados: {{ relatorio.objetivos.pausados }}</li>
+                    <li>Objetivos pausados no total: {{ objetivos_pausadosTotal }}</li>
                     <br>
-                    <li>Objetivos Concluídos: {{ relatorio.objetivos.concluidos }}</li>
+                    <li>Objetivos concluidos no total: {{ objetivos_concluidosTotal }}</li>
                     <br>
-                    <li>Objetivos Criados este mês: {{ relatorio.objetivos.criadosMes }}</li>
+                    <li>Objetivos concluídos este mês: {{ objetivos_concluidosMes }}</li>
                     <br>
-                    <li>Objetivos Concluídos este mês: {{ relatorio.objetivos.concluidosMes }}</li>
+                    <li>Objetivos criados este mês: {{ objetivos_criadosMes }}</li>
                     <br>
-                    <li>Total Economizado: R$ {{ relatorio.objetivos.total_economizado|intcomma }}</li>
+                    <li>Total Economizado: Alterar</li>
                     <br>
                 </ul>
                 <br>
 
                 <h3>📊 Análise Detalhada</h3><br>
                 <ul>
-                    <li>Categoria com Maior Gasto: {{ relatorio.analise.categoria_maior_gasto }}
-                        ({{ relatorio.analise.percentual_maior_gasto|floatformat:0 }}%)
+                    <li>Categoria com maior Gasto: <strong>{{ maior_categoria_despesa }}</strong> [
+                        R$ {{ valor_maior_categoria_despesa }} ]
                     </li>
                     <br>
-                    <li>Categoria com Menor Gasto: {{ relatorio.analise.categoria_menor_gasto }}
-                        ({{ relatorio.analise.percentual_menor_gasto|floatformat:0 }}%)
+                    <li>Categoria com menor Gasto: <strong>{{ menor_categoria_despesa }}</strong> [
+                        R$ {{ valor_menor_categoria_despesa }} ]
                     </li>
                     <br>
-                    <li>Maior Receita: R$ {{ relatorio.analise.maior_receita|intcomma }}</li>
+                    <li>Categoria com maior receita: <strong>{{ maior_categoria_receita }}</strong> [
+                        R$ {{ valor_maior_categoria_receita }} ]
+                    </li>
                     <br>
-                    <li>Maior Despesa: R$ {{ relatorio.analise.maior_despesa|intcomma }}</li>
+                    <li>Categoria com menor receita: <strong>{{ menor_categoria_receita }}</strong> [
+                        R$ {{ valor_menor_categoria_receita }} ]
+                    </li>
                     <br>
-                    <li>Frequência de Transações: {{ relatorio.analise.frequencia_transacoes|floatformat:1 }} por dia
+                    <li>Maior transação de receita: R$ {{ maior_receita }}</li>
+                    <br>
+                    <li>Maior transação de despesa: R$ {{ maior_despesa }}</li>
+                    <br>
+                    <li>Frequência de Transações: {{ frequencia_transacoes|floatformat:2 }} por dia
                     </li>
                     <br>
                 </ul>
@@ -125,7 +134,9 @@
             <div class="grafico-switch">
                 <div class="chart-header">
                     <h3>Gráfico da variação do saldo do mês</h3>
-                    <button onclick="alternarGrafico()" class="btn-grafico">Alternar para fluxo de caixa</button>
+                    <button id="botao-historico-fluxo" onclick="alternarGrafico()" class="btn-grafico" value="fluxo">
+                        Alternar para fluxo de caixa
+                    </button>
                 </div>
                 <canvas id="graficoLinha"></canvas>
             </div>
@@ -134,7 +145,8 @@
                 <div class="grafico-categorias">
                     <div class="chart-header">
                         <h3>Gráfico de categorias</h3>
-                        <button onclick="alternarCategoria()" class="btn-grafico">Alternar para categorias de receita
+                        <button id="botao-pizza" onclick="alternarGraficoPizza()" class="btn-grafico" value="gastos">
+                            Alternar para categorias de receita
                         </button>
                     </div>
                     <canvas id="graficoPizza"></canvas>
@@ -150,56 +162,132 @@
     </section>
 </main>
 
-<script>
+<script defer>
+
+    function dadosGraficoPizza(tipo) {
+        if (tipo === "gastos") {
+
+            const categorias_gasto = "{{ categorias_despesa }}".split(',');
+            const valores_gasto = "{{ valores_categoria_receita }}".split(',');
+
+            const cores_gastos = {
+                "Alimentação": "#f39c12"
+                , "Transporte": "#1abc9c"
+                , "Educação": "#3498db"
+                , "Moradia": "#9b59b6"
+                , "Despesas pessoais": "#e74c3c"
+                , "Saúde": "#2ecc71"
+                , "Tarifas": "#34495e"
+                , "Outras despesas": "#95a5a6"
+            };
+
+            let lista_cores_gastos = [];
+            let nome_categorias_gastos = [];
+
+            for (let i = 0; i < categorias_gasto.length; i++) {
+                let nome = categorias_gasto[i]
+                lista_cores_gastos.push(cores_gastos[nome]);
+                nome_categorias_gastos.push(nome);
+            }
+
+            return {
+                labels: nome_categorias_gastos,
+                datasets: [{
+                    label: "Gastos por categoria",
+                    data: valores_gasto,
+                    backgroundColor: lista_cores_gastos
+                }]
+            };
+        }
+        if (tipo === "ganhos") {
+
+            const categorias_ganhos = "{{ categorias_receita }}".split(',');
+            const valores_ganhos = "{{ valores_categoria_receita }}".split(',');
+
+            const cores_ganhos = {
+                "Salário": "#1f77b4"
+                , "Aposentadoria": "#ff7f0e"
+                , "Bolsa de estudos": "#2ca02c"
+                , "Aluguel recebido": "#d62728"
+                , "Rendimentos de investimentos": "#9467bd"
+                , "Freelance": "#8c564b"
+                , "Venda de produtos": "#e377c2"
+                , "Comissão": "#7f7f7f"
+                , "Prêmios": "#bcbd22"
+                , "Presente": "#17becf"
+                , "Doação": "#aec7e8"
+                , "Herança": "#ffbb78"
+                , "Outras Receita": "#95a5a6"
+            };
+
+            let lista_cores_ganhos = [];
+
+            let nome_categorias_ganhos = [];
+
+            for (let i = 0; i < categorias_ganhos.length; i++) {
+                let nome = categorias_ganhos[i];
+                lista_cores_ganhos.push(cores_ganhos[nome]);
+                nome_categorias_ganhos.push(nome);
+            }
+
+
+            return {
+                labels: nome_categorias_ganhos,
+                datasets: [{
+                    label: "Ganhos por categoria",
+                    data: valores_ganhos,
+                    backgroundColor: lista_cores_ganhos
+                }]
+            };
+        }
+    }
+
     document.addEventListener('DOMContentLoaded', function () {
         try {
-            const dadosLinha = JSON.parse('{{ grafico_linha_json|escapejs }}');
-            const dadosPizzaGastos = JSON.parse('{{ grafico_pizza_gastos_json|escapejs }}');
-            const dadosPizzaReceitas = JSON.parse('{{ grafico_pizza_receitas_json|escapejs }}');
-            const dadosBarras = JSON.parse('{{ grafico_barras_json|escapejs }}');
-
-            graficoLinha = new Chart(document.getElementById("graficoLinha"), {
+            const dados_historico = "{{ valores_historico|escapejs }}".split(',');
+            const dias_historico = "{{ dias_historico|escapejs }}".split(',');
+            let graficoLinha = new Chart(document.getElementById("graficoLinha"), {
                 type: "line",
                 data: {
-                    labels: dadosLinha.labels,
+                    labels: dias_historico,
                     datasets: [{
-                        label: "Saldo",
-                        data: dadosLinha.data,
+                        label: "historico",
+                        data: dados_historico,
                         borderColor: "#2ecc71",
                         backgroundColor: "rgba(46, 204, 113, 0.1)",
-                        fill: true,
-                        tension: 0.4
                     }]
                 },
                 options: {
                     responsive: true,
-                    maintainAspectRatio: false,
+                    maintainAspectRatio: false, // Adicionado para controlar o tamanho
                     plugins: {legend: {display: false}}
                 }
             });
 
-            graficoPizza = new Chart(document.getElementById("graficoPizza"), {
+
+            let dadosGastos = dadosGraficoPizza("gastos");
+
+            let GraficoPizza = new Chart(document.getElementById("graficoPizza"), {
                 type: "pie",
-                data: {
-                    labels: dadosPizzaGastos.labels,
-                    datasets: [{
-                        data: dadosPizzaGastos.data,
-                        backgroundColor: dadosPizzaGastos.colors
-                    }]
-                },
+                data: dadosGastos,
                 options: {
                     responsive: true,
-                    maintainAspectRatio: false
+                    plugins: {
+                        legend: {position: 'bottom'}
+                    }
                 }
             });
+
+            const dados_gastos_dias_semana = "{{ gastos_dia_da_semana }}".split(",");
+            const dias_semana = "{{ dias_semana }}".split(",");
 
             graficoBarras = new Chart(document.getElementById("graficoBarras").getContext("2d"), {
                 type: "bar",
                 data: {
-                    labels: dadosBarras.labels,
+                    labels: dias_semana,
                     datasets: [{
                         label: "Gastos",
-                        data: dadosBarras.data,
+                        data: dados_gastos_dias_semana,
                         backgroundColor: "#e74c3c"
                     }]
                 },
@@ -213,6 +301,53 @@
             console.error("Erro ao carregar dados dos gráficos.", e);
         }
     });
+
+    function alternarGrafico() {
+        const dados_historico = "{{ valores_historico|escapejs }}".split(',');
+
+        const dados_fluxo = "{{ valores_fluxo }}".split(',');
+
+        const botao_alternar = document.getElementById("botao-historico-fluxo");
+        let tipoGraficoLinha = botao_alternar.value;
+
+        botao_alternar.value = tipoGraficoLinha === "historico" ? "fluxo" : "historico";
+
+        const graficoLinha = Chart.getChart("graficoLinha");
+
+        graficoLinha.data.datasets[0] = tipoGraficoLinha === "historico"
+            ? {
+                label: "historico saldo",
+                data: dados_historico,
+                borderColor: "#2ecc71",
+                backgroundColor: "rgba(46, 204, 113, 0.1)"
+            }
+            : {
+                label: "Fluxo de Caixa",
+                data: dados_fluxo,
+                borderColor: "#3498db",
+                backgroundColor: "rgba(52, 152, 219, 0.1)"
+            };
+        graficoLinha.update();
+        const botao = document.querySelector(".grafico-switch button");
+        botao.innerText = tipoGraficoLinha === "historico" ? "Alternar para fluxo de caixa" : "Alternar para saldo";
+
+    }
+
+    let modoGrafico = "gastos";
+
+    function alternarGraficoPizza() {
+        let meuGrafico = Chart.getChart("graficoPizza");
+        if (modoGrafico === "gastos") {
+            meuGrafico.data = dadosGraficoPizza("ganhos");
+            document.getElementById("botao-pizza").innerText = "Alternar para categorias de despesa";
+            modoGrafico = "ganhos";
+        } else {
+            meuGrafico.data = dadosGraficoPizza("gastos");
+            document.getElementById("botao-pizza").innerText = "Alternar para categorias de receita";
+            modoGrafico = "ganhos";
+        }
+        meuGrafico.update();
+    }
 </script>
 </body>
 </html>

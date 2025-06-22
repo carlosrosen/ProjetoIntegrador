@@ -14,7 +14,7 @@ class Data:
         return cls(data)
 
     @classmethod
-    def inicializar(cls, dia:int, mes:int, ano:int) :
+    def inicializar(cls, dia:int, mes:int, ano:int):
         dia, mes, ano = abs(dia), abs(mes), abs(ano)
         data = f'{ano}-{mes}-{dia}'
         return cls(data)
@@ -51,11 +51,13 @@ class Data:
 
     @staticmethod
     def ultimoDiaMes(mes:int, ano:int):
+        mes, ano = abs(mes), abs(ano)
         ultimo_dia = calendar.monthrange(ano, mes)[1]
         return date(ano, mes, ultimo_dia)
 
     @staticmethod
     def primeiroDiaMes(mes:int,ano:int):
+        mes, ano = abs(mes), abs(ano)
         return date(ano, mes, 1)
 
     @staticmethod
@@ -66,3 +68,9 @@ class Data:
         data = Data.inicializar(1, mes, ano)
         nome_mes = data.valor.strftime('%B')
         return nome_mes[0:3] + '/' + str(ano)[2:4]
+
+    @staticmethod
+    def listaDiasSemana():
+        return ['segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sabado','domingo']
+
+
