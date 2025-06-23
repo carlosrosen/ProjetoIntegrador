@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cadastro - U-Balance</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'core/css/style-login-cadastro.css' %}">
+    <link rel="stylesheet" href="{% static 'usuarios/css/style-login-cadastro.css' %}">
 </head>
 <body>
 <header>
@@ -15,13 +15,13 @@
 </header>
 
 <main class="form-container">
-    <form class="form-box" method="POST">
+    <form class="form-box" action="{% url 'usuario:cadastro' %}" method="POST">
         {% csrf_token %}
         <h2>Cadastro</h2>
 
         {% if messages %}
             {% for message in messages %}
-                <div id="mensagem" class="alert alert-{{ message.tags }}">{{ message }}</div>
+                <div class="alert alert-{{ message.tags }}">{{ message }}</div>
             {% endfor %}
         {% endif %}
 
@@ -37,7 +37,7 @@
         <label for="confirmar">Repetir senha</label>
         <input type="password" id="confirmar" name="repetir_senha" required>
 
-        <button type="submit" href="{% url 'usuario:cadastro' %}">Cadastrar</button>
+        <button type="submit">Cadastrar</button>
         <p class="link">Já tem uma conta? <a href="{% url 'usuario:login' %}">Entrar</a></p>
     </form>
 </main>
@@ -45,7 +45,21 @@
 <footer>
     <p>&copy; 2025 - U-Balance</p>
 </footer>
+<script>
 
+    function sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+
+        sleep(5000).then(() => {
+            document.querySelectorAll(".alert").forEach(mensagem => {
+                mensagem.style.display = "none"
+            });
+        });
+    })
+</script>
 
 </body>
 </html>

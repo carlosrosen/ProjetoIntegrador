@@ -31,7 +31,7 @@
     .modal-content label {
       display: block;
       width: 100%;
-      margin-bottom: 1rem;
+      margin-bottom: 0.5rem;
     }
 
     .modal-content input {

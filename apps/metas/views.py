@@ -60,8 +60,7 @@ def criarMeta(request):
 
 def editarMeta(request, meta_id):
     if request.method == 'POST':
-        print(request.POST)
-        meta = get_object_or_404(Metas, id=meta_id)
+        print('\n\n',request.POST,'\n\n')
         categoria = request.POST.get('categoria')
         tipo = request.POST.get('tipoMeta')
         valor = Decimal(request.POST.get('valor'))
@@ -70,10 +69,9 @@ def editarMeta(request, meta_id):
         descricao = request.POST.get('descricao')
 
         categoria = Categoria.objects.get(nome=categoria)
-        print(categoria)
 
         operacao = OperacoesMeta(request.user.id)
-        operacao.editarMeta(meta, categoria, tipo, valor, data_inicio, data_fim, descricao)
+        operacao.editarMeta(meta_id, categoria, tipo, valor, data_inicio, data_fim, descricao)
 
     return redirect("core:metas:meta")
 

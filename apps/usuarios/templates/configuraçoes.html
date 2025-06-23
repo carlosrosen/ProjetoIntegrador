@@ -15,8 +15,8 @@
     <nav>
         <a href="{% url 'core:dashboard' %}">🏠 Início</a>
         <a href="" id="abrirModalTransacao">💲 Adicionar Transação</a>
-        <a href="#" id="abrirModalMeta">🎯 Adicionar Meta</a>
-        <a href="#" id="abrirModalObjetivo">📈 Adicionar Objetivo</a>
+        <a href="" id="abrirModalMeta">🎯 Adicionar Meta</a>
+        <a href="" id="abrirModalObjetivo">📈 Adicionar Objetivo</a>
         <a href="{% url 'core:metas:meta' %}">🎯 Metas</a>
         <a href="{% url 'core:objetivos:menu_objetivos' %}">📈 Objetivos</a>
         <a href="{% url 'core:menuExtrato' mes=mes ano=ano %}">🧾 Extrato</a>
@@ -27,6 +27,11 @@
     </nav>
 </aside>
 <main class="content">
+    <div class="configuracoes-container">
+        <div class="configuracoes-header">
+            <h1>Configurações</h1>
+            <p>Gerencie suas preferências e configurações da conta</p>
+        </div>
     {% if messages %}
         <div class="messages-container">
             {% for message in messages %}
@@ -36,11 +41,6 @@
             {% endfor %}
         </div>
     {% endif %}
-    <div class="configuracoes-container">
-        <div class="configuracoes-header">
-            <h1>Configurações</h1>
-            <p>Gerencie suas preferências e configurações da conta</p>
-        </div>
 
         <div class="configuracoes-grid">
             <form class="config-box" method="POST" action="{% url 'usuario:configuracoes' %}">
@@ -422,6 +422,13 @@ document.getElementById("formTransacaoDespesa").addEventListener("submit", funct
 });
 
 document.addEventListener("DOMContentLoaded", () => {
+
+    sleep(5000).then(() => {
+            document.querySelectorAll(".alert").forEach(mensagem => {
+                mensagem.style.display = "none"
+            });
+        });
+
     const tabs = document.querySelectorAll(".tab");
     const camposDespesa = document.getElementById("camposDespesa");
     const camposReceita = document.getElementById("camposReceita");
@@ -590,6 +597,11 @@ window.addEventListener("hashchange", abrirModalViaHash_menu);
 window.addEventListener("DOMContentLoaded", () => {
     abrirModalViaHash_menu();
 });
+
+    function sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
 </script>
 </body>
 </html>

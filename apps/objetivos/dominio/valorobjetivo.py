@@ -5,7 +5,8 @@ class ValorObjetivo:
         self.valor = self.__formatarValor(valor)
 
     def __formatarValor(self,valor):
-        valor = int(valor)
+        valor = valor.replace(',','.')
+        valor = float(valor)
         if valor < 0:
             valor = -valor
         return Decimal(valor)

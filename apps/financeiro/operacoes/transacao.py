@@ -63,6 +63,7 @@ class OperacoesTransacao:
                 if data_parcela.valor > date.today():
                     status_pago = False
 
+
                 parcela = ParcelasTransacao.objects.create(transacao_fk = transacao
                                                          , data = data_parcela.valor
                                                          , valor = abs(valor_parcela)
@@ -81,6 +82,10 @@ class OperacoesTransacao:
                                                  , valor_correcao= valor_parcela
                                                  , inversor=False
                     )
+
+                if self.user.dataUltimaTransacaoVerificada < parcela.data <= date.today():
+                    continue
+
                 if status_pago == True and data_parcela.valor <= date.today():
                     self.user.operarSaldoAtual(valor_parcela, transacao.tipo, inversor=False)
             except Exception as e:
@@ -322,8 +327,9 @@ class OperacoesTransacao:
                                          , valor=parcela.valor
                                          , inversor=False
                 )
-
-            self.user.dataUltimaTransacaoVerificada = intervalo.latest('data').data
+            print(self.user.dataUltimaTransacaoVerificada)
+            self.user.dataUltimaTransacaoVerificada = intervalo.order_by('-data').first().data
+            print(self.user.dataUltimaTransacaoVerificada)
             try:
                 self.user.save()
             except Exception as e:

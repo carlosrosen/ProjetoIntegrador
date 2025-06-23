@@ -21,6 +21,10 @@ class Objetivos(models.Model):
     data_conclusao = models.DateField(null=True,blank=True)
     status = models.CharField(max_length=1, choices=__opcoes_status, default='A')
 
+    def valorFormatado(self):
+        valor = str(self.valor_objetivo).replace(',','.')
+        return valor
+
     def porcentagem(self):
         if self.valor_guardado > 0:
             return round((self.valor_guardado/self.valor_objetivo)*100, 2)

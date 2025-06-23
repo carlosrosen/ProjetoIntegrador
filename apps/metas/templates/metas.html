@@ -14,7 +14,7 @@
     <h1>U-Balance</h1>
     <nav>
         <a href="{% url 'core:dashboard' %}">🏠 Início</a>
-        <a href="" id="abrirModalTransacao">💲 Adicionar Transação</a>
+        <a href="#" id="abrirModalTransacao">💲 Adicionar Transação</a>
         <a href="#" id="abrirModalMeta">🎯 Adicionar Meta</a>
         <a href="#" id="abrirModalObjetivo">📈 Adicionar Objetivo</a>
         <a href="{% url 'core:metas:meta' %}" style="display:block; background-color: #f0f0f0; font-weight: 600;">🎯
@@ -155,7 +155,7 @@
 
 
 
-<div id="modalTransacao">
+<div id="modalTransacao" class="modal">
     <div class="modal-content">
         <div class="tabs">
             <button type="button" class="tab active" data-tipo="saida">Despesa</button>
@@ -175,7 +175,7 @@
 
             <div id="camposDespesa">
                 <label>Valor gasto: <br>
-                    <input type="number" name="valor_despesa" step="0.01" min="0.01" maxlength="12" required><br>
+                    <input type="number" name="valor_despesa" step="0.01" min="0.01" maxlength="12" required>
                 </label>
 
                 <label>Categoria:<br>
@@ -183,7 +183,6 @@
                         {% for categoria in todas_categorias_despesa %}
                             <option value="{{ categoria.nome }}">{{ categoria.nome }}</option>
                         {% endfor %}
-
                     </select>
                 </label>
 
@@ -191,19 +190,19 @@
                     <select id="condicaoPagamento" name="condicao_despesa">
                         <option value="avista">À vista</option>
                         <option value="parcelado">Parcelado</option>
-                    </select></label><br>
+                    </select></label>
                 <div id="campoParcelas" style="display: none;">
                     <label>Quantidade de parcelas:<br>
-                        <input type="number" name="parcelas_despesa" min="1" maxlength="2" value="1" step="1"><br>
+                        <input type="number" name="parcelas_despesa" min="1" maxlength="2" value="1" step="1">
                     </label>
                 </div>
 
                 <label>Data da Transação:<br>
-                    <input type="date" name="data_despesa" value="{{ hoje|date:'Y-m-d' }}" required><br>
+                    <input type="date" name="data_despesa" value="{{ hoje|date:'Y-m-d' }}" required>
                 </label>
 
                 <label>Descrição:<br>
-                    <input type="text" name="descricao_despesa"><br>
+                    <input type="text" name="descricao_despesa">
                 </label>
                 <!-- ADICIONADO 16/05/2025   1-->
                 <div class="radio-group">
@@ -217,7 +216,7 @@
                         <label for="pagamentoNAO">Não, não paguei essa despesa.</label>
                     </div>
                 </div>
-                <br>
+            <br>
                 <button type="submit" class="btn-salvar">Salvar</button>
                 <button type="button" onclick="fecharModalTransacao()" class="btn-cancelar">Cancelar</button>
             </div>
@@ -228,7 +227,6 @@
             <div id="camposReceita" style="display: none;">
                 <label>Valor ganho:<br>
                     <input type="number" name="valor_receita" step="0.01" min="0.01" maxlength="12" required>
-                    <br>
                 </label>
 
                 <label>Categoria:<br>
@@ -240,11 +238,11 @@
                 </label>
 
                 <label>Data:<br>
-                    <input type="date" name="data_receita" value="{{ hoje|date:'Y-m-d' }}" required><br>
+                    <input type="date" name="data_receita" value="{{ hoje|date:'Y-m-d' }}" required>
                 </label>
 
                 <label>Descrição:<br>
-                    <input type="text" name="descricao_receita"><br>
+                    <input type="text" name="descricao_receita">
                 </label>
 
                 <!-- ADIIONADO 16/05/2025    2-->
@@ -269,7 +267,7 @@
         </form>
     </div>
 </div>
-<div id="modalMeta">
+<div id="modalMeta" class="modal">
     <div class="modal-content">
         <h2>Adicionar Meta 🎯</h2><br>
         Aqui você irá definir uma meta, ela pode ser tratada de duas formas:<br><br>
@@ -324,7 +322,7 @@
 </div>
 <!--ADICIONADO 16/05/2025  3 -->
 
-<div id="modalObjetivo">
+<div id="modalObjetivo" class="modal">
     <div class="modal-content">
         <h2>Adicionar Objetivo 📈</h2><br>
         <p>Aqui você irá adicionar um objetivo, diferente da meta, o objetivo se trata de algo focado no longo prazo,
@@ -363,264 +361,6 @@
         </form>
     </div>
 </div>
-
-
-
-
-
-<script>
-    // Modal - abrir e fechar
-function fecharModalTransacao() {
-    const modal = document.getElementById("modalTransacao");
-    modal.classList.remove("ativo");
-    cancelarNavegacaoHash_menu();
-}
-
-// Lista de transações
-let transacao = [];
-
-document.getElementById("formTransacaoReceita").addEventListener("submit", function (event) {
-    const formData = new FormData(event.target);
-
-    let valor = formData.get("valor_receita");
-    let data = formData.get("data_receita");
-    let descricao = formData.get("descricao_receita");
-    let pago = formData.get("pagamentoRE_receita");
-
-    if (valor == null || data == null || pago == null) {
-        event.preventDefault();
-        alert("Preencha os campos corretamente.");
-        return;
-    }
-
-    if (parseFloat(valor) > 999999999) {
-        event.preventDefault();
-        alert("valor muito grande");
-        return;
-    }
-    if (pago === "true") {
-        pago = "Sim";
-    } else if (pago === 'false') {
-        pago = "Não";
-    }
-
-    alert(`Transação de receita adicionada:
-        valor: 1xR$${valor}
-        data: ${data}
-        esta pago?: ${pago}
-        descrição: ${descricao}
-    `);
-    cancelarNavegacaoHash_menu();
-});
-
-document.getElementById("formTransacaoDespesa").addEventListener("submit", function (event) {
-    const formData = new FormData(event.target);
-    const valor = formData.get("valor_despesa");
-    const data = formData.get("data_despesa");
-    const descricao = formData.get("descricao_despesa");
-    let pago = formData.get("pagamentoRE_despesa");
-    let parcelas = formData.get("parcelas_despesa")
-
-    if (valor == null || data == null || pago == null || parcelas == null) {
-        event.preventDefault();
-        alert("Preencha os campos corretamente.");
-    }
-
-    console.log(parseFloat(valor));
-
-    if (parseFloat(valor) > 999999999) {
-        event.preventDefault();
-        alert("valor muito grande");
-        return;
-    }
-
-    if (pago === "true") {
-        pago = "Sim";
-    } else if (pago === 'false') {
-        pago = "Não";
-    }
-
-    alert(`Transação de despesa adicionada:
-  valor: ${parcelas}xR$${valor / parcelas}
-  data: ${data}
-  esta pago?: ${pago}
-  descrição: ${descricao}
-  `);
-
-
-    cancelarNavegacaoHash_menu();
-});
-
-document.addEventListener("DOMContentLoaded", () => {
-    const tabs = document.querySelectorAll(".tab");
-    const camposDespesa = document.getElementById("camposDespesa");
-    const camposReceita = document.getElementById("camposReceita");
-
-    const condicaoPagamento = document.getElementById("condicaoPagamento");
-    const campoParcelas = document.getElementById("campoParcelas");
-
-    const btnAbrir = document.getElementById("abrirModalTransacao");
-    const modal = document.getElementById("modalTransacao");
-
-    tabs.forEach(tab => {
-        tab.addEventListener("click", () => {
-            tabs.forEach(t => t.classList.remove("active"));
-            tab.classList.add("active");
-
-            const tipo = tab.getAttribute("data-tipo");
-
-            // Verifica qual aba foi clicada e exibe os campos corretos
-            if (tipo === "saida") {
-                camposDespesa.style.display = "block";
-                camposReceita.style.display = "none";
-            } else {
-                camposDespesa.style.display = "none";
-                camposReceita.style.display = "block";
-            }
-        });
-    });
-
-    condicaoPagamento.addEventListener("change", () => {
-        campoParcelas.style.display = (condicaoPagamento.value === "parcelado") ? "block" : "none";
-    });
-
-    btnAbrir.addEventListener("click", () => {
-        modal.classList.add("ativo");
-    });
-});
-
-
-// Fechar modal
-function fecharModalMeta() {
-    document.getElementById("modalMeta").classList.remove("ativo");
-    cancelarNavegacaoHash_menu();
-}
-
-// Mostrar/ocultar campo de data baseado na opção de exclusão
-
-
-// Capturar dados do formulário de meta
-document.getElementById("formMeta").addEventListener("submit", function (event) {
-    const formData = new FormData(event.target);
-    const tipo = formData.get("tipoMeta");
-    const valor = parseFloat(formData.get("valorMeta"));
-    const dataInicio = formData.get("dataInicio");
-    const dataFinal = formData.get("dataFinal");
-    const categoria = formData.get("categoria");
-
-    if (!tipo || !valor || !dataInicio || !dataFinal || !categoria) {
-        event.preventDefault();
-        alert("Insira as informações corretamente!");
-        return;
-    }
-
-    alert(`Meta adicionada:\n
-  Tipo: ${tipo}
-  Valor: R$ ${valor.toFixed(2)}
-  Data Início: ${dataInicio}
-  Data Final: ${dataFinal}
-  categoria: ${categoria}`);
-
-    cancelarNavegacaoHash_menu();
-});
-
-//ADICIONADO A PARTIR DAQUI DIA 16/06/2025
-
-// Fechar modal de objetivo
-function fecharModalObjetivo() {
-    document.getElementById("modalObjetivo").classList.remove("ativo");
-    cancelarNavegacaoHash_menu();
-}
-
-// Capturar dados do formulário de objetivo
-document.getElementById("formObjetivo").addEventListener("submit", function (event) {
-    const formData = new FormData(event.target);
-    const titulo = formData.get("tituloObjetivo");
-    const valorDesejado = parseFloat(formData.get("valorDesejado"));
-    const valorGuardado = parseFloat(formData.get("valorGuardado"));
-    const anoFinal = formData.get("anoFinal");
-
-    if (!titulo || !valorDesejado || !valorGuardado || !anoFinal) {
-        event.preventDefault();
-        alert("insira as informações corretamente!");
-        fecharModalObjetivo();
-        return;
-    }
-
-
-    alert(`Objetivo adicionado:\n
-  Título: ${titulo}
-  Valor desejado: R$ ${valorDesejado.toFixed(2)}
-  Valor guardado: R$ ${valorGuardado.toFixed(2)}
-  Ano final: ${anoFinal}`);
-
-    fecharModalObjetivo();
-});
-
-//---------------------------------------------------------------------------------
-
-function cancelarNavegacaoHash_menu() {
-    history.pushState("", document.title, window.location.pathname + window.location.search);
-    fecharTodosModais_menu();
-    location.reload()
-}
-
-function navegarParaHash_menu(forcadoHash) {
-    if (location.hash === forcadoHash) {
-        // Força o hashchange manualmente se o hash já for igual
-        location.hash = "";
-        // Pequeno delay para garantir o reset e acionar o hashchange
-        setTimeout(() => location.hash = forcadoHash, 1);
-    } else {
-        location.hash = forcadoHash;
-    }
-}
-
-document.getElementById("abrirModalTransacao").addEventListener("click", function (e) {
-    e.preventDefault();
-    navegarParaHash_menu("#transacao");
-});
-
-document.getElementById("abrirModalMeta").addEventListener("click", function (e) {
-    e.preventDefault();
-    navegarParaHash_menu("#meta");
-});
-
-document.getElementById("abrirModalObjetivo").addEventListener("click", function (e) {
-    e.preventDefault();
-    navegarParaHash_menu("#objetivo");
-});
-
-
-function abrirModalViaHash_menu() {
-    const hash = window.location.hash;
-
-    fecharTodosModais_menu();
-
-    if (hash === "#transacao") {
-        document.getElementById("modalTransacao").classList.add("ativo");
-    } else if (hash === "#meta") {
-        document.getElementById("modalMeta").classList.add("ativo");
-    } else if (hash === "#objetivo") {
-        document.getElementById("modalObjetivo").classList.add("ativo");
-    }
-}
-
-function fecharTodosModais_menu() {
-    document.querySelectorAll(".modal").forEach(modal => modal.classList.remove("ativo"));
-}
-
-// Dispara quando hash muda (botão voltar, link direto etc.)
-window.addEventListener("hashchange", abrirModalViaHash_menu);
-
-// Dispara ao carregar a página
-window.addEventListener("DOMContentLoaded", abrirModalViaHash_menu);
-
-window.addEventListener("hashchange", abrirModalViaHash_menu);
-window.addEventListener("DOMContentLoaded", () => {
-    abrirModalViaHash_menu();
-});
-</script>
 
 <script src="{% static 'metas/js/script.js' %}" defer></script>
 </body>
