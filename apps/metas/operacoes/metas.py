@@ -48,7 +48,7 @@ class OperacoesMeta:
 
     def editarMeta(
             self,
-            meta: Metas,
+            meta_id: Metas,
             categoria: Categoria,
             tipo: str,
             valor: Decimal,
@@ -56,6 +56,7 @@ class OperacoesMeta:
             data_fim: Data,
             descricao: str,
     ):
+        meta = Metas.objects.get(user_fk=self.user, id=meta_id)
         if not meta.status == 'A':
             return
 
@@ -63,6 +64,20 @@ class OperacoesMeta:
             return "A data final não pode ser anterior à data inicial."
         elif data_fim.valor < meta.data_inicio:
             return "A data final não pode ser anterior à data inicial."
+
+        print(f"Data de início: {data_inicio.valor}")
+        print(f"Data de fim: {data_fim.valor}")
+        print(f"Categoria: {categoria}")
+        print(f"Tipo: {tipo}")
+        print(f"Valor: {valor}")
+        print(f"Descrição: {descricao}")
+
+        print(f"Meta - Data de início: {meta.data_inicio}")
+        print(f"Meta - Data de fim: {meta.data_fim}")
+        print(f"Meta - Categoria: {meta.categoria_fk}")
+        print(f"Meta - Tipo: {meta.tipo}")
+        print(f"Meta - Valor: {meta.valor}")
+        print(f"Meta - Descrição: {meta.descricao}")
 
         meta.data_fim = data_fim.valor
         meta.categoria_fk = categoria

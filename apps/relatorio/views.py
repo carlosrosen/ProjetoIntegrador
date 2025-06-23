@@ -63,11 +63,11 @@ def relatorioMensal(request):
     todas_metas = Metas.objects.filter(user_fk=user)
 
     total_quantidade_metas = todas_metas.count() # Quantidade total de metas criadas
-    metas_ativas = todas_metas.filter(tipo="A").count() # Quantidade total de metas ativas
+    metas_ativas = todas_metas.filter(status="A").count() # Quantidade total de metas ativas
 
     metas_intervalo = todas_metas.filter(data_conclusao__range=(primeiro_dia, ultimo_dia))
 
-    metas_concluidas, metas_utrapassadas, metas_naoatingidas  = metas_intervalo.filter(tipo="C").count(), metas_intervalo.filter(tipo="U").count(), metas_intervalo.filter(tipo="N").count()
+    metas_concluidas, metas_utrapassadas, metas_naoatingidas  = metas_intervalo.filter(status="C").count(), metas_intervalo.filter(status="U").count(), metas_intervalo.filter(status="N").count()
 
     getter_metas = GetMetas(request.user.id)
 
@@ -76,6 +76,7 @@ def relatorioMensal(request):
     # Objetivos
 
     objetivos = Objetivos.objects.filter(user_fk=user)
+    getter_objetivos = GetObjetivo(request.user.id)
 
     total_objetivos = objetivos.count() # Quantidade total de objetivos criados
     objetivos_ativosTotal = objetivos.filter(status="A").count() # Quantidade total de objetivos ativos
@@ -88,6 +89,8 @@ def relatorioMensal(request):
     objetivos_concluidosMes = objetivos_concluidos.filter(data_conclusao__range=(primeiro_dia, ultimo_dia)).count() # Quantidade de objetivos concluidos no mês
 
     # total economizado
+
+    total_economizado_objetivos = getter_objetivos.totalEconomizadoPorMes(mes,ano)
 
 
     #Analise detalhada do mês
@@ -120,6 +123,7 @@ def relatorioMensal(request):
 
     categorias_receita = getter_financeiro.valorTotalDasCategorias(mes,ano,'receita')
     categorias_despesa = getter_financeiro.valorTotalDasCategorias(mes,ano,'despesa')
+
 
 
     # Gastos por dia da semana
@@ -161,6 +165,7 @@ def relatorioMensal(request):
         'objetivos_concluidosTotal': objetivos_concluidosTotal,
         'objetivos_criadosMes': objetivos_criadosMes,
         'objetivos_concluidosMes': objetivos_concluidosMes,
+        'total_economizado_objetivos': total_economizado_objetivos,
 
         # Análise detalhada do mês
         'maior_categoria_receita': maior_categoria_receita,

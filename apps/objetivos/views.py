@@ -11,6 +11,7 @@ from apps.objetivos.dominio.tipoobjetivo import TipoObjetivo
 from apps.objetivos.dominio.valorobjetivo import ValorObjetivo
 from apps.objetivos.models import Objetivos
 from apps.objetivos.operacoes.objetivos import GetObjetivo, OperacoesObjetivo
+from apps.usuarios.models import CustomUser
 
 from common.dominio.data import Data
 
@@ -42,7 +43,7 @@ def detalheObjetivo(request, id):
     objetivo = get_object_or_404(Objetivos, id=id)
 
     # Caso seja outro usuario tentando acessar um objetivo que não lhe pertence
-    if objetivo.user_fk != request.user:
+    if objetivo.user_fk != CustomUser.objects.get(id=request.user.id):
         return
 
     getter = GetObjetivo(request.user.id)

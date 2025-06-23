@@ -53,17 +53,6 @@
             <h3>DESPESAS DO MÊS</h3>
             <p class="amount">R$ {{ despesas_mes|floatformat:2 }}</p>
         </div>
-
-        <!-- APAGAR ESSA DIV abaixo -->
-
-
-        <div class="summary-card expense">
-            <h3>saldo atual (apagar dps) </h3>
-            <p class="amount">R$ {{ saldoAtual|floatformat:2 }}</p>
-        </div>
-
-        <!-- APAGAR ESSA DIV acima -->
-
     </div>
 
     <form id="filtroForm" class="filters-section">
@@ -272,7 +261,7 @@
 </div>
 
 
-<div id="modalTransacao">
+<div id="modalTransacao" class="modal">
     <div class="modal-content">
         <div class="tabs">
             <button type="button" class="tab active" data-tipo="saida">Despesa</button>
@@ -337,7 +326,7 @@
                 </div>
                 <br>
                 <button type="submit" class="btn-salvar">Salvar</button>
-                <button type="button" onclick="fecharModalTransacao()" class="btn-cancelar">Cancelar</button>
+                <button type="button" onclick="fecharModalHash()" class="btn-cancelar">Cancelar</button>
             </div>
         </form>
         <form id="formTransacaoReceita" action="{% url 'core:financeiro:criar-receita' %}?next={{ request.path }}"
@@ -382,13 +371,13 @@
                 <br>
                 <!-------------------------   2-->
                 <button type="submit" class="btn-salvar">Salvar</button>
-                <button type="button" onclick="fecharModalTransacao()" class="btn-cancelar">Cancelar</button>
+                <button type="button" onclick="fecharModalHash()" class="btn-cancelar">Cancelar</button>
             </div>
             <br>
         </form>
     </div>
 </div>
-<div id="modalMeta">
+<div id="modalMeta" class="modal">
     <div class="modal-content">
         <h2>Adicionar Meta 🎯</h2><br>
         Aqui você irá definir uma meta, ela pode ser tratada de duas formas:<br><br>
@@ -436,14 +425,14 @@
             </label>
             <div style="text-align:right;">
                 <button type="submit" class="btn-salvar">Salvar</button>
-                <button type="button" class="btn-cancelar" onclick="fecharModalMeta()">Cancelar</button>
+                <button type="button" class="btn-cancelar" onclick="fecharModalHash()">Cancelar</button>
             </div>
         </form>
     </div>
 </div>
 <!--ADICIONADO 16/05/2025  3 -->
 
-<div id="modalObjetivo">
+<div id="modalObjetivo" class="modal">
     <div class="modal-content">
         <h2>Adicionar Objetivo 📈</h2><br>
         <p>Aqui você irá adicionar um objetivo, diferente da meta, o objetivo se trata de algo focado no longo prazo,
@@ -477,7 +466,7 @@
 
             <div style="text-align:right;">
                 <button type="submit" class="btn-salvar">Salvar</button>
-                <button type="button" class="btn-cancelar" onclick="fecharModalObjetivo()">Cancelar</button>
+                <button type="button" class="btn-cancelar" onclick="fecharModalHash()">Cancelar</button>
             </div>
         </form>
     </div>
@@ -517,7 +506,10 @@
     }
 
     function fecharTodosModais() {
-        document.querySelectorAll(".modal.ativo").forEach(modal => modal.classList.remove('ativo'));
+        document.querySelectorAll(".modal.ativo").forEach(modal => {
+            modal.classList.remove('ativo');
+            modal.display = "none";
+        });
     }
 
     function fecharModalHash() {

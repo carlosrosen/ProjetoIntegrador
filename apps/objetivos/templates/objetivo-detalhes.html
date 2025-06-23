@@ -48,11 +48,11 @@
             <input type="hidden" name="tipoform" value="transacao_despesa">
 
             <div id="camposDespesa">
-                <label>Valor gasto: <br>
-                    <input type="number" name="valor_despesa" step="0.01" required><br>
+                <label>Valor gasto:
+                    <input type="number" name="valor_despesa" step="0.01" required>
                 </label>
 
-                <label>Categoria:<br>
+                <label>Categoria:
                     <select name="categoria_despesa" required>
                         {% for categoria in todas_categorias_despesa %}
                             <option value="{{ categoria.nome }}">{{ categoria.nome }}</option>
@@ -60,23 +60,23 @@
                     </select>
                 </label>
 
-                <label>Condição do pagamento:<br>
+                <label>Condição do pagamento:
                     <select id="condicaoPagamento" name="condicao_despesa">
                         <option value="avista">À vista</option>
                         <option value="parcelado">Parcelado</option>
-                    </select></label><br>
+                    </select></label>
                 <div id="campoParcelas" style="display: none;">
-                    <label>Quantidade de parcelas:<br>
-                        <input type="number" name="parcelas_despesa" min="1" value="1"><br>
+                    <label>Quantidade de parcelas:
+                        <input type="number" name="parcelas_despesa" min="1" value="1">
                     </label>
                 </div>
 
-                <label>Data da Transação:<br>
-                    <input type="date" name="data_despesa" required><br>
+                <label>Data da Transação:
+                    <input type="date" name="data_despesa" required>
                 </label>
 
-                <label>Descrição:<br>
-                    <input type="text" name="descricao_despesa"><br>
+                <label>Descrição:
+                    <input type="text" name="descricao_despesa">
                 </label>
                 <!-- ADICIONADO 16/05/2025   1-->
                 <div class="radio-group">
@@ -92,19 +92,18 @@
                 </div>
                 <br>
                 <button type="submit" class="btn-salvar">Salvar</button>
-                <button type="button" onclick="fecharModal()" class="btn-cancelar">Cancelar</button>
+                <button type="button" onclick="fecharModalTransacao()" class="btn-cancelar">Cancelar</button>
             </div>
         </form>
         <form id="formTransacaoReceita" method="POST">
             {% csrf_token %}
             <input type="hidden" name="tipoform" value="transacao_receita">
             <div id="camposReceita" style="display: none;">
-                <label>Valor ganho:<br>
+                <label>Valor ganho:
                     <input type="number" name="valor_receita" step="0.01" value="0.00" min="0.01" required>
-                    <br>
                 </label>
 
-                <label>Categoria:<br>
+                <label>Categoria:
                     <select name="categoria_receita" required>
                         {% for categoria in todas_categorias_receita %}
                             <option value="{{ categoria.nome }}">{{ categoria.nome }}</option>
@@ -112,13 +111,13 @@
                     </select>
                 </label>
 
-                <label>Data:<br>
-                    <input type="date" name="data_receita" required><br>
+                <label>Data:
+                    <input type="date" name="data_receita" required>
                 </label>
 
 
-                <label>Descrição:<br>
-                    <input type="text" name="descricao_receita" required><br>
+                <label>Descrição:
+                    <input type="text" name="descricao_receita" required>
                 </label>
 
                 <!-- ADIIONADO 16/05/2025    2-->
@@ -137,7 +136,7 @@
                 <br>
                 <!-------------------------   2-->
                 <button type="submit" class="btn-salvar">Salvar</button>
-                <button type="button" onclick="fecharModal()" class="btn-cancelar">Cancelar</button>
+                <button type="button" onclick="fecharModalTransacao()" class="btn-cancelar">Cancelar</button>
             </div>
             <br>
         </form>
@@ -342,7 +341,7 @@
         <form id="formDeposito" method="POST" action="{% url 'core:objetivos:depositar-objetivo' objetivo.id %}">
             {% csrf_token %}
             <label for="valorDeposito">Valor a depositar:</label>
-            <input type="number" name="valorDeposito" step="0.01" min="0" required>
+            <input type="number" name="valorDeposito" step="0.01" min="0.01" value="0.00" required>
             <div style="text-align:right;">
                 <button type="submit" class="btn-salvar">Confirmar</button>
                 <button type="button" class="btn-cancelar" onclick="fecharModalHash()">Cancelar</button>
@@ -356,7 +355,7 @@
         <form id="formResgate" method="POST" action="{% url 'core:objetivos:resgatar-objetivo' objetivo.id %}">
             {% csrf_token %}
             <label for="valorResgate">Valor a resgatar:</label>
-            <input type="number" name="valorResgate" step="0.01" min="0" required>
+            <input type="number" name="valorResgate" step="0.01" min="0.01" value="0.00" required>
             <div style="text-align:right;">
                 <button type="submit" class="btn-salvar">Confirmar</button>
                 <button type="button" class="btn-cancelar" onclick="fecharModalHash()">Cancelar</button>
@@ -374,12 +373,10 @@
             </label>
 
             <label for="novoValor">Novo Valor do Objetivo:
-                <input type="number" name="novoValor" step="0.01" min="0.01" value="{{ objetivo.valor_objetivo }}"
-                       required>
+                <input type="number" name="novoValor" step="0.01" min="0.01" value="{{ objetivo.valorFormatado}}" required>
             </label>
-
             <label for="novaData">Nova Data Final:
-                <input type="date" name="novaData" value="{{ objetivo.data_limite|date:'Y-m-d' }}" required>
+                <input type="date" name="novaData" value="{{ objetivo.data_fim|date:'Y-m-d' }}" required>
             </label>
             <div class="radio-group">
                 <div class="radio-option">
@@ -421,7 +418,7 @@
 
 
 
-<div id="modalTransacao">
+<div id="modalTransacao" class="modal">
     <div class="modal-content">
         <div class="tabs">
             <button type="button" class="tab active" data-tipo="saida">Despesa</button>
@@ -431,20 +428,19 @@
         <h2>Adicionar Transação 💲</h2><br>
         <p>Aqui você irá adicionar uma transação, seja ela uma receita ou despesa para auxiliarmos no gerenciamento
             financeiro da sua conta! <strong>Lembre-se</strong>, é importante manter as transações atualizadas para uma
-            maior precisão de decisões. ⚠️</p><br>
+            maior precisão de decisões. ⚠️</p>
         <hr>
-        <br>
         <form id="formTransacaoDespesa" action="{% url 'core:financeiro:criar-despesa' %}?next={{ request.path }}" method="POST">
             {% csrf_token %}
             <label></label>
             <input type="hidden" name="next" value="{{ request.path }}">
 
             <div id="camposDespesa">
-                <label>Valor gasto: <br>
-                    <input type="number" name="valor_despesa" step="0.01" min="0.01" maxlength="12" required><br>
+                <label>Valor gasto:
+                    <input type="number" name="valor_despesa" step="0.01" min="0.01" maxlength="12" required>
                 </label>
 
-                <label>Categoria:<br>
+                <label>Categoria:
                     <select name="categoria_despesa" required>
                         {% for categoria in todas_categorias_despesa %}
                             <option value="{{ categoria.nome }}">{{ categoria.nome }}</option>
@@ -453,23 +449,23 @@
                     </select>
                 </label>
 
-                <label>Condição do pagamento:<br>
+                <label>Condição do pagamento:
                     <select id="condicaoPagamento" name="condicao_despesa">
                         <option value="avista">À vista</option>
                         <option value="parcelado">Parcelado</option>
-                    </select></label><br>
+                    </select></label>
                 <div id="campoParcelas" style="display: none;">
-                    <label>Quantidade de parcelas:<br>
-                        <input type="number" name="parcelas_despesa" min="1" maxlength="2" value="1" step="1"><br>
+                    <label>Quantidade de parcelas:
+                        <input type="number" name="parcelas_despesa" min="1" maxlength="2" value="1" step="1">
                     </label>
                 </div>
 
-                <label>Data da Transação:<br>
-                    <input type="date" name="data_despesa" value="{{ hoje|date:'Y-m-d' }}" required><br>
+                <label>Data da Transação:
+                    <input type="date" name="data_despesa" value="{{ hoje|date:'Y-m-d' }}" required>
                 </label>
 
-                <label>Descrição:<br>
-                    <input type="text" name="descricao_despesa"><br>
+                <label>Descrição:
+                    <input type="text" name="descricao_despesa">
                 </label>
                 <!-- ADICIONADO 16/05/2025   1-->
                 <div class="radio-group">
@@ -492,12 +488,11 @@
             {% csrf_token %}
             <input type="hidden" name="next" value="{{ request.path }}">
             <div id="camposReceita" style="display: none;">
-                <label>Valor ganho:<br>
+                <label>Valor ganho:
                     <input type="number" name="valor_receita" step="0.01" min="0.01" maxlength="12" required>
-                    <br>
                 </label>
 
-                <label>Categoria:<br>
+                <label>Categoria:
                     <select name="categoria_receita" required>
                         {% for categoria in todas_categorias_receita %}
                             <option value="{{ categoria.nome }}">{{ categoria.nome }}</option>
@@ -505,12 +500,12 @@
                     </select>
                 </label>
 
-                <label>Data:<br>
-                    <input type="date" name="data_receita" value="{{ hoje|date:'Y-m-d' }}" required><br>
+                <label>Data:
+                    <input type="date" name="data_receita" value="{{ hoje|date:'Y-m-d' }}" required>
                 </label>
 
-                <label>Descrição:<br>
-                    <input type="text" name="descricao_receita"><br>
+                <label>Descrição:
+                    <input type="text" name="descricao_receita">
                 </label>
 
                 <!-- ADIIONADO 16/05/2025    2-->
@@ -683,9 +678,6 @@
             }
         });
     });
-
-
-
 
 
 

@@ -32,6 +32,9 @@ def menuExtrato(request, mes: int, ano: int):
         return redirect(reverse('usuario:login'))
 
     if request.method == 'GET':
+
+        OperacoesTransacao(request.user.id).verificarParcelasPagas()
+
         getter = GetterFinanceiro(request.user.id)
 
         parcelas = getter.todasParcelasMes(mes, ano)
@@ -64,7 +67,6 @@ def menuExtrato(request, mes: int, ano: int):
         except IndexError:
             nome_mes = "Mês Inválido"
 
-        saldoAtual = CustomUser.objects.get(id=request.user.id).saldoAtual # apagar
 
         context = {
             'parcelas': parcelas.order_by('-data'),
@@ -77,11 +79,6 @@ def menuExtrato(request, mes: int, ano: int):
             'receitas_mes': receita,
             'saldo_mes': saldo_mes,
             'request': request,
-
-
-            'saldoAtual': saldoAtual,
-
-
             'hoje': date.today(),
             'todas_categorias_receita': categorias.filter(tipo='R'),
             'todas_categorias_despesa': categorias.filter(tipo='D')

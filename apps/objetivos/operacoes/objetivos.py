@@ -86,7 +86,6 @@ class OperacoesObjetivo:
             hoje = date.today()
             if objetivo.data_fim < hoje and objetivo.valor_guardado < objetivo.valor_objetivo:
                 objetivo.status = 'T'
-                objetivo.save()
         try:
             objetivo.save()
         except Exception as e:
@@ -226,10 +225,10 @@ class GetObjetivo:
 
     def totalEconomizadoPorMes(self,mes:int,ano:int):
         inicio_mes = Data.primeiroDiaMes(mes,ano)
-        proximo_mes = Data.incrementarMes(inicio_mes.valor)
+        proximo_mes = Data.incrementarMes(inicio_mes)
 
-        parcelas = TransacaoObjetivo.objects.filter(user_fk=self.user
-                                                    , data__gte=inicio_mes.valor
+        parcelas = TransacaoObjetivo.objects.filter(objetivo_fk__user_fk=self.user
+                                                    , data__gte=inicio_mes
                                                     , data__lt=proximo_mes.valor
         )
         economia = Decimal('0')

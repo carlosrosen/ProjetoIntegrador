@@ -96,7 +96,7 @@
                     <br>
                     <li>Objetivos criados este mês: {{ objetivos_criadosMes }}</li>
                     <br>
-                    <li>Total Economizado: Alterar</li>
+                    <li>Total Economizado: {{ total_economizado_objetivos }}</li>
                     <br>
                 </ul>
                 <br>
@@ -391,7 +391,7 @@
         if (tipo === "gastos") {
 
             const categorias_gasto = "{{ categorias_despesa }}".split(',');
-            const valores_gasto = "{{ valores_categoria_receita }}".split(',');
+            const valores_gasto = "{{ valores_categorias_despesa }}".split(',');
 
             const cores_gastos = {
                 "Alimentação": "#f39c12"
@@ -567,7 +567,7 @@
         } else {
             meuGrafico.data = dadosGraficoPizza("gastos");
             document.getElementById("botao-pizza").innerText = "Alternar para categorias de receita";
-            modoGrafico = "ganhos";
+            modoGrafico = "gastos";
         }
         meuGrafico.update();
     }
