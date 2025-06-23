@@ -1,43 +1,49 @@
-Projeto Integrado de faculdade 3° semestre
+U-Balance - Sistema de Gestão Financeira
 
-Instruções para acesso apos clonar o repositorio em linux:
+A U-Balance é uma plataforma web de gestão financeira pessoal desenvolvida para auxiliar os usuários no controle e organização de suas finanças. O sistema permite o cadastro e acompanhamento de receitas, despesas, metas financeiras e objetivos, oferecendo uma visão clara do saldo e das movimentações ao longo do tempo.
 
-criação e ativação do venv:
-python -m venv venv
-source /venv/bin/activate
+Este projeto foi desenvolvido como um trabalho acadêmico do terceiro semestre da graduação em Ciências da Computação, com o objetivo de proporcionar a compreensão das estruturas de dados e sua aplicação em projetos reais, utilizando tecnologias modernas para oferecer uma experiência intuitiva e eficiente.
 
-instalação da biblioteca e framework:
-pip install Django=5.2
-pip install python-dateutil=2.9
+Funcionalidades:
 
-para iniciar o site localmente:
-entre no diretorio do do projeto onde há o arquivo manage.py
-execute o seguinte comando:
-python manage.py runserver
+*Cadastro e autenticação de usuários
+*Registro e categorização de receitas e despesas
+*Controle e histórico detalhado do saldo financeiro
+*Criação e acompanhamento de metas financeiras e objetivos
+*Visualização de relatórios mensais e gráficos para análise financeira
+*Interface responsiva e amigável com modais para operações rápidas
 
-acessar a pagina incial:
-entre em um navegador e acesse
-127.0.0.1:8000
+Tecnologias utilizadas:
 
+Backend: Django (Python)
+Frontend: HTML5, CSS3, JavaScript, Chart.js (para gráficos)
+Banco de Dados: SQLite 
 
-Instruções para acesso apos clonar o repositorio em windows:
+Como rodar o projeto:
 
-criação e ativação do venv:
-py -m venv venv
-.\venv\Source\activate
+1. Clone o repositório:
+   git clone https://github.com/carlosrosen/U-Balance
+   cd u-balance
 
-instalação da biblioteca e framework:
-pip install Django=5.2
-pip install python-dateutil=2.9
+2. Crie e ative um ambiente virtual:
+   python -m venv venv
+   source venv/bin/activate  (Linux/MacOS)
+   venv\Scripts\activate     (Windows)
 
-para iniciar o site localmente:
-entre no diretorio do do projeto onde há o arquivo manage.py
-execute o seguinte comando:
-py manage.py runserver
+3. Instale as dependências necessárias:
+   pip install django python-dateutil
 
-acessar a pagina incial:
-entre em um navegador e acesse
-127.0.0.1:8000
+4. Aplique as migrações do banco de dados:
+   python manage.py migrate
 
+5. Crie um superusuário para manusear a parte administrativa do Django (Opcional):
+   python manage.py createsuperuser
 
+6. Para iniciar o servidor local:
+   python manage.py runserver
 
+Equipe:
+
+Carlos Eduardo (Backend)
+Davi Roberto (Backend)
+Gabriel Inácio (Frontend)
