@@ -63,6 +63,6 @@ Equipe:
 
 Carlos Eduardo (@carlosrosen) — Responsável pelo backend
 
-Davi Roberto (@ngdx4) — Responsável pelo backend
+Davi Roberto (@Davi-Robert) — Responsável pelo backend
 
 Gabriel Inácio (@Genz05) — Responsável pelo frontend
